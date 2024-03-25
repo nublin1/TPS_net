@@ -8,6 +8,8 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	CurrentCameraLocation= FVector(250, 20, 30);
+	DesiredCameraLocation = FVector(250, 20, 30);	
 	DefaultCameraLocation = FVector(250, 20, 30);
 }
 
