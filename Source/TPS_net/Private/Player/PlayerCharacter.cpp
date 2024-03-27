@@ -11,6 +11,8 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 	CurrentCameraLocation= FVector(250, 20, 30);
 	DesiredCameraLocation = FVector(250, 20, 30);	
 	DefaultCameraLocation = FVector(250, 20, 30);
+
+	
 }
 
 // Called when the game starts or when spawned

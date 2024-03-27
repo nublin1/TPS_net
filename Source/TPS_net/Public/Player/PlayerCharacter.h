@@ -19,6 +19,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsAiming;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsMoving;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsGrounded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraInterpolationSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector CurrentCameraLocation;
