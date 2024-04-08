@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UStateMachineComponent;
+
 UCLASS()
 class TPS_NET_API APlayerCharacter : public ACharacter
 {
@@ -16,20 +18,28 @@ public:
 
 protected:
 	// Properties
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
 	bool IsAiming;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsMoving;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsGrounded;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraInterpolationSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FVector CurrentCameraLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FVector DesiredCameraLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector DefaultCameraLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector AimingCameraPosition;
+
+	UPROPERTY(BlueprintReadWrite)
+	UStateMachineComponent* StateMachine_Movemant;
+	UPROPERTY(BlueprintReadWrite)
+	UStateMachineComponent* StateMachine_Aiming;
 	
 	//Functions
 	virtual void BeginPlay() override;
@@ -39,5 +49,5 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 };

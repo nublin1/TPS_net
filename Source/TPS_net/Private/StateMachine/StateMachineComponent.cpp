@@ -42,7 +42,7 @@ bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 	
 }
 
-void UStateMachineComponent::InitState()
+void UStateMachineComponent::InitState() const
 {
 	if (InitStateDelegate.IsBound())
 	{
@@ -72,16 +72,12 @@ void UStateMachineComponent::ExitState()
 	}
 }
 
-
-
 void UStateMachineComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SwitchState(InitialStateTag);
-	
+	SwitchState(InitialStateTag);	
 }
-
 
 void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
