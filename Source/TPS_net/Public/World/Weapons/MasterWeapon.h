@@ -4,19 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Weapon.generated.h"
+#include "MasterWeapon.generated.h"
 
 UCLASS()
-class TPS_NET_API AWeapon : public AActor
+class TPS_NET_API AMasterWeapon : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AWeapon();
+	AMasterWeapon();
 
 protected:
-	// Called when the game starts or when spawned
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName HolsterName;
+	
 	virtual void BeginPlay() override;
 
 public:	

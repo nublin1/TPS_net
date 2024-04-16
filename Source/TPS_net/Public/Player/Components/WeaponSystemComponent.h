@@ -7,23 +7,27 @@
 #include "WeaponSystemComponent.generated.h"
 
 
-class AWeapon;
+class AMasterWeapon;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
 class TPS_NET_API UWeaponSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	UWeaponSystemComponent();
+public:
+	// Functions	
+	UWeaponSystemComponent();	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AWeapon* CurrentWeaponInHands;
+	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AWeapon* WeaponPistolHolster;
+	AMasterWeapon* WeaponPistolHolster;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Blueprintable)
+	AMasterWeapon* WeaponPrimaryHolster;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AWeapon* WeaponPrimaryHolster;
+	TArray<AMasterWeapon*> StartingWeapons;
 	
 	virtual void BeginPlay() override;
 
