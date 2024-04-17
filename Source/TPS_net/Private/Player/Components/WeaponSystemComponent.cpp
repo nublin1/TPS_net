@@ -3,6 +3,11 @@
 
 #include "Player/Components/WeaponSystemComponent.h"
 
+#include "Data/Weapon/WeaponData.h"
+#include "Weapon/WeaponBase.h"
+#include "Engine/EngineTypes.h"
+#include "World/Weapons/MasterWeapon.h"
+
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
@@ -19,7 +24,45 @@ void UWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	
+	
+}
+
+void UWeaponSystemComponent::InitStartingWeapon()
+{
+	if (!WeaponTable)
+		return;
+
+	for (auto StartingWeapon : StartingWeapons)
+	{
+		if (StartingWeapon.IsNone())
+			continue;
+
+		FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(StartingWeapon, StartingWeapon.ToString());
+		if (!WData)
+			continue;
+
+		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
+		WeaponBase->SetID(WData->Name);
+		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
+		WeaponBase->SetHolsterType(WData->HolsterType);
+
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = GetOwner();
+		SpawnParameters.bNoFail = true;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true ); 
+		
+		const FVector SpawnLocation{GetOwner()->GetActorLocation()};
+		const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
+		AMasterWeapon *Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform, SpawnParameters);
+
+		
+		Weapon->AttachToComponent(SpawnParameters.Owner, AttachRule, UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetHolsterType()));
+	}
+
 	
 }
 

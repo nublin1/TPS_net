@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "MasterWeapon.generated.h"
 
+class UWeaponBase;
+
 UCLASS()
 class TPS_NET_API AMasterWeapon : public AActor
 {
@@ -17,7 +19,7 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	FName HolsterName;
+	UWeaponBase* WeaponBaseRef;
 	
 	virtual void BeginPlay() override;
 

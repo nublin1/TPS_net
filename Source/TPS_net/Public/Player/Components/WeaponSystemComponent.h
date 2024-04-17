@@ -15,10 +15,14 @@ class TPS_NET_API UWeaponSystemComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Functions	
+		
 	UWeaponSystemComponent();	
 
 protected:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -27,9 +31,16 @@ protected:
 	AMasterWeapon* WeaponPrimaryHolster;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<AMasterWeapon*> StartingWeapons;
-	
+	UDataTable* WeaponTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> StartingWeapons;
+
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================	
 	virtual void BeginPlay() override;
+
+	virtual void InitStartingWeapon();
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
