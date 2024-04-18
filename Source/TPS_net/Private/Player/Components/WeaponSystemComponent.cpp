@@ -21,14 +21,25 @@ UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr),
 	// ...
 }
 
-
 // Called when the game startsKO
 void UWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	InitStartingWeapon();
-	
+bool UWeaponSystemComponent::bCheckHolsterAvaibility(EHolsterType BeingCheckedType) const
+{
+	switch (BeingCheckedType)
+	{
+	case EHolsterType::Primary:
+		return WeaponPrimaryHolster == nullptr;
+
+	case EHolsterType::Pistol:
+		return WeaponPistolHolster == nullptr;
+
+	default:
+		return false;
+	}
 }
 
 void UWeaponSystemComponent::InitStartingWeapon()
@@ -45,37 +56,65 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		if (!WData)
 			continue;
 
+		if (bCheckHolsterAvaibility(WData->HolsterType) == false)
+			continue;
+
 		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 		WeaponBase->SetID(WData->Name);
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
 		WeaponBase->SetHolsterType(WData->HolsterType);
 
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Owner = GetOwner();
-		SpawnParameters.bNoFail = true;
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-		FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true ); 
-		
-		const FVector SpawnLocation{GetOwner()->GetActorLocation()};
-		const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
-		AMasterWeapon *Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform, SpawnParameters);
-		Weapon->SetWeaponBaseRef(WeaponBase);
-		Weapon->UpdateVisual();
-
-		auto Comp = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-		Weapon->AttachToComponent(Comp, AttachRule, UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetHolsterType()));
+		AddWeapon(WeaponBase);
 	}
+}
 
+void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
+{
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = GetOwner();
+	SpawnParameters.bNoFail = true;
+	SpawnParameters.SpawnCollisionHandlingOverride =
+		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+	                                     EAttachmentRule::SnapToTarget, true);
+
+	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
+	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
+	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform,
+	                                                              SpawnParameters);
+	Weapon->SetWeaponBaseRef(NewWeaponData);
+	Weapon->UpdateVisual();
+
+	auto Comp = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+	Weapon->AttachToComponent(Comp, AttachRule,
+	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetHolsterType()));
+
+	AssignWeaponToHolsterSlot(Weapon, NewWeaponData);
 	
+}
+
+void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData)
+{
+	switch (NewWeaponData->GetHolsterType())
+	{
+	case EHolsterType::Primary:
+		WeaponPrimaryHolster = WeaponInstance;
+		break;
+	case EHolsterType::Pistol:
+		WeaponPistolHolster = WeaponInstance;
+		break;
+	default:
+		break;
+	}
 }
 
 
 // Called every frame
-void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
 }
-

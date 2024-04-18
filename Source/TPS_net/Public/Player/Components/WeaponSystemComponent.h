@@ -7,6 +7,8 @@
 #include "WeaponSystemComponent.generated.h"
 
 
+class UWeaponBase;
+enum class EHolsterType : uint8;
 class AMasterWeapon;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
@@ -15,8 +17,12 @@ class TPS_NET_API UWeaponSystemComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-		
-	UWeaponSystemComponent();	
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================	
+	UWeaponSystemComponent();
+
+	bool bCheckHolsterAvaibility(EHolsterType BeingCheckedType) const; // true mean avaible
 
 protected:
 	//====================================================================
@@ -34,6 +40,8 @@ protected:
 	UDataTable* WeaponTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AMasterWeapon* MasterWeaponTemplate;
 
 	//====================================================================
 	// FUNCTIONS
@@ -42,6 +50,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void AddWeapon(UWeaponBase* NewWeaponData);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData);
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

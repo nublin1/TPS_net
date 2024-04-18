@@ -26,7 +26,7 @@ public:
 
 	//Setters
 	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) {WeaponBaseRef = _WeaponBase;}
-	void SetSkeletalMeshWeapon(USkeletalMesh* _SkeletalMesh) {SkeletalMeshWeapon = _SkeletalMesh;}
+	void SetSkeletalMeshWeapon(USkeletalMeshComponent* _SkeletalMesh) {SkeletalMeshWeapon = _SkeletalMesh;}
 	
 
 protected:
@@ -34,7 +34,7 @@ protected:
 	UWeaponBase* WeaponBaseRef;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	USkeletalMesh* SkeletalMeshWeapon;
+	USkeletalMeshComponent* SkeletalMeshWeapon;
 	
 	virtual void BeginPlay() override;
 
