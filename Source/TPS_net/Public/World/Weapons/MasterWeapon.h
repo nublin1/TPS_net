@@ -13,13 +13,28 @@ class TPS_NET_API AMasterWeapon : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
+public:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================	
 	AMasterWeapon();
+
+	void UpdateVisual();
+
+	//Getters
+	
+
+	//Setters
+	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) {WeaponBaseRef = _WeaponBase;}
+	void SetSkeletalMeshWeapon(USkeletalMesh* _SkeletalMesh) {SkeletalMeshWeapon = _SkeletalMesh;}
+	
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UWeaponBase* WeaponBaseRef;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	USkeletalMesh* SkeletalMeshWeapon;
 	
 	virtual void BeginPlay() override;
 

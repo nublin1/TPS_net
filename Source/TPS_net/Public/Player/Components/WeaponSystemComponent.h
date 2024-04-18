@@ -40,6 +40,7 @@ protected:
 	//====================================================================	
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
 
 public:		

@@ -7,9 +7,12 @@
 #include "Weapon/WeaponBase.h"
 #include "Engine/EngineTypes.h"
 #include "World/Weapons/MasterWeapon.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values for this component's properties
-UWeaponSystemComponent::UWeaponSystemComponent()
+UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
+                                                  WeaponPrimaryHolster(nullptr),
+                                                  WeaponTable(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -19,12 +22,12 @@ UWeaponSystemComponent::UWeaponSystemComponent()
 }
 
 
-// Called when the game starts
+// Called when the game startsKO
 void UWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	InitStartingWeapon();
 	
 }
 
@@ -47,7 +50,6 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
 		WeaponBase->SetHolsterType(WData->HolsterType);
 
-
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.Owner = GetOwner();
 		SpawnParameters.bNoFail = true;
@@ -58,9 +60,11 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 		const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
 		AMasterWeapon *Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform, SpawnParameters);
+		Weapon->SetWeaponBaseRef(WeaponBase);
+		Weapon->UpdateVisual();
 
-		
-		Weapon->AttachToComponent(SpawnParameters.Owner, AttachRule, UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetHolsterType()));
+		auto Comp = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		Weapon->AttachToComponent(Comp, AttachRule, UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetHolsterType()));
 	}
 
 	

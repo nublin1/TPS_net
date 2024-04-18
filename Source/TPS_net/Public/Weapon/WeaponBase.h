@@ -27,25 +27,25 @@ public:
 	UWeaponBase();
 
 	// Getters
-	FName GetID() const { return ID; }
-
-	void SetID(const FName& ID) { this->ID = ID; }
+	FName GetID() const { return NameID; }
+	
+	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
 
 	EHolsterType GetHolsterType() const { return HolsterType; }
 
 	// Setters
-	void SetHolsterType(EHolsterType HolsterType) { this->HolsterType = HolsterType; }
+	void SetHolsterType(EHolsterType _HolsterType) { this->HolsterType = _HolsterType; }
 
-	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
+	void SetID(const FName& _NameID) { this->NameID = _NameID; }
 
-	void SetWeaponAssetData(const FWeaponAssetData& WeaponAssetData) { this->WeaponAssetData = WeaponAssetData; }
+	void SetWeaponAssetData(const FWeaponAssetData& _WeaponAssetData) { this->WeaponAssetData = _WeaponAssetData; }
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Data")
-	FName ID;
+	FName NameID;
 
 protected:
 	UPROPERTY(VisibleAnywhere)

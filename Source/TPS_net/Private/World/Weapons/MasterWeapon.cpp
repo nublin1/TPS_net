@@ -3,6 +3,8 @@
 
 #include "World/Weapons/MasterWeapon.h"
 
+#include "Weapon/WeaponBase.h"
+
 
 AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr)
 {
@@ -10,12 +12,15 @@ AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr)
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-
 void AMasterWeapon::BeginPlay()
 {
 	Super::BeginPlay();	
 }
 
+void AMasterWeapon::UpdateVisual()
+{
+	SkeletalMeshWeapon = WeaponBaseRef->GetWeaponAssetData().SkeletalMesh;
+}
 
 void AMasterWeapon::Tick(float DeltaTime)
 {
