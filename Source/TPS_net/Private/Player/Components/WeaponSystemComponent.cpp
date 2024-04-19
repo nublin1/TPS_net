@@ -52,7 +52,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		if (StartingWeapon.IsNone())
 			continue;
 
-		FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(StartingWeapon, StartingWeapon.ToString());
+		const FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(StartingWeapon, StartingWeapon.ToString());
 		if (!WData)
 			continue;
 

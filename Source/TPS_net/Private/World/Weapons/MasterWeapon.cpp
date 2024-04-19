@@ -15,6 +15,25 @@ AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr), SkeletalMeshWeapon(nullp
 	SetRootComponent(SkeletalMeshWeapon);
 }
 
+void AMasterWeapon::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (WeaponTable && !StartingWeapon.IsNone())
+	{
+		const FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(StartingWeapon, StartingWeapon.ToString());
+		if (WData)
+		{
+			WeaponBaseRef = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
+			WeaponBaseRef->SetID(WData->Name);
+			WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
+			WeaponBaseRef->SetHolsterType(WData->HolsterType);
+
+			UpdateVisual();
+		}			
+	}
+}
+
 void AMasterWeapon::BeginPlay()
 {
 	Super::BeginPlay();	
@@ -22,6 +41,9 @@ void AMasterWeapon::BeginPlay()
 
 void AMasterWeapon::UpdateVisual()
 {
+	if (!WeaponBaseRef)
+		return;
+	
 	SkeletalMeshWeapon->SetSkeletalMesh(WeaponBaseRef->GetWeaponAssetData().SkeletalMesh);
 	
 }
@@ -30,4 +52,6 @@ void AMasterWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+
 

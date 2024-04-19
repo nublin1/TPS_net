@@ -40,8 +40,7 @@ protected:
 	UDataTable* WeaponTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AMasterWeapon* MasterWeaponTemplate;
+	
 
 	//====================================================================
 	// FUNCTIONS

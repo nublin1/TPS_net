@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/Weapon/WeaponData.h"
 #include "GameFramework/Actor.h"
 #include "MasterWeapon.generated.h"
 
@@ -30,16 +31,24 @@ public:
 	
 
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UWeaponBase* WeaponBaseRef;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USkeletalMeshComponent* SkeletalMeshWeapon;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UDataTable* WeaponTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName StartingWeapon;
+
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
 };
