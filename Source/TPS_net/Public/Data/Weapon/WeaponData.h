@@ -11,9 +11,18 @@
  */
 
 UENUM()
-enum class EHolsterType : uint8
+enum class EWeaponType : uint8
 {
 	Primary UMETA(DisplayName = "Primary"),
+	Pistol UMETA(DisplayName = "Pistol"),
+};
+
+UENUM()
+enum class EHolsterType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Primary UMETA(DisplayName = "Primary"),
+	AlternativePrimary UMETA(DisplayName = "AlternativePrimary"),
 	Pistol UMETA(DisplayName = "Pistol"),
 };
 
@@ -35,7 +44,7 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere)
-	EHolsterType HolsterType;
+	EWeaponType HolsterType;
 
 	UPROPERTY(EditAnywhere)
 	FWeaponAssetData WeaponAssetData;	
@@ -49,16 +58,18 @@ class TPS_NET_API UWeaponHelper : public UObject
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	static FName ConvertHolsterTypeToText(const EHolsterType HolsterType)
+	static FName ConvertHolsterTypeToText(const EWeaponType HolsterType)
 	{
 		switch (HolsterType)
 		{
-		case EHolsterType::Primary:
-			return FName("Primary");
-		case EHolsterType::Pistol:
+		case EWeaponType::Primary:
+			return FName("PrimaryHolster");
+		case EWeaponType::Pistol:
 			return FName("R_PistolHolster");
 		default:
 			return FName("");
 		}
 	}
+
+	
 };

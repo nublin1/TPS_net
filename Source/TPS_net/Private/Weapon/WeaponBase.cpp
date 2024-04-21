@@ -3,6 +3,6 @@
 
 #include "Weapon/WeaponBase.h"
 
-UWeaponBase::UWeaponBase(): HolsterType(EHolsterType::Primary), WeaponAssetData()
+UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), WeaponAssetData()
 {
 }

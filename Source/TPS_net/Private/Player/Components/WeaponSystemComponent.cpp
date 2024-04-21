@@ -12,29 +12,39 @@
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
                                                   WeaponPrimaryHolster(nullptr),
-                                                  WeaponTable(nullptr)
+                                                  WeaponTable(nullptr), SkeletalMeshComponent(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+}
 
-	// ...
+bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
+{
+	return CurrentWeaponInHands != nullptr;
+}
+
+void UWeaponSystemComponent::PostInitProperties()
+{
+	Super::PostInitProperties();	
 }
 
 // Called when the game startsKO
 void UWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
 }
 
-bool UWeaponSystemComponent::bCheckHolsterAvaibility(EHolsterType BeingCheckedType) const
+bool UWeaponSystemComponent::bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const
 {
 	switch (BeingCheckedType)
 	{
-	case EHolsterType::Primary:
+	case EWeaponType::Primary:
 		return WeaponPrimaryHolster == nullptr;
 
-	case EHolsterType::Pistol:
+	case EWeaponType::Pistol:
 		return WeaponPistolHolster == nullptr;
 
 	default:
@@ -62,7 +72,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 		WeaponBase->SetID(WData->Name);
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
-		WeaponBase->SetHolsterType(WData->HolsterType);
+		WeaponBase->SetWeaponType(WData->HolsterType);
 
 		AddWeapon(WeaponBase);
 	}
@@ -74,10 +84,7 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	SpawnParameters.Owner = GetOwner();
 	SpawnParameters.bNoFail = true;
 	SpawnParameters.SpawnCollisionHandlingOverride =
-		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-	                                     EAttachmentRule::SnapToTarget, true);
+		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;	
 
 	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
@@ -85,10 +92,11 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	                                                              SpawnParameters);
 	Weapon->SetWeaponBaseRef(NewWeaponData);
 	Weapon->UpdateVisual();
-
-	auto Comp = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-	Weapon->AttachToComponent(Comp, AttachRule,
-	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetHolsterType()));
+	
+	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+	                                           EAttachmentRule::SnapToTarget, true);
+	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
+	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetWeaponType()));
 
 	AssignWeaponToHolsterSlot(Weapon, NewWeaponData);
 	
@@ -96,16 +104,64 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 
 void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData)
 {
-	switch (NewWeaponData->GetHolsterType())
+	switch (NewWeaponData->GetWeaponType())
 	{
-	case EHolsterType::Primary:
+	case EWeaponType::Primary:
 		WeaponPrimaryHolster = WeaponInstance;
 		break;
-	case EHolsterType::Pistol:
+	case EWeaponType::Pistol:
 		WeaponPistolHolster = WeaponInstance;
 		break;
 	default:
 		break;
+	}
+}
+
+void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
+{
+	if (HandWeaponSocketName.IsNone())
+		return;
+
+	if (!SkeletalMeshComponent)
+		return;
+
+	if (LastUsedHolsterType != Holster && CurrentWeaponInHands)
+	{
+		const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+											   EAttachmentRule::SnapToTarget, true);
+		
+		CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
+							  UWeaponHelper::ConvertHolsterTypeToText(CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
+		CurrentWeaponInHands = nullptr;
+	}
+	
+	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+											   EAttachmentRule::SnapToTarget, true);
+	
+	switch (Holster)
+	{
+	case EHolsterType::None:
+		break;
+		
+	case EHolsterType::Pistol:
+		if (!WeaponPistolHolster || WeaponPistolHolster == CurrentWeaponInHands)
+			break;
+		WeaponPistolHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
+		CurrentWeaponInHands = WeaponPistolHolster;
+		LastUsedHolsterType = Holster;
+		break;
+
+	case EHolsterType::Primary:
+		if (!WeaponPrimaryHolster || WeaponPrimaryHolster == CurrentWeaponInHands)
+			break;
+		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
+		CurrentWeaponInHands = WeaponPrimaryHolster;
+		LastUsedHolsterType = Holster;
+		break;
+
+	case EHolsterType::AlternativePrimary:
+		break;
+		
 	}
 }
 

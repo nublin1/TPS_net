@@ -20,15 +20,13 @@ public:
 	//====================================================================	
 	AMasterWeapon();
 
-	void UpdateVisual();
+	void UpdateVisual() const;
 
 	//Getters
-	
+	UWeaponBase* GetWeaponBaseRef () const {return WeaponBaseRef;}
 
 	//Setters
-	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) {WeaponBaseRef = _WeaponBase;}
-	void SetSkeletalMeshWeapon(USkeletalMeshComponent* _SkeletalMesh) {SkeletalMeshWeapon = _SkeletalMesh;}
-	
+	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) {WeaponBaseRef = _WeaponBase;}	
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)

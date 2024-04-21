@@ -27,7 +27,7 @@ void AMasterWeapon::PostInitializeComponents()
 			WeaponBaseRef = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 			WeaponBaseRef->SetID(WData->Name);
 			WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
-			WeaponBaseRef->SetHolsterType(WData->HolsterType);
+			WeaponBaseRef->SetWeaponType(WData->HolsterType);
 
 			UpdateVisual();
 		}			
@@ -39,7 +39,7 @@ void AMasterWeapon::BeginPlay()
 	Super::BeginPlay();	
 }
 
-void AMasterWeapon::UpdateVisual()
+void AMasterWeapon::UpdateVisual() const
 {
 	if (!WeaponBaseRef)
 		return;

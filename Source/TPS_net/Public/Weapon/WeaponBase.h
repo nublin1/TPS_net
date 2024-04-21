@@ -7,7 +7,7 @@
 #include "UObject/NoExportTypes.h"
 #include "WeaponBase.generated.h"
 
-enum class EHolsterType : uint8;
+enum class EWeaponType : uint8;
 /**
  * 
  */
@@ -31,10 +31,10 @@ public:
 	
 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
 
-	EHolsterType GetHolsterType() const { return HolsterType; }
+	EWeaponType GetWeaponType() const { return WeaponType; }
 
 	// Setters
-	void SetHolsterType(EHolsterType _HolsterType) { this->HolsterType = _HolsterType; }
+	void SetWeaponType(EWeaponType _HolsterType) { this->WeaponType = _HolsterType; }
 
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
 
@@ -49,7 +49,7 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere)
-	EHolsterType HolsterType;
+	EWeaponType WeaponType;
 
 	UPROPERTY(VisibleAnywhere)
 	FWeaponAssetData WeaponAssetData;

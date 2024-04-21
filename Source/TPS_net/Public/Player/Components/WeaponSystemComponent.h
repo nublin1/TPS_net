@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Data/Weapon/WeaponData.h"
 #include "WeaponSystemComponent.generated.h"
 
 
-class UWeaponBase;
 enum class EHolsterType : uint8;
+class UWeaponBase;
+enum class EWeaponType : uint8;
 class AMasterWeapon;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
@@ -22,42 +24,54 @@ public:
 	//====================================================================	
 	UWeaponSystemComponent();
 
-	bool bCheckHolsterAvaibility(EHolsterType BeingCheckedType) const; // true mean avaible
+	UFUNCTION(BlueprintCallable)
+	bool bIsAnyWeaponInHands() const;
+	
+	UFUNCTION()
+	bool bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const; // true mean available
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName HandWeaponSocketName;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* WeaponPistolHolster;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Blueprintable)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Blueprintable)
 	AMasterWeapon* WeaponPrimaryHolster;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* WeaponTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
+
+	//Data
+	UPROPERTY()
+	USkeletalMeshComponent* SkeletalMeshComponent;
+	UPROPERTY()
+	EHolsterType LastUsedHolsterType = EHolsterType::None;
 	
 
 	//====================================================================
 	// FUNCTIONS
-	//====================================================================	
+	//====================================================================
+	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
-
 	UFUNCTION(BlueprintCallable)
 	virtual void AddWeapon(UWeaponBase* NewWeaponData);
-
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData);
+	UFUNCTION(BlueprintCallable)
+	virtual void TakeupArms(EHolsterType Holster);
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	
 };
