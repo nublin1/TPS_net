@@ -3,6 +3,7 @@
 
 #include "Player/PlayerCharacter.h"
 
+#include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
 
 // Sets default values
@@ -47,5 +48,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& LifetimeProperties) const
 {
 	Super::GetLifetimeReplicatedProps(LifetimeProperties);
+
+	TArray<FLifetimeProperty> OutLifetimeProps;
+	DOREPLIFETIME_CONDITION(APlayerCharacter, IsAiming, COND_OwnerOnly);
+	//DOREPLIFETIME_CONDITION(APlayerCharacter, IsMoving, COND_None); // Пример условия, которое означает, что свойство реплицируется для всех
+	//DOREPLIFETIME_CONDITION(APlayerCharacter, IsGrounded, COND_SkipOwner); // Пример условия, которое означает, что свойство реплицируется для всех, кроме владельца
 }
 

@@ -50,9 +50,9 @@ protected:
 	TArray<FName> StartingWeapons;
 
 	//Data
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* SkeletalMeshComponent;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	EHolsterType LastUsedHolsterType = EHolsterType::None;
 	
 
@@ -69,7 +69,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData);
 	UFUNCTION(BlueprintCallable)
-	virtual void TakeupArms(EHolsterType Holster);
+	virtual void TakeupArms(EHolsterType Holster = EHolsterType::None);
+	UFUNCTION(BlueprintCallable)
+	virtual void HideWeapon();
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

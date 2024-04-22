@@ -127,12 +127,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
 
 	if (LastUsedHolsterType != Holster && CurrentWeaponInHands)
 	{
-		const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-											   EAttachmentRule::SnapToTarget, true);
-		
-		CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
-							  UWeaponHelper::ConvertHolsterTypeToText(CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
-		CurrentWeaponInHands = nullptr;
+		HideWeapon();
 	}
 	
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
@@ -163,6 +158,19 @@ void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
 		break;
 		
 	}
+}
+
+void UWeaponSystemComponent::HideWeapon()
+{
+	if (!CurrentWeaponInHands)
+		return;
+	
+	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+											   EAttachmentRule::SnapToTarget, true);
+		
+	CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
+						  UWeaponHelper::ConvertHolsterTypeToText(CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
+	CurrentWeaponInHands = nullptr;
 }
 
 
