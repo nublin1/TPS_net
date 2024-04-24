@@ -10,7 +10,7 @@
  * 
  */
 
-UENUM()
+UENUM(Blueprintable, BlueprintType)
 enum class EWeaponType : uint8
 {
 	Primary UMETA(DisplayName = "Primary"),
@@ -18,7 +18,7 @@ enum class EWeaponType : uint8
 };
 
 UENUM()
-enum class EHolsterType : uint8
+enum class EWeaponHolsterType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Primary UMETA(DisplayName = "Primary"),

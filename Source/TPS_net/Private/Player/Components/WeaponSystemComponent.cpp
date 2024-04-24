@@ -117,7 +117,7 @@ void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInst
 	}
 }
 
-void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
+void UWeaponSystemComponent::TakeupArms(EWeaponHolsterType Holster)
 {
 	if (HandWeaponSocketName.IsNone())
 		return;
@@ -135,10 +135,10 @@ void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
 	
 	switch (Holster)
 	{
-	case EHolsterType::None:
+	case EWeaponHolsterType::None:
 		break;
 		
-	case EHolsterType::Pistol:
+	case EWeaponHolsterType::Pistol:
 		if (!WeaponPistolHolster || WeaponPistolHolster == CurrentWeaponInHands)
 			break;
 		WeaponPistolHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
@@ -146,7 +146,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
 		LastUsedHolsterType = Holster;
 		break;
 
-	case EHolsterType::Primary:
+	case EWeaponHolsterType::Primary:
 		if (!WeaponPrimaryHolster || WeaponPrimaryHolster == CurrentWeaponInHands)
 			break;
 		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
@@ -154,7 +154,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterType Holster)
 		LastUsedHolsterType = Holster;
 		break;
 
-	case EHolsterType::AlternativePrimary:
+	case EWeaponHolsterType::AlternativePrimary:
 		break;
 		
 	}

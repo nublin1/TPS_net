@@ -27,10 +27,11 @@ public:
 	UWeaponBase();
 
 	// Getters
+	UFUNCTION(BlueprintCallable)
 	FName GetID() const { return NameID; }
-	
+	UFUNCTION()
 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
-
+	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
 
 	// Setters
@@ -47,8 +48,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Data")
 	FName NameID;
 
-protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EWeaponType WeaponType;
 
 	UPROPERTY(VisibleAnywhere)
