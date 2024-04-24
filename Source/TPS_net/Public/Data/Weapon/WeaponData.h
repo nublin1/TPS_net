@@ -17,8 +17,8 @@ enum class EWeaponType : uint8
 	Pistol UMETA(DisplayName = "Pistol"),
 };
 
-UENUM()
-enum class EWeaponHolsterType : uint8
+UENUM(meta=(ScriptName="EHolsterType"))
+enum class EHolsterType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Primary UMETA(DisplayName = "Primary"),
