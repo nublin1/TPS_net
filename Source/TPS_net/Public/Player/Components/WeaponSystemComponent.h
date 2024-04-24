@@ -8,7 +8,7 @@
 #include "WeaponSystemComponent.generated.h"
 
 
-enum class EWeaponHolsterType : uint8;
+enum class EHolsterWeaponType : uint8;
 class UWeaponBase;
 enum class EWeaponType : uint8;
 class AMasterWeapon;
@@ -53,7 +53,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(BlueprintReadWrite)
-	EWeaponHolsterType LastUsedHolsterType = EWeaponHolsterType::None;
+	EHolsterWeaponType LastUsedHolsterType = EHolsterWeaponType::None;
 	
 
 	//====================================================================
@@ -69,7 +69,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData);
 	UFUNCTION(BlueprintCallable)
-	virtual void TakeupArms(EWeaponHolsterType Holster = EWeaponHolsterType::None);
+	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
 
