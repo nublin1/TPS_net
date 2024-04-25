@@ -51,7 +51,7 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class TPS_NET_API UWeaponHelper : public UObject
 {
 	GENERATED_BODY()
@@ -71,5 +71,9 @@ public:
 		}
 	}
 
-	
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	static int CastEnumToInt(EWeaponType EnumValue)
+	{
+		return static_cast<int>(EnumValue);
+	}
 };
