@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSwitchingWeapon = false;
+
 	//Data
 	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* SkeletalMeshComponent;

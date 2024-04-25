@@ -44,7 +44,7 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere)
-	EWeaponType HolsterType;
+	EWeaponType HolsterType = EWeaponType::Primary;
 
 	UPROPERTY(EditAnywhere)
 	FWeaponAssetData WeaponAssetData;	
