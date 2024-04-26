@@ -51,7 +51,10 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Lif
 
 	TArray<FLifetimeProperty> OutLifetimeProps;
 	DOREPLIFETIME_CONDITION(APlayerCharacter, IsAiming, COND_OwnerOnly);
-	//DOREPLIFETIME_CONDITION(APlayerCharacter, IsMoving, COND_None); // Пример условия, которое означает, что свойство реплицируется для всех
-	//DOREPLIFETIME_CONDITION(APlayerCharacter, IsGrounded, COND_SkipOwner); // Пример условия, которое означает, что свойство реплицируется для всех, кроме владельца
+	//DOREPLIFETIME_CONDITION(APlayerCharacter, CurrentCameraLocation, COND_None); // Пример условия, которое означает, что свойство реплицируется для всех
+	//DOREPLIFETIME_CONDITION(APlayerCharacter, DesiredCameraLocation, COND_SkipOwner); // Пример условия, которое означает, что свойство реплицируется для всех, кроме владельца
+	DOREPLIFETIME(APlayerCharacter, IsAiming);
+	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
+	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 }
 

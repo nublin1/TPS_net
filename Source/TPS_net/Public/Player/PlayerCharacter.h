@@ -27,9 +27,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraInterpolationSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FVector CurrentCameraLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FVector DesiredCameraLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector DefaultCameraLocation;
