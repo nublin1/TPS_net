@@ -15,16 +15,25 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 	DesiredCameraLocation = FVector(250, 20, 30);	
 	DefaultCameraLocation = FVector(250, 20, 30);
 	AimingCameraPosition = FVector(100,60,60);
-	
+
 	StateMachine_Movemant = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
-	StateMachine_Movemant->RegisterComponent();
-	this->AddInstanceComponent(StateMachine_Movemant);
+	//StateMachine_Movemant->RegisterComponent();
+	//this->AddInstanceComponent(StateMachine_Movemant);
 	StateMachine_Movemant->OnComponentCreated();
 
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
-	StateMachine_Aiming->RegisterComponent();
-	this->AddInstanceComponent(StateMachine_Aiming);
+	//StateMachine_Aiming->RegisterComponent();
+	//this->AddInstanceComponent(StateMachine_Aiming);
 	StateMachine_Aiming->OnComponentCreated();	
+	
+	
+}
+
+void APlayerCharacter::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	
 }
 
 void APlayerCharacter::BeginPlay()
@@ -50,9 +59,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Lif
 	Super::GetLifetimeReplicatedProps(LifetimeProperties);
 
 	TArray<FLifetimeProperty> OutLifetimeProps;
-	DOREPLIFETIME_CONDITION(APlayerCharacter, IsAiming, COND_OwnerOnly);
-	//DOREPLIFETIME_CONDITION(APlayerCharacter, CurrentCameraLocation, COND_None); // Пример условия, которое означает, что свойство реплицируется для всех
-	//DOREPLIFETIME_CONDITION(APlayerCharacter, DesiredCameraLocation, COND_SkipOwner); // Пример условия, которое означает, что свойство реплицируется для всех, кроме владельца
+	
 	DOREPLIFETIME(APlayerCharacter, IsAiming);
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);

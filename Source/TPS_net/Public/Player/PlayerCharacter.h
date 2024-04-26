@@ -42,6 +42,7 @@ protected:
 	UStateMachineComponent* StateMachine_Aiming;
 	
 	//Functions
+	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 
 public:	
@@ -50,4 +51,5 @@ public:
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	
 };
