@@ -50,7 +50,7 @@ void UStateMachineComponent::InitState() const
 	}
 }
 
-void UStateMachineComponent::TickState(float DeltaTime)
+void UStateMachineComponent::TickState(float DeltaTime) const
 {
 	if (TickStateDelegate.IsBound())
 	{

@@ -13,6 +13,14 @@ class UWeaponBase;
 enum class EWeaponType : uint8;
 class AMasterWeapon;
 
+UENUM(Blueprintable, BlueprintType)
+enum EWeaponTransitionType: uint8
+{
+	Holster UMETA(DisplayName = "Holster"),
+	SwitchToPrimary UMETA(DisplayName = "Switch to Primary"),
+	SwitchToPistol UMETA(DisplayName = "Switch to Pistol")
+};
+
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
 class TPS_NET_API UWeaponSystemComponent : public UActorComponent
 {

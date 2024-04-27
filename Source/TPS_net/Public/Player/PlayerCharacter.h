@@ -17,7 +17,9 @@ public:
 	APlayerCharacter();
 
 protected:
-	// Properties
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
 	bool IsAiming;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -41,9 +43,14 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
 	
-	//Functions
+	
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
+	
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;

@@ -67,6 +67,6 @@ public:
 private:
 	bool bCanTickState = false;
 	void InitState() const;
-	void TickState(float DeltaTime);
+	void TickState(float DeltaTime) const;
 	void ExitState();
 };
