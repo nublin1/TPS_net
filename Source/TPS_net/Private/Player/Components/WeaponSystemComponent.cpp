@@ -8,6 +8,7 @@
 #include "Engine/EngineTypes.h"
 #include "World/Weapons/MasterWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
@@ -51,6 +52,22 @@ bool UWeaponSystemComponent::bCheckHolsterAvaibility(EWeaponType BeingCheckedTyp
 		return false;
 	}
 }
+
+void UWeaponSystemComponent::UpdateSocketsTransform()
+{
+	if (CurrentWeaponInHands)
+	{
+		//LeftHandSocketTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
+		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
+		auto rhand = SkeletalMeshComponent->GetSocketTransform("hand_r", RTS_World);
+		LeftHandSocketTransform = UKismetMathLibrary::MakeRelativeTransform(lhand, rhand);
+	}
+	else
+	{
+		LeftHandSocketTransform= FTransform::Identity;
+	}
+}
+
 
 void UWeaponSystemComponent::InitStartingWeapon()
 {
@@ -150,7 +167,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 		if (!WeaponPrimaryHolster || WeaponPrimaryHolster == CurrentWeaponInHands)
 			break;
 		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
-		CurrentWeaponInHands = WeaponPrimaryHolster;
+		CurrentWeaponInHands = WeaponPrimaryHolster;		
 		LastUsedHolsterType = Holster;
 		break;
 
@@ -158,6 +175,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 		break;
 		
 	}
+	
 }
 
 void UWeaponSystemComponent::HideWeapon()
@@ -180,5 +198,5 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	UpdateSocketsTransform();
 }

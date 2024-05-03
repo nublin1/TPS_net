@@ -13,7 +13,7 @@ UCLASS()
 class TPS_NET_API AMasterWeapon : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:
 	//====================================================================
 	// FUNCTIONS
@@ -23,10 +23,11 @@ public:
 	void UpdateVisual() const;
 
 	//Getters
-	UWeaponBase* GetWeaponBaseRef () const {return WeaponBaseRef;}
+	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
+	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
 
 	//Setters
-	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) {WeaponBaseRef = _WeaponBase;}	
+	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
@@ -45,8 +46,7 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
 };

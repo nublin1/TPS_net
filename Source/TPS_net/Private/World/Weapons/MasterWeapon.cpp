@@ -12,7 +12,7 @@ AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr), SkeletalMeshWeapon(nullp
 	PrimaryActorTick.bCanEverTick = true;
 
 	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
-	SetRootComponent(SkeletalMeshWeapon);
+	SetRootComponent(SkeletalMeshWeapon);	
 }
 
 void AMasterWeapon::PostInitializeComponents()

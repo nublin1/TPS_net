@@ -38,6 +38,12 @@ public:
 	UFUNCTION()
 	bool bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const; // true mean available
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateSocketsTransform();
+
+	//Getters
+	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -65,6 +71,12 @@ protected:
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(BlueprintReadWrite)
 	EHolsterWeaponType LastUsedHolsterType = EHolsterWeaponType::None;
+
+	//Left Hand Helpers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName LeftHandSocketName = "LeftHandSocket";
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FTransform LeftHandSocketTransform;
 	
 
 	//====================================================================
