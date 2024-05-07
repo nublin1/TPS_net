@@ -13,12 +13,20 @@ class UWeaponBase;
 enum class EWeaponType : uint8;
 class AMasterWeapon;
 
+UENUM(BlueprintType)
+enum class EWeaponInteraction : uint8
+{
+	None            UMETA(DisplayName = "None"),
+	Reload          UMETA(DisplayName = "Reload"),
+	Switch          UMETA(DisplayName = "Switch"),
+};
+
 UENUM(Blueprintable, BlueprintType)
 enum EWeaponTransitionType: uint8
 {
-	Holster UMETA(DisplayName = "Holster"),
+	Holster			UMETA(DisplayName = "Holster"),
 	SwitchToPrimary UMETA(DisplayName = "Switch to Primary"),
-	SwitchToPistol UMETA(DisplayName = "Switch to Pistol")
+	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
@@ -63,8 +71,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsSwitchingWeapon = false;
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite )
+	EWeaponInteraction WeaponInteraction = EWeaponInteraction::None;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//bool bIsSwitchingWeapon = false;
 
 	//Data
 	UPROPERTY(BlueprintReadWrite)
