@@ -1,0 +1,22 @@
+[
+	{
+		"Name": "Pistol",
+		"HolsterType": "Pistol",
+		"BulletMode": "HitScan",
+		"WeaponAssetData":
+		{
+			"SkeletalMesh": "/Script/Engine.SkeletalMesh'/Game/MilitaryWeapDark/Weapons/Pistols_B.Pistols_B'",
+			"BulletActor": "None"
+		}
+	},
+	{
+		"Name": "Assault_Rifle",
+		"HolsterType": "Primary",
+		"BulletMode": "Projectile",
+		"WeaponAssetData":
+		{
+			"SkeletalMesh": "/Script/Engine.SkeletalMesh'/Game/MilitaryWeapDark/Weapons/Assault_Rifle_B.Assault_Rifle_B'",
+			"BulletActor": "None"
+		}
+	}
+]

@@ -49,6 +49,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateSocketsTransform();
 
+	UFUNCTION(BlueprintCallable)
+	void Shoot() const;
+	UFUNCTION()
+	void ShootProjectile() const;
+
 	//Getters
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
 
@@ -72,7 +77,7 @@ protected:
 	TArray<FName> StartingWeapons;
 
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite )
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
 	EWeaponInteraction WeaponInteraction = EWeaponInteraction::None;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//bool bIsSwitchingWeapon = false;
@@ -109,5 +114,6 @@ protected:
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 };

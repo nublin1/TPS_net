@@ -10,20 +10,29 @@
  * 
  */
 
+class ABaseBulletActor;
+
 UENUM(Blueprintable, BlueprintType)
 enum class EWeaponType : uint8
 {
 	Primary UMETA(DisplayName = "Primary"),
-	Pistol UMETA(DisplayName = "Pistol"),
+	Pistol	UMETA(DisplayName = "Pistol"),
 };
 
 UENUM(meta=(ScriptName="EHolsterWeaponType"))
 enum class EHolsterWeaponType : uint8
 {
-	None UMETA(DisplayName = "None"),
-	Primary UMETA(DisplayName = "Primary"),
-	AlternativePrimary UMETA(DisplayName = "AlternativePrimary"),
-	Pistol UMETA(DisplayName = "Pistol"),
+	None				UMETA(DisplayName = "None"),
+	Primary				UMETA(DisplayName = "Primary"),
+	AlternativePrimary	UMETA(DisplayName = "AlternativePrimary"),
+	Pistol				UMETA(DisplayName = "Pistol"),
+};
+
+UENUM(Blueprintable, BlueprintType)
+enum class EBulletMode
+{
+	HitScan		UMETA(DisplayName = "HitScan"),
+	Projectile	UMETA(DisplayName = "Projectile"),
 };
 
 USTRUCT()
@@ -33,6 +42,9 @@ struct FWeaponAssetData
 
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
+	UBlueprint* BulletActor;
 };
 
 USTRUCT()
@@ -45,6 +57,9 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType HolsterType = EWeaponType::Primary;
+
+	UPROPERTY(EditAnywhere)
+	EBulletMode BulletMode;
 
 	UPROPERTY(EditAnywhere)
 	FWeaponAssetData WeaponAssetData;	

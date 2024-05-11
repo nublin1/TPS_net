@@ -30,15 +30,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FName GetID() const { return NameID; }
 	UFUNCTION()
+	EBulletMode GetEBulletMode() const {return BulletMode;}
+	UFUNCTION()
 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
 
 	// Setters
+	UFUNCTION()
 	void SetWeaponType(EWeaponType _HolsterType) { this->WeaponType = _HolsterType; }
-
+	UFUNCTION()
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
-
+	UFUNCTION()
+	void SetBulletMode(EBulletMode _BulletMode) {BulletMode = _BulletMode;}
+	UFUNCTION()
 	void SetWeaponAssetData(const FWeaponAssetData& _WeaponAssetData) { this->WeaponAssetData = _WeaponAssetData; }
 
 protected:
@@ -50,6 +55,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere)
+	EBulletMode BulletMode = EBulletMode::HitScan;
 
 	UPROPERTY(VisibleAnywhere)
 	FWeaponAssetData WeaponAssetData;

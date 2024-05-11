@@ -9,6 +9,7 @@
 #include "World/Weapons/MasterWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
@@ -68,6 +69,34 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 	}
 }
 
+void UWeaponSystemComponent::Shoot() const
+{
+	if (!CurrentWeaponInHands)
+		return;	
+	
+	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
+	{
+	case EBulletMode::HitScan:
+		break;
+	case EBulletMode::Projectile:
+		ShootProjectile();		
+		break;
+		
+	default:
+		break;
+	}	
+	
+}
+
+void UWeaponSystemComponent::ShootProjectile() const
+{
+	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform("MuzzleFlash", RTS_World);
+	auto actorToSpawn = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+	FActorSpawnParameters SpawnParameters;
+	if (actorToSpawn)
+		AActor* SpawnedActorRef= GetWorld()->SpawnActor<AActor>(actorToSpawn->GeneratedClass, BulletSpawnPointTransform.GetLocation(), BulletSpawnPointTransform.GetRotation().Rotator(), SpawnParameters);
+}
+
 
 void UWeaponSystemComponent::InitStartingWeapon()
 {
@@ -88,6 +117,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 
 		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 		WeaponBase->SetID(WData->Name);
+		WeaponBase->SetBulletMode(WData->BulletMode);
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
 		WeaponBase->SetWeaponType(WData->HolsterType);
 
@@ -199,4 +229,13 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UpdateSocketsTransform();
+}
+
+void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& LifetimeProperties) const
+{
+	Super::GetLifetimeReplicatedProps(LifetimeProperties);
+
+	TArray<FLifetimeProperty> OutLifetimeProps;
+	
+	DOREPLIFETIME(UWeaponSystemComponent, WeaponInteraction);
 }
