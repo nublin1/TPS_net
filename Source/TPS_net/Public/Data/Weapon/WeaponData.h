@@ -56,6 +56,8 @@ struct FCharacteristicsOfTheWeapon
 	float Mass = 1000; // grams
 	UPROPERTY()
 	float RPM = 600; //Rounds per minute
+	UPROPERTY()
+	float MuzzleVelocity = 55000; // cm/sec
 	
 };
 
@@ -72,6 +74,9 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	EBulletMode BulletMode;
+
+	UPROPERTY(EditAnywhere)
+	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
 
 	UPROPERTY(EditAnywhere)
 	FWeaponAssetData WeaponAssetData;	

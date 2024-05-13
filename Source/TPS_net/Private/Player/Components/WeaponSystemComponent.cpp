@@ -99,11 +99,15 @@ void UWeaponSystemComponent::Shoot()
 		break;
 	}
 
-	bCanShoot = false;	
-	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
+	if (!GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
 	{
-		bCanShoot = true;
-	}, 1.0f, false);
+		bCanShoot = false;	
+		GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
+		{
+			bCanShoot = true;
+		},  60.0f / CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().RPM , false);
+	}
+	
 }
 
 void UWeaponSystemComponent::ShootProjectile() const

@@ -32,6 +32,8 @@ public:
 	UFUNCTION()
 	EBulletMode GetEBulletMode() const {return BulletMode;}
 	UFUNCTION()
+	FCharacteristicsOfTheWeapon GetCharacteristicsOfTheWeapon() const {return CharacteristicsOfTheWeapon;}
+	UFUNCTION()
 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
@@ -43,6 +45,8 @@ public:
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
 	UFUNCTION()
 	void SetBulletMode(EBulletMode _BulletMode) {BulletMode = _BulletMode;}
+	UFUNCTION()
+	void SetCharacteristicsOfTheWeapon(FCharacteristicsOfTheWeapon _CharacteristicsOfTheWeapon) const {_CharacteristicsOfTheWeapon = CharacteristicsOfTheWeapon;}
 	UFUNCTION()
 	void SetWeaponAssetData(const FWeaponAssetData& _WeaponAssetData) { this->WeaponAssetData = _WeaponAssetData; }
 
@@ -58,6 +62,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::HitScan;
+
+	UPROPERTY(EditAnywhere)
+	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
 
 	UPROPERTY(VisibleAnywhere)
 	FWeaponAssetData WeaponAssetData;

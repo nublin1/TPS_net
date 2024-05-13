@@ -27,6 +27,7 @@ void AMasterWeapon::PostInitializeComponents()
 			WeaponBaseRef = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 			WeaponBaseRef->SetID(WData->Name);
 			WeaponBaseRef->SetBulletMode(WData->BulletMode);
+			WeaponBaseRef->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
 			WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
 			WeaponBaseRef->SetWeaponType(WData->HolsterType);
 
