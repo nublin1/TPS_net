@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Data/Weapon/WeaponData.h"
+#include "Engine/TimerHandle.h"
 #include "WeaponSystemComponent.generated.h"
 
 
@@ -50,7 +51,7 @@ public:
 	void UpdateSocketsTransform();
 
 	UFUNCTION(BlueprintCallable)
-	void Shoot() const;
+	void Shoot() ;
 	UFUNCTION()
 	void ShootProjectile() const;
 
@@ -93,6 +94,13 @@ protected:
 	FName LeftHandSocketName = "LeftHandSocket";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FTransform LeftHandSocketTransform;
+
+
+	//
+	UPROPERTY()
+	bool bCanShoot = true;
+	UPROPERTY()
+	FTimerHandle ShootDelayTimerHandle;
 	
 
 	//====================================================================

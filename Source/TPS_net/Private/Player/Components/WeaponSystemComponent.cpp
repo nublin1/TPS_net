@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/TimerHandle.h"
 
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
@@ -28,7 +29,7 @@ bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
 
 void UWeaponSystemComponent::PostInitProperties()
 {
-	Super::PostInitProperties();	
+	Super::PostInitProperties();
 }
 
 // Called when the game startsKO
@@ -65,36 +66,57 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 	}
 	else
 	{
-		LeftHandSocketTransform= FTransform::Identity;
+		LeftHandSocketTransform = FTransform::Identity;
 	}
 }
 
-void UWeaponSystemComponent::Shoot() const
+void UWeaponSystemComponent::Shoot() 
 {
 	if (!CurrentWeaponInHands)
-		return;	
-	
+		return;
+
+	EFireMode FireMode = EFireMode::Single;
+	switch (FireMode)
+	{
+	case EFireMode::Single:
+		break;
+	case EFireMode::Burst:
+		break;
+	case EFireMode::Full_Auto:
+		break;
+	}
+
 	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
 	{
 	case EBulletMode::HitScan:
 		break;
 	case EBulletMode::Projectile:
-		ShootProjectile();		
+		if(bCanShoot)
+			ShootProjectile();
 		break;
-		
+
 	default:
 		break;
-	}	
-	
+	}
+
+	bCanShoot = false;	
+	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
+	{
+		bCanShoot = true;
+	}, 1.0f, false);
 }
 
 void UWeaponSystemComponent::ShootProjectile() const
 {
-	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform("MuzzleFlash", RTS_World);
+	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
+		"MuzzleFlash", RTS_World);
 	auto actorToSpawn = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
 	FActorSpawnParameters SpawnParameters;
 	if (actorToSpawn)
-		AActor* SpawnedActorRef= GetWorld()->SpawnActor<AActor>(actorToSpawn->GeneratedClass, BulletSpawnPointTransform.GetLocation(), BulletSpawnPointTransform.GetRotation().Rotator(), SpawnParameters);
+		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(actorToSpawn->GeneratedClass,
+		                                                         BulletSpawnPointTransform.GetLocation(),
+		                                                         BulletSpawnPointTransform.GetRotation().Rotator(),
+		                                                         SpawnParameters);
 }
 
 
@@ -131,7 +153,7 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	SpawnParameters.Owner = GetOwner();
 	SpawnParameters.bNoFail = true;
 	SpawnParameters.SpawnCollisionHandlingOverride =
-		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;	
+		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
@@ -139,14 +161,13 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	                                                              SpawnParameters);
 	Weapon->SetWeaponBaseRef(NewWeaponData);
 	Weapon->UpdateVisual();
-	
+
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
 	                                           EAttachmentRule::SnapToTarget, true);
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
 	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetWeaponType()));
 
 	AssignWeaponToHolsterSlot(Weapon, NewWeaponData);
-	
 }
 
 void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData)
@@ -176,19 +197,19 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 	{
 		HideWeapon();
 	}
-	
+
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-											   EAttachmentRule::SnapToTarget, true);
-	
+	                                           EAttachmentRule::SnapToTarget, true);
+
 	switch (Holster)
 	{
 	case EHolsterWeaponType::None:
 		break;
-		
+
 	case EHolsterWeaponType::Pistol:
 		if (!WeaponPistolHolster || WeaponPistolHolster == CurrentWeaponInHands)
 			break;
-		WeaponPistolHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
+		WeaponPistolHolster->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
 		CurrentWeaponInHands = WeaponPistolHolster;
 		LastUsedHolsterType = Holster;
 		break;
@@ -196,28 +217,27 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 	case EHolsterWeaponType::Primary:
 		if (!WeaponPrimaryHolster || WeaponPrimaryHolster == CurrentWeaponInHands)
 			break;
-		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule,HandWeaponSocketName);
-		CurrentWeaponInHands = WeaponPrimaryHolster;		
+		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
+		CurrentWeaponInHands = WeaponPrimaryHolster;
 		LastUsedHolsterType = Holster;
 		break;
 
 	case EHolsterWeaponType::AlternativePrimary:
 		break;
-		
 	}
-	
 }
 
 void UWeaponSystemComponent::HideWeapon()
 {
 	if (!CurrentWeaponInHands)
 		return;
-	
+
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-											   EAttachmentRule::SnapToTarget, true);
-		
+	                                           EAttachmentRule::SnapToTarget, true);
+
 	CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
-						  UWeaponHelper::ConvertHolsterTypeToText(CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
+	                                        UWeaponHelper::ConvertHolsterTypeToText(
+		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
 	CurrentWeaponInHands = nullptr;
 }
 
@@ -236,6 +256,6 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(LifetimeProperties);
 
 	TArray<FLifetimeProperty> OutLifetimeProps;
-	
+
 	DOREPLIFETIME(UWeaponSystemComponent, WeaponInteraction);
 }

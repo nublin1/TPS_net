@@ -48,6 +48,18 @@ struct FWeaponAssetData
 };
 
 USTRUCT()
+struct FCharacteristicsOfTheWeapon
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	float Mass = 1000; // grams
+	UPROPERTY()
+	float RPM = 600; //Rounds per minute
+	
+};
+
+USTRUCT()
 struct TPS_NET_API FWeaponData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
