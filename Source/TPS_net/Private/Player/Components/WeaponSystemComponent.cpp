@@ -3,11 +3,14 @@
 
 #include "Player/Components/WeaponSystemComponent.h"
 
+#include <iostream>
+
 #include "Data/Weapon/WeaponData.h"
 #include "Weapon/WeaponBase.h"
 #include "Engine/EngineTypes.h"
 #include "World/Weapons/MasterWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Componets/Bullets/CustomBulletProjectile.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/TimerHandle.h"
@@ -70,43 +73,66 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 	}
 }
 
-void UWeaponSystemComponent::Shoot() 
+void UWeaponSystemComponent::PreShoot()
 {
 	if (!CurrentWeaponInHands)
 		return;
-
+	
 	EFireMode FireMode = EFireMode::Single;
 	switch (FireMode)
 	{
 	case EFireMode::Single:
+		AvailableShootsCount = 1;
 		break;
 	case EFireMode::Burst:
 		break;
 	case EFireMode::Full_Auto:
 		break;
 	}
+}
+
+bool UWeaponSystemComponent::CheckIsCanShoot()
+{
+	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+		return false;
+	
+	if(bIsReadyToNextShoot && AvailableShootsCount>0)
+	{			
+		//UE_LOG(LogTemp, Warning, TEXT("Available Shoots Count: %d"), AvailableShootsCount);
+
+		return true;
+	}
+	
+	return false;
+}
+
+void UWeaponSystemComponent::Shoot() 
+{
+	if (!CurrentWeaponInHands)
+		return;
+
+	if (CheckIsCanShoot() == false)
+		return;
 
 	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
 	{
 	case EBulletMode::HitScan:
 		break;
 	case EBulletMode::Projectile:
-		if(bCanShoot)
-			ShootProjectile();
+		ShootProjectile();
 		break;
-
 	default:
 		break;
 	}
 
-	if (!GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+	AvailableShootsCount--;
+	bIsReadyToNextShoot = false;
+	
+	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
 	{
-		bCanShoot = false;	
-		GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
-		{
-			bCanShoot = true;
-		},  60.0f / CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().RPM , false);
-	}
+		bIsReadyToNextShoot = true;
+	},  60.0f / CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().RPM , false);
+	
 	
 }
 
@@ -117,10 +143,23 @@ void UWeaponSystemComponent::ShootProjectile() const
 	auto actorToSpawn = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
 	FActorSpawnParameters SpawnParameters;
 	if (actorToSpawn)
+	{
 		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(actorToSpawn->GeneratedClass,
-		                                                         BulletSpawnPointTransform.GetLocation(),
-		                                                         BulletSpawnPointTransform.GetRotation().Rotator(),
-		                                                         SpawnParameters);
+																 BulletSpawnPointTransform.GetLocation(),
+																 BulletSpawnPointTransform.GetRotation().Rotator(),
+																 SpawnParameters);
+		if (SpawnedActorRef)
+		{
+			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
+			if (BulletProjectileComponent)
+			{
+				// Настройте необходимые переменные компонента здесь
+				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
+				BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().Mass);
+				
+			}
+		}
+	}
 }
 
 

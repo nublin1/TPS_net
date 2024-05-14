@@ -53,7 +53,7 @@ struct FCharacteristicsOfTheWeapon
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float Mass = 1000; // grams
+	float Mass = 0.100f; // kilograms
 	UPROPERTY()
 	float RPM = 600; //Rounds per minute
 	UPROPERTY()

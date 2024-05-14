@@ -51,7 +51,11 @@ public:
 	void UpdateSocketsTransform();
 
 	UFUNCTION(BlueprintCallable)
-	void Shoot() ;
+	void PreShoot();
+	UFUNCTION(BlueprintCallable)
+	bool CheckIsCanShoot();
+	UFUNCTION(BlueprintCallable)
+	void Shoot();
 	UFUNCTION()
 	void ShootProjectile() const;
 
@@ -98,7 +102,9 @@ protected:
 
 	//
 	UPROPERTY()
-	bool bCanShoot = true;
+	bool bIsReadyToNextShoot = true;
+	UPROPERTY()
+	uint8 AvailableShootsCount = 0;
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
 	

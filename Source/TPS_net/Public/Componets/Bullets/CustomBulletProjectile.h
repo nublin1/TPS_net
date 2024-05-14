@@ -7,34 +7,45 @@
 #include "CustomBulletProjectile.generated.h"
 
 
-UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UCustomBulletProjectile : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UCustomBulletProjectile();
 
+	//Getters
+	float GetStartBulletSpeed() const { return StartBulletSpeed; }	
+	float GetBulletLifeTime() const { return BulletLifeTime; }	
+	float GetBulletMass() const { return BulletMass; }
+	float GetCrossSection() const { return CrossSection; }
+
+	//Setters
+	void SetStartBulletSpeed(const float _StartBulletSpeed) { this->StartBulletSpeed = _StartBulletSpeed; }
+	void SetBulletMass(const float _BulletMass) { this->BulletMass = _BulletMass; }
+	void SetBulletLifeTime(const float _BulletLifeTime) { this->BulletLifeTime = _BulletLifeTime; }
+	void SetCrossSection(const float _CrossSection) { this->CrossSection = _CrossSection; }
+
 protected:
 	//Bullet Params
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category = "Bullet Params", meta=(DisplayName="Velocity"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="Velocity"))
 	FVector Velocity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category = "Bullet Params", meta=(DisplayName="StartBulletSpeed"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="StartBulletSpeed"))
 	float StartBulletSpeed = 75000; // cm/s
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category = "Bullet Params", meta=(DisplayName="BulletLifeTime"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="BulletLifeTime"))
 	float BulletLifeTime = 8;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category = "Bullet Params", meta=(DisplayName="BulletMass"))
-	float BulletMass = 0.0116f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category = "Bullet Params", meta=(DisplayName="CrossSection"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="BulletMass"))
+	float BulletMass = 0.116f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="CrossSection"))
 	float CrossSection = 0.49f;
-	
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 };
