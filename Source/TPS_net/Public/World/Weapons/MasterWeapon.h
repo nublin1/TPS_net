@@ -9,13 +9,7 @@
 
 class UWeaponBase;
 
-UENUM(BlueprintType)
-enum class EFireMode : uint8
-{
-	Single        UMETA(DisplayName = "Single"),
-	Burst         UMETA(DisplayName = "Burst"),
-	Full_Auto     UMETA(DisplayName = "Full_Auto"),
-};
+
 
 UCLASS()
 class TPS_NET_API AMasterWeapon : public AActor

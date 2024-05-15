@@ -85,6 +85,7 @@ void UWeaponSystemComponent::PreShoot()
 		AvailableShootsCount = 1;
 		break;
 	case EFireMode::Burst:
+		AvailableShootsCount = 3;
 		break;
 	case EFireMode::Full_Auto:
 		break;
@@ -138,16 +139,31 @@ void UWeaponSystemComponent::Shoot()
 
 void UWeaponSystemComponent::ShootProjectile() const
 {
-	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
-		"MuzzleFlash", RTS_World);
-	auto actorToSpawn = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
-	FActorSpawnParameters SpawnParameters;
-	if (actorToSpawn)
+	if (!CurrentWeaponInHands->GetSkeletalMeshWeapon())
+		return;
+
+	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform("MuzzleFlash", ERelativeTransformSpace::RTS_World);
+	UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+	if (BulletBlueprint)
 	{
-		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(actorToSpawn->GeneratedClass,
-																 BulletSpawnPointTransform.GetLocation(),
-																 BulletSpawnPointTransform.GetRotation().Rotator(),
-																 SpawnParameters);
+		FActorSpawnParameters SpawnParameters;
+		FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
+		FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
+
+		// Получаем угол разброса
+		float SpreadAngle = 1.0f;
+
+		// Генерируем случайное отклонение для разброса
+		FRotator RandomSpread = FRotator(
+			FMath::RandRange(-SpreadAngle, SpreadAngle), // Отклонение по оси Pitch
+			FMath::RandRange(-SpreadAngle, SpreadAngle), // Отклонение по оси Yaw
+			0.0f                                        // Отклонение по оси Roll (не нужно для разброса)
+		);
+
+		// Применяем случайное отклонение к направлению выстрела
+		SpawnRotation += RandomSpread;
+
+		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
 		if (SpawnedActorRef)
 		{
 			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
@@ -155,8 +171,7 @@ void UWeaponSystemComponent::ShootProjectile() const
 			{
 				// Настройте необходимые переменные компонента здесь
 				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
-				BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().Mass);
-				
+				BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().BulletMass);
 			}
 		}
 	}
