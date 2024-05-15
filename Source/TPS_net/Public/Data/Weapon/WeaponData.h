@@ -68,9 +68,7 @@ struct FCharacteristicsOfTheWeapon
 	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")
 	float SpreadAngle = 1.0f;
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
-	float RPM = 600; //Rounds per minute
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
-	uint16 MaxAmmoCarry = 300;
+	float RPM = 600; //Rounds per minute	
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	uint16 MagazineSize = 30; // Rounds
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")

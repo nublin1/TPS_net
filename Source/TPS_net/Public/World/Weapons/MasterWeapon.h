@@ -24,9 +24,16 @@ public:
 
 	void UpdateVisual() const;
 
+	UFUNCTION()
+	void DecreaseRoundsInMagazine() {RoundsInMagazine--;}
+	UFUNCTION(BlueprintCallable)
+	void Reload();
+
 	//Getters
 	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
+
+	uint16 GetRoundsInMagazine() const {return RoundsInMagazine;}
 
 	//Setters
 	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }
@@ -43,7 +50,7 @@ protected:
 	FName StartingWeapon;
 
 	//
-	bool bIsReadyToShoot = true;
+	uint16 RoundsInMagazine = 10;
 
 	//====================================================================
 	// FUNCTIONS

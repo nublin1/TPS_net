@@ -50,6 +50,11 @@ void AMasterWeapon::UpdateVisual() const
 	
 }
 
+void AMasterWeapon::Reload()
+{
+	RoundsInMagazine = 10;
+}
+
 void AMasterWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

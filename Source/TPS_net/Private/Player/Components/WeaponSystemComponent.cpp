@@ -82,19 +82,30 @@ void UWeaponSystemComponent::PreShoot()
 	switch (FireMode)
 	{
 	case EFireMode::Single:
+		
 		AvailableShootsCount = 1;
 		break;
 	case EFireMode::Burst:
 		AvailableShootsCount = 3;
 		break;
 	case EFireMode::Full_Auto:
+		AvailableShootsCount = CurrentWeaponInHands->GetRoundsInMagazine();
 		break;
 	}
 }
 
 bool UWeaponSystemComponent::CheckIsCanShoot()
 {
+	if (WeaponInteraction != EWeaponInteraction::None)
+		return false;
+	
+	if (!CurrentWeaponInHands)
+		return false;
+	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+		return false;
+	
+	if(CurrentWeaponInHands->GetRoundsInMagazine()<=0)
 		return false;
 	
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
@@ -110,10 +121,7 @@ bool UWeaponSystemComponent::CheckIsCanShoot()
 void UWeaponSystemComponent::Shoot() 
 {
 	if (!CurrentWeaponInHands)
-		return;
-
-	if (CheckIsCanShoot() == false)
-		return;
+		return;	
 
 	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
 	{
@@ -127,6 +135,7 @@ void UWeaponSystemComponent::Shoot()
 	}
 
 	AvailableShootsCount--;
+	CurrentWeaponInHands->DecreaseRoundsInMagazine(); 
 	bIsReadyToNextShoot = false;
 	
 	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
@@ -150,17 +159,16 @@ void UWeaponSystemComponent::ShootProjectile() const
 		FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
 		FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
 
-		// Получаем угол разброса
-		float SpreadAngle = 1.0f;
+		// Угол разброса
+		auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
 
-		// Генерируем случайное отклонение для разброса
+		// Отклонение для разброса
 		FRotator RandomSpread = FRotator(
-			FMath::RandRange(-SpreadAngle, SpreadAngle), // Отклонение по оси Pitch
-			FMath::RandRange(-SpreadAngle, SpreadAngle), // Отклонение по оси Yaw
-			0.0f                                        // Отклонение по оси Roll (не нужно для разброса)
+			FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
+			FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
+			0.0f                                        //Roll (не нужно для разброса)
 		);
-
-		// Применяем случайное отклонение к направлению выстрела
+		
 		SpawnRotation += RandomSpread;
 
 		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
@@ -168,8 +176,7 @@ void UWeaponSystemComponent::ShootProjectile() const
 		{
 			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
 			if (BulletProjectileComponent)
-			{
-				// Настройте необходимые переменные компонента здесь
+			{			
 				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
 				BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().BulletMass);
 			}
