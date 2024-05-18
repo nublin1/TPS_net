@@ -46,17 +46,25 @@ void AMasterWeapon::UpdateVisual() const
 	if (!WeaponBaseRef)
 		return;
 	
-	SkeletalMeshWeapon->SetSkeletalMesh(WeaponBaseRef->GetWeaponAssetData().SkeletalMesh);	
-	
-	FString AnimClassName = TEXT("WeaponAnimClass_C");		
-	UClass* AnimInstanceClass = FindObject<UClass>(ANY_PACKAGE, *AnimClassName);
-	if (AnimInstanceClass)
-	{		
-		SkeletalMeshWeapon->SetAnimInstanceClass(AnimInstanceClass);
-	}
+	SkeletalMeshWeapon->SetSkeletalMesh(WeaponBaseRef->GetWeaponAssetData().SkeletalMesh);
+
+	if (WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint)
+		SkeletalMeshWeapon->SetAnimInstanceClass(WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetAnimBlueprintGeneratedClass());
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"), *AnimClassName);
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"), *WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetBlueprintClass()->GetName());
+	}
+	
+	//FString AnimClassName = TEXT("WeaponAnimClass_C");		
+	//UClass* AnimInstanceClass = FindObject<UClass>(ANY_PACKAGE, *AnimClassName);
+	//if (AnimInstanceClass)
+	{		
+		//SkeletalMeshWeapon->SetAnimInstanceClass(AnimInstanceClass);
+		
+	}
+	//else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"), *AnimClassName);
 	}
 }
 

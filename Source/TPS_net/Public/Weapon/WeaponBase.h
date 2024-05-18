@@ -10,9 +10,6 @@
 enum class EWeaponType : uint8;
 
 
-
-
-
 UCLASS(Blueprintable)
 class TPS_NET_API UWeaponBase : public UObject
 {

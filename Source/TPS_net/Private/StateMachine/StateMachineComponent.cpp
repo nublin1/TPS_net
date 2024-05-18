@@ -10,7 +10,7 @@ UStateMachineComponent::UStateMachineComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	InitialStateTag = FGameplayTag::RequestGameplayTag(TEXT("Idle"));
+	//InitialStateTag = FGameplayTag::RequestGameplayTag(TEXT("Idle"));
 }
 
 bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)

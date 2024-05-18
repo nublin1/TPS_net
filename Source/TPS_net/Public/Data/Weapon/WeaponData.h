@@ -54,6 +54,12 @@ struct FWeaponAssetData
 
 	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
 	UBlueprint* BulletActor;
+
+	UPROPERTY(EditAnywhere)
+	UAnimBlueprint* AnimationBlueprint;
+
+	UPROPERTY(EditAnywhere)
+	FName BulletSpawnSocketTransformName = "MuzzleFlash";
 };
 
 USTRUCT()

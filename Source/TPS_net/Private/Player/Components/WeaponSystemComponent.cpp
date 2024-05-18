@@ -151,7 +151,9 @@ void UWeaponSystemComponent::ShootProjectile() const
 	if (!CurrentWeaponInHands->GetSkeletalMeshWeapon())
 		return;
 
-	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform("MuzzleFlash", ERelativeTransformSpace::RTS_World);
+	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
+		CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
+		ERelativeTransformSpace::RTS_World);
 	UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
 	if (BulletBlueprint)
 	{
@@ -307,7 +309,6 @@ void UWeaponSystemComponent::HideWeapon()
 }
 
 
-// Called every frame
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                            FActorComponentTickFunction* ThisTickFunction)
 {
