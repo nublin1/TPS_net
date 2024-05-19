@@ -161,28 +161,30 @@ void UWeaponSystemComponent::ShootProjectile() const
 		FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
 		FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
 
-		// Угол разброса
-		auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
-
-		// Отклонение для разброса
-		FRotator RandomSpread = FRotator(
-			FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
-			FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
-			0.0f                                        //Roll (не нужно для разброса)
-		);
-		
-		SpawnRotation += RandomSpread;
-
-		AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
-		if (SpawnedActorRef)
+		for (int i =0; i<CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().NumberOfShotsPerRound; i++)
 		{
-			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
-			if (BulletProjectileComponent)
-			{			
-				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
-				BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().BulletMass);
+			// Угол разброса
+			auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
+			// Отклонение для разброса
+			FRotator RandomSpread = FRotator(
+				FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
+				FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
+				0.0f                                        //Roll (не нужно для разброса)
+			);
+		
+			SpawnRotation += RandomSpread;
+
+			AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
+			if (SpawnedActorRef)
+			{
+				UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
+				if (BulletProjectileComponent)
+				{			
+					BulletProjectileComponent->SetStartBulletSpeed(10.0f);
+					BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().BulletMass);
+				}
 			}
-		}
+		}			
 	}
 }
 
@@ -207,6 +209,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 		WeaponBase->SetID(WData->Name);
 		WeaponBase->SetBulletMode(WData->BulletMode);
+		WeaponBase->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
 		WeaponBase->SetWeaponType(WData->HolsterType);
 

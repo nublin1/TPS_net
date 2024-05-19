@@ -20,6 +20,7 @@ enum class EWeaponInteraction : uint8
 	None            UMETA(DisplayName = "None"),
 	Reload          UMETA(DisplayName = "Reload"),
 	Switch          UMETA(DisplayName = "Switch"),
+	Shoot			UMETA(DisplayName = "Shoot"),
 };
 
 UENUM(Blueprintable, BlueprintType)

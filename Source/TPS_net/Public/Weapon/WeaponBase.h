@@ -45,7 +45,7 @@ public:
 	UFUNCTION()
 	void SetBulletMode(EBulletMode _BulletMode) {BulletMode = _BulletMode;}
 	UFUNCTION()
-	void SetCharacteristicsOfTheWeapon(FCharacteristicsOfTheWeapon _CharacteristicsOfTheWeapon) const {_CharacteristicsOfTheWeapon = CharacteristicsOfTheWeapon;}
+	void SetCharacteristicsOfTheWeapon(const FCharacteristicsOfTheWeapon& _CharacteristicsOfTheWeapon) {CharacteristicsOfTheWeapon = _CharacteristicsOfTheWeapon;}
 	UFUNCTION()
 	void SetWeaponAssetData(const FWeaponAssetData& _WeaponAssetData) { this->WeaponAssetData = _WeaponAssetData; }
 

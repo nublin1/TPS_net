@@ -69,6 +69,8 @@ struct FCharacteristicsOfTheWeapon
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	TArray<EFireMode> AvailableShootingModes;
+	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	uint8 NumberOfShotsPerRound = 1;	
 	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")
 	float WeaponMass = 1.0f; // kilograms
 	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")

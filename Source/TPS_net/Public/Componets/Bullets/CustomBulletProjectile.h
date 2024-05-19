@@ -13,6 +13,9 @@ class TPS_NET_API UCustomBulletProjectile : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	// Sets default values for this component's properties
 	UCustomBulletProjectile();
 
@@ -41,6 +44,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="CrossSection"))
 	float CrossSection = 0.49f;
 
+	// Behaviour
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsCanRicochet"))
+	bool IsCanRicochet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsEffectOfGravity"))
+	bool IsEffectOfGravity = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsEffectOfDragForce"))
+	bool IsEffectOfDragForce = true;
+
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
