@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
@@ -43,13 +44,22 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
 	
+
+	//Timers
+	UPROPERTY()
+	FTimerHandle CollisionOffTimerHandle;
+
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
-	
+
+
+	//
+	UFUNCTION(BlueprintCallable)
+	void ShortCollisionOff(UBoxComponent* TargetCollision);
 
 
 public:	

@@ -3,6 +3,7 @@
 
 #include "Player/PlayerCharacter.h"
 
+#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
 
@@ -39,6 +40,17 @@ void APlayerCharacter::PostInitProperties()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
+{
+	UBoxComponent* TempCollision = TargetCollision;
+	TempCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	GetWorld()->GetTimerManager().SetTimer(CollisionOffTimerHandle, [TempCollision]()
+	{
+		TempCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	},  1.0f , false);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
