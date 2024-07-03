@@ -44,6 +44,9 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
 {
+	if (!TargetCollision)
+		return;
+	
 	UBoxComponent* TempCollision = TargetCollision;
 	TempCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
