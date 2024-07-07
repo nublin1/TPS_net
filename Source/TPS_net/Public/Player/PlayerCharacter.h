@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/ClimbableInterface.h"
 #include "PlayerCharacter.generated.h"
 
 class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ACharacter
+class TPS_NET_API APlayerCharacter : public ACharacter, public IClimbableInterface
 {
 	GENERATED_BODY()
 
@@ -43,12 +44,17 @@ protected:
 	UStateMachineComponent* StateMachine_Movemant;
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
-	
+
+	//Ladder
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* LadderTarget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsUpLadderEntry;
 
 	//Timers
 	UPROPERTY()
 	FTimerHandle CollisionOffTimerHandle;
-
+	
 	
 	//====================================================================
 	// FUNCTIONS
@@ -56,6 +62,13 @@ protected:
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void StartClimbing() override;	
+	
+	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable)
+	void ServerStartClimbing(USceneComponent* TargetMoveToComponent);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStartClimbing(USceneComponent* TargetMoveToComponent);
 
 	//
 	UFUNCTION(BlueprintCallable)

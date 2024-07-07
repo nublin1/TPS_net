@@ -4,8 +4,12 @@
 #include "Player/PlayerCharacter.h"
 
 #include "Components/BoxComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
+#include "World/Ladders/ProceduralLadder.h"
+
+#include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(5)
@@ -33,13 +37,57 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 void APlayerCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
-
-	
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void APlayerCharacter::StartClimbing()
+{
+	if (IsUpLadderEntry)
+	{
+		
+	}
+	else
+	{
+		AProceduralLadder* Ladder = Cast<AProceduralLadder>(LadderTarget);
+		ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("EnterBox"))));
+		ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("SlideExitBox"))));
+		//ServerStartClimbing_Implementation(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
+	}
+}
+
+void APlayerCharacter::ServerStartClimbing_Implementation(USceneComponent* TargetMoveToComponent )
+{
+	
+}
+
+bool APlayerCharacter::ServerStartClimbing_Validate(USceneComponent* TargetMoveToComponent)
+{
+	//if (!LadderTarget)
+	//	return false;
+	
+	return true;
+}
+
+void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
+{
+	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.EnteringLadder")));
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+	GetCharacterMovement()->MaxFlySpeed = 0.0f;
+	GetCharacterMovement()->BrakingDecelerationFlying = 3000.0f;
+
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this;
+	UKismetSystemLibrary::MoveComponentTo(
+		RootComponent,
+		TargetMoveToComponent->GetComponentLocation(),
+		TargetMoveToComponent->GetComponentRotation(),
+		false, false, 0.2f,false, EMoveComponentAction::Type::Move, LatentInfo);
+
+	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
 
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
