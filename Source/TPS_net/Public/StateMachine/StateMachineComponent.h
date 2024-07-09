@@ -27,9 +27,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool SwitchState(FGameplayTag _StateTag);
+	UFUNCTION()
+	void OnRep_CurrentStateTag();
 
 	//Getters
+	UFUNCTION()
 	FGameplayTag GetCurrentStateTag() const { return CurrentStateTag; }
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	FString GetCurrentStateTagName() const {return CurrentStateTag.ToString();}
 
 protected:
 	UPROPERTY(BlueprintAssignable)
@@ -42,7 +47,7 @@ protected:
 	FStateChangedSignature StateChangedDelegate;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FGameplayTag CurrentStateTag;
 
 protected:
@@ -50,7 +55,7 @@ protected:
 	FGameplayTag InitialStateTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDebug = false;
+	bool bDebug = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FGameplayTag> StateHistory;
@@ -69,4 +74,6 @@ private:
 	void InitState() const;
 	void TickState(float DeltaTime) const;
 	void ExitState();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

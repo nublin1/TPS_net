@@ -40,7 +40,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector AimingCameraPosition;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	UStateMachineComponent* StateMachine_Movemant;
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
@@ -62,10 +62,18 @@ protected:
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 
+	// MovemantSpeed
+	UFUNCTION(BlueprintCallable)
+	void ChangeMaxMoveSpeed(float NewMaxSpeed);
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void ServerSetSpeed(float NewMaxSpeed);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastSetSpeed(float NewMaxSpeed);
+
+	// Ladder climbing
 	UFUNCTION(BlueprintCallable)
 	virtual void StartClimbing() override;	
-	
-	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable)
+	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
 	void ServerStartClimbing(USceneComponent* TargetMoveToComponent);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStartClimbing(USceneComponent* TargetMoveToComponent);

@@ -3,6 +3,8 @@
 
 #include "StateMachine/StateMachineComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
 
 UStateMachineComponent::UStateMachineComponent()
 {
@@ -11,6 +13,8 @@ UStateMachineComponent::UStateMachineComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	//InitialStateTag = FGameplayTag::RequestGameplayTag(TEXT("Idle"));
+	SetIsReplicatedByDefault(true);
+	SetIsReplicated(true);
 }
 
 bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
@@ -24,8 +28,10 @@ bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 		InitState();
 
 		bCanTickState= true;
+		OnRep_CurrentStateTag();
 		if(StateChangedDelegate.IsBound())
 		{
+			
 			StateChangedDelegate.Broadcast(CurrentStateTag);
 		}
 		return true;
@@ -72,6 +78,29 @@ void UStateMachineComponent::ExitState()
 	}
 }
 
+void UStateMachineComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	
+	DOREPLIFETIME(UStateMachineComponent, CurrentStateTag);
+}
+
+void UStateMachineComponent::OnRep_CurrentStateTag()
+{
+	// if (GEngine)
+	// {
+	// 	FString Role = GetOwnerRole() == ROLE_Authority ? "Server" : "Client";
+	// 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("OnRep_CurrentStateTag for %s: %s, Role: %s"), *GetOwner()->GetName(), *CurrentStateTag.ToString(), *Role));
+	// }
+	
+	InitState();
+	if (StateChangedDelegate.IsBound())
+	{
+		StateChangedDelegate.Broadcast(CurrentStateTag);
+	}
+}
+
 void UStateMachineComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -90,13 +119,18 @@ void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	if (bDebug)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("CurrentState for %s: %s"), *GetOwner()->GetName(), *CurrentStateTag.ToString()));
+		if (GPlayInEditorID == 0)
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("CurrentState for %s: %s"), *GetOwner()->GetName(), *CurrentStateTag.ToString()));
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("CurrentState for %s: %s"), *GetOwner()->GetName(), *CurrentStateTag.ToString()));
+		}
 
 		if (StateHistory.Num() > 0)
 		{
 			for (int i=0; i<StateHistory.Num(); i++)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("%s"), *StateHistory[i].ToString()));
+				//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("%s"), *StateHistory[i].ToString()));
 			}
 		}
 	}

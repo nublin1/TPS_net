@@ -25,6 +25,7 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 	//StateMachine_Movemant->RegisterComponent();
 	//this->AddInstanceComponent(StateMachine_Movemant);
 	StateMachine_Movemant->OnComponentCreated();
+	StateMachine_Movemant->SetIsReplicated(true);
 
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
 	//StateMachine_Aiming->RegisterComponent();
@@ -44,24 +45,68 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void APlayerCharacter::ChangeMaxMoveSpeed(float NewMaxSpeed)
+{
+	if (HasAuthority())
+	{
+		MulticastSetSpeed(NewMaxSpeed);
+	}
+	else
+	{
+		ServerSetSpeed(NewMaxSpeed);
+	}
+}
+
+void APlayerCharacter::ServerSetSpeed_Implementation(float NewMaxSpeed)
+{
+	MulticastSetSpeed(NewMaxSpeed);
+}
+
+void APlayerCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
+}
+
 void APlayerCharacter::StartClimbing()
 {
 	if (IsUpLadderEntry)
 	{
+		AProceduralLadder* Ladder = Cast<AProceduralLadder>(LadderTarget);
 		
+		
+		if (HasAuthority())
+		{
+			ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("ExitBox"))));
+			ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("ClimbTriggerUp"))));
+			MulticastStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningUpPosition"))));
+		}
+		else
+		{
+			ServerStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningUpPosition"))));
+		}
 	}
 	else
 	{
 		AProceduralLadder* Ladder = Cast<AProceduralLadder>(LadderTarget);
-		ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("EnterBox"))));
-		ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("SlideExitBox"))));
-		//ServerStartClimbing_Implementation(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
+		
+		
+		if (HasAuthority())
+		{
+			//ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("EnterBox"))));
+			//ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("SlideExitBox"))));
+			MulticastStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
+		}
+		else
+		{
+			ServerStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
+		}
 	}
 }
 
-void APlayerCharacter::ServerStartClimbing_Implementation(USceneComponent* TargetMoveToComponent )
+void APlayerCharacter::ServerStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
 {
 	
+	MulticastStartClimbing_Implementation(TargetMoveToComponent);
 }
 
 bool APlayerCharacter::ServerStartClimbing_Validate(USceneComponent* TargetMoveToComponent)
@@ -73,19 +118,19 @@ bool APlayerCharacter::ServerStartClimbing_Validate(USceneComponent* TargetMoveT
 }
 
 void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
-{
+{		
 	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.EnteringLadder")));
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 	GetCharacterMovement()->MaxFlySpeed = 0.0f;
-	GetCharacterMovement()->BrakingDecelerationFlying = 3000.0f;
-
+	GetCharacterMovement()->BrakingDecelerationFlying = 3000.0f;	
+	
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this;
 	UKismetSystemLibrary::MoveComponentTo(
 		RootComponent,
 		TargetMoveToComponent->GetComponentLocation(),
 		TargetMoveToComponent->GetComponentRotation(),
-		false, false, 0.2f,false, EMoveComponentAction::Type::Move, LatentInfo);
+		false, false, 0.5f,true, EMoveComponentAction::Type::Move, LatentInfo);
 
 	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
@@ -117,14 +162,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& LifetimeProperties) const
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(LifetimeProperties);
-
-	TArray<FLifetimeProperty> OutLifetimeProps;
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(APlayerCharacter, IsAiming);
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
+
+	DOREPLIFETIME(APlayerCharacter, StateMachine_Movemant);
 }
 
