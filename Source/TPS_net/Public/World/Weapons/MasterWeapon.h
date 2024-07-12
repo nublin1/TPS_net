@@ -32,6 +32,7 @@ public:
 	//Getters
 	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
+	UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
 
 	uint16 GetRoundsInMagazine() const {return RoundsInMagazine;}
 
@@ -43,6 +44,8 @@ protected:
 	UWeaponBase* WeaponBaseRef;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USkeletalMeshComponent* SkeletalMeshWeapon;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UStaticMeshComponent* TargetPoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* WeaponTable;

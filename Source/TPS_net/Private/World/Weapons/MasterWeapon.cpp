@@ -6,13 +6,24 @@
 #include "Weapon/WeaponBase.h"
 
 
-AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr), SkeletalMeshWeapon(nullptr)
+AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr), SkeletalMeshWeapon(nullptr), TargetPoint(nullptr)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Initialize the SkeletalMeshWeapon component
+	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SetRootComponent(SkeletalMeshWeapon);
 
-	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
-	SetRootComponent(SkeletalMeshWeapon);	
+	// Initialize the TargetPoint component
+	TargetPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetPoint"));
+	TargetPoint->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	TargetPoint->SetWorldLocation(FVector(0, 1000.0f, 10.0f));
+	TargetPoint->SetWorldScale3D(FVector(0.1f));
+	TargetPoint->SetupAttachment(SkeletalMeshWeapon);
+	//TargetPoint->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	if (SphereMesh.Succeeded())
+	{
+		TargetPoint->SetStaticMesh(SphereMesh.Object);
+	}
 }
 
 void AMasterWeapon::PostInitializeComponents()

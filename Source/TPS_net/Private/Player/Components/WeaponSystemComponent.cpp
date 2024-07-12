@@ -181,7 +181,16 @@ void UWeaponSystemComponent::ShootProjectile() const
 				if (BulletProjectileComponent)
 				{			
 					BulletProjectileComponent->SetStartBulletSpeed(10.0f);
-					BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().BulletMass);
+
+					if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
+					{
+						UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
+						BulletProjectileComponent->SetBulletMass(1);
+					}
+					else
+					{
+						BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics().BulletMass);
+					}					
 				}
 			}
 		}			
@@ -212,6 +221,30 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		WeaponBase->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
 		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
 		WeaponBase->SetWeaponType(WData->HolsterType);
+
+		if(!WData->CharacteristicsOfTheWeapon.UsableAmmo.IsEmpty())
+		{
+			TArray<UAmmoBase*> tempAmmo;
+			for (auto Element : WData->CharacteristicsOfTheWeapon.UsableAmmo)
+			{		
+				const FAmmoData* AData = Element.DataTable->FindRow<FAmmoData>(Element.RowName, Element.RowName.ToString());
+				if (!AData)
+					continue;
+
+				UAmmoBase* AmmoBase = NewObject<UAmmoBase>(this, UAmmoBase::StaticClass());
+								
+				tempAmmo.Add(AmmoBase);
+			}
+			if (tempAmmo.Num() > 0)
+			{
+				WeaponBase->SetSelectedAmmoData(tempAmmo[0]);
+				WeaponBase->SetUsableAmmo(tempAmmo);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found after processing."));
+			}
+		}
 
 		AddWeapon(WeaponBase);
 	}

@@ -6,3 +6,4 @@
 UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), WeaponAssetData()
 {
 }
+

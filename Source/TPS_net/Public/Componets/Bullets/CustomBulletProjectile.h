@@ -6,6 +6,11 @@
 #include "Components/ActorComponent.h"
 #include "CustomBulletProjectile.generated.h"
 
+#pragma region Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, HitResult);
+
+#pragma endregion
+
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UCustomBulletProjectile : public UActorComponent
@@ -32,6 +37,9 @@ public:
 	void SetCrossSection(const float _CrossSection) { this->CrossSection = _CrossSection; }
 
 protected:
+	UPROPERTY(BlueprintAssignable)
+	FHitSignature HitResultDelegate;
+	
 	//Bullet Params
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="Velocity"))
 	FVector Velocity;
@@ -52,11 +60,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsEffectOfDragForce"))
 	bool IsEffectOfDragForce = true;
 
+	//HitResult
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FHitResult OutHit;
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void HitDetected();
 
 public:
 	// Called every frame

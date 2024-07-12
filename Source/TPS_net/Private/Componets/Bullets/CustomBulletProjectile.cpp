@@ -19,8 +19,16 @@ void UCustomBulletProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	
+	
+}
+
+void UCustomBulletProjectile::HitDetected()
+{
+	if(HitResultDelegate.IsBound())
+	{
+		HitResultDelegate.Broadcast(OutHit);
+	}
 }
 
 

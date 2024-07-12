@@ -55,7 +55,7 @@ protected:
 	FGameplayTag InitialStateTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDebug = true;
+	bool bDebug = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FGameplayTag> StateHistory;

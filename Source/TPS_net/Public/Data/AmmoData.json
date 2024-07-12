@@ -1,0 +1,12 @@
+[
+	{
+		"Name": "5.45x39mm",
+		"Damage": 40,
+		"BulletMass": 0.1
+	},
+	{
+		"Name": "9x18mm",
+		"Damage": 14,
+		"BulletMass": 0.1
+	}
+]

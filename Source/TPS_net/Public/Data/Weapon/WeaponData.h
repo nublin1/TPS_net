@@ -3,13 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AmmoData.h"
 #include "Engine/DataTable.h"
 
 #include "WeaponData.generated.h"
 
-/**
- * 
- */
+
 
 class ABaseBulletActor;
 
@@ -70,6 +69,8 @@ struct FCharacteristicsOfTheWeapon
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	TArray<EFireMode> AvailableShootingModes;
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	TArray<FDataTableRowHandle> UsableAmmo;
+	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	uint8 NumberOfShotsPerRound = 1;	
 	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")
 	float WeaponMass = 1.0f; // kilograms
@@ -79,8 +80,7 @@ struct FCharacteristicsOfTheWeapon
 	float RPM = 600; //Rounds per minute	
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	uint16 MagazineSize = 30; // Rounds
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
-	float BulletMass = 0.100f; // kilograms
+	
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	float MuzzleVelocity = 55000; // cm/sec
 

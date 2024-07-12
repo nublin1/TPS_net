@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AmmoBase.h"
 #include "Data/Weapon/WeaponData.h"
-#include "UObject/NoExportTypes.h"
+
 #include "WeaponBase.generated.h"
 
 enum class EWeaponType : uint8;
@@ -28,26 +29,46 @@ public:
 	// Getters
 	UFUNCTION(BlueprintCallable)
 	FName GetID() const { return NameID; }
+
 	UFUNCTION()
-	EBulletMode GetEBulletMode() const {return BulletMode;}
+	EBulletMode GetEBulletMode() const { return BulletMode; }
+
 	UFUNCTION()
-	FCharacteristicsOfTheWeapon GetCharacteristicsOfTheWeapon() const {return CharacteristicsOfTheWeapon;}
+	FCharacteristicsOfTheWeapon GetCharacteristicsOfTheWeapon() const { return CharacteristicsOfTheWeapon; }
+
 	UFUNCTION()
 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
+
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
+	UFUNCTION()
+	TArray<UAmmoBase*> GetUsableAmmo() {return UsableAmmo;}
+	UFUNCTION()
+	UAmmoBase* GetSelectedAmmoData() const { return SelectedAmmoData; }
+
 
 	// Setters
 	UFUNCTION()
 	void SetWeaponType(EWeaponType _HolsterType) { this->WeaponType = _HolsterType; }
+
 	UFUNCTION()
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
+
 	UFUNCTION()
-	void SetBulletMode(EBulletMode _BulletMode) {BulletMode = _BulletMode;}
+	void SetBulletMode(EBulletMode _BulletMode) { BulletMode = _BulletMode; }
+
 	UFUNCTION()
-	void SetCharacteristicsOfTheWeapon(const FCharacteristicsOfTheWeapon& _CharacteristicsOfTheWeapon) {CharacteristicsOfTheWeapon = _CharacteristicsOfTheWeapon;}
+	void SetCharacteristicsOfTheWeapon(const FCharacteristicsOfTheWeapon& _CharacteristicsOfTheWeapon)
+	{
+		CharacteristicsOfTheWeapon = _CharacteristicsOfTheWeapon;
+	}
+
 	UFUNCTION()
 	void SetWeaponAssetData(const FWeaponAssetData& _WeaponAssetData) { this->WeaponAssetData = _WeaponAssetData; }
+	UFUNCTION()
+	void SetUsableAmmo(TArray<UAmmoBase*> NewArray) {UsableAmmo = NewArray;}
+	UFUNCTION()
+	void SetSelectedAmmoData(UAmmoBase* NewSelectedAmmoData) { this->SelectedAmmoData = NewSelectedAmmoData; }
 
 protected:
 	//====================================================================
@@ -67,6 +88,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	FWeaponAssetData WeaponAssetData;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<UAmmoBase*> UsableAmmo;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAmmoBase* SelectedAmmoData;
 
 	//====================================================================
 	// FUNCTIONS
