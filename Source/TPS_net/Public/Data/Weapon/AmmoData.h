@@ -21,7 +21,7 @@ struct TPS_NET_API FAmmoCharacteristics
 	float BulletMass = 0.100f; // kilograms
 };
 
-USTRUCT(Blueprintable)
+USTRUCT(Blueprintable, meta=(ScriptName="FAmmoData"))
 struct TPS_NET_API FAmmoData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()

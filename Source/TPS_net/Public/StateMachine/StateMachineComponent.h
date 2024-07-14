@@ -23,6 +23,21 @@ class TPS_NET_API UStateMachineComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	UPROPERTY(BlueprintAssignable)
+	FInitStateSignature InitStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FExitStateSignature ExitStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FTickStateSinganture TickStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FStateChangedSignature StateChangedDelegate;
+
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	UStateMachineComponent();
 
 	UFUNCTION(BlueprintCallable)
@@ -37,20 +52,9 @@ public:
 	FString GetCurrentStateTagName() const {return CurrentStateTag.ToString();}
 
 protected:
-	UPROPERTY(BlueprintAssignable)
-	FInitStateSignature InitStateDelegate;
-	UPROPERTY(BlueprintAssignable)
-	FExitStateSignature ExitStateDelegate;
-	UPROPERTY(BlueprintAssignable)
-	FTickStateSinganture TickStateDelegate;
-	UPROPERTY(BlueprintAssignable)
-	FStateChangedSignature StateChangedDelegate;
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FGameplayTag CurrentStateTag;
-
-protected:
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTag InitialStateTag;
 

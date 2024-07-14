@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/Weapon/AmmoData.h"
-#include "UObject/NoExportTypes.h"
+
 #include "AmmoBase.generated.h"
 
 

@@ -9,6 +9,8 @@
 #include "WeaponSystemComponent.generated.h"
 
 
+struct FGameplayTag;
+class IProjectileFactory;
 enum class EHolsterWeaponType : uint8;
 class UWeaponBase;
 enum class EWeaponType : uint8;
@@ -67,7 +69,11 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	//
+	UPROPERTY()
+	TScriptInterface<IProjectileFactory> ProjectileFactory;
 	
+	//
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -102,14 +108,17 @@ protected:
 
 
 	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsNeedCalculateShootInfo = false;
 	UPROPERTY()
 	bool bIsReadyToNextShoot = true;
 	UPROPERTY()
 	uint8 AvailableShootsCount = 0;
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
-	
 
+
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
@@ -126,6 +135,9 @@ protected:
 	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
+
+	UFUNCTION()
+	void SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag);
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

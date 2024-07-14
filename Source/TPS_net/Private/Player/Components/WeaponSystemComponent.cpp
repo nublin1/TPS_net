@@ -14,14 +14,17 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/TimerHandle.h"
+#include "Factories/BulletProjectileFactory.h"
+#include "Player/PlayerCharacter.h"
+#include "StateMachine/StateMachineComponent.h"
 
 // Sets default values for this component's properties
 UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
                                                   WeaponPrimaryHolster(nullptr),
                                                   WeaponTable(nullptr), SkeletalMeshComponent(nullptr)
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+	ProjectileFactory = NewObject<UBulletProjectileFactory>();
+	
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
@@ -33,6 +36,17 @@ bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
 void UWeaponSystemComponent::PostInitProperties()
 {
 	Super::PostInitProperties();
+
+	auto Owner = Cast<APlayerCharacter>(GetOwner());
+	if (Owner)
+	{
+		auto FindStateMachine_Aiming =  Cast<UStateMachineComponent>(Owner->GetDefaultSubobjectByName(TEXT("StateMachine_Aiming")));
+		if (FindStateMachine_Aiming)
+		{
+			FindStateMachine_Aiming->StateChangedDelegate.AddDynamic(this, &UWeaponSystemComponent::SwitchStateMachine_Aiming);
+		}
+		
+	}
 }
 
 // Called when the game startsKO
@@ -149,52 +163,60 @@ void UWeaponSystemComponent::Shoot()
 void UWeaponSystemComponent::ShootProjectile() const
 {
 	if (!CurrentWeaponInHands->GetSkeletalMeshWeapon())
-		return;
+        return;
 
-	auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
-		CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
-		ERelativeTransformSpace::RTS_World);
-	UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
-	if (BulletBlueprint)
-	{
-		FActorSpawnParameters SpawnParameters;
-		FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
-		FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
+    auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
+        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
+        ERelativeTransformSpace::RTS_World);
+    UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+    if (BulletBlueprint)
+    {
+        FActorSpawnParameters SpawnParameters;
+        FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
+        FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
 
-		for (int i =0; i<CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().NumberOfShotsPerRound; i++)
-		{
-			// Угол разброса
-			auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
-			// Отклонение для разброса
-			FRotator RandomSpread = FRotator(
-				FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
-				FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
-				0.0f                                        //Roll (не нужно для разброса)
-			);
-		
-			SpawnRotation += RandomSpread;
+        for (int i = 0; i < CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().NumberOfShotsPerRound; i++)
+        {
+            // Угол разброса
+            auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
+            // Отклонение для разброса
+            FRotator RandomSpread = FRotator(
+                FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
+                FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
+                0.0f                                        // Roll (не нужно для разброса)
+            );
 
-			AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
-			if (SpawnedActorRef)
-			{
-				UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
-				if (BulletProjectileComponent)
-				{			
-					BulletProjectileComponent->SetStartBulletSpeed(10.0f);
+            SpawnRotation += RandomSpread;
 
-					if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
-					{
-						UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
-						BulletProjectileComponent->SetBulletMass(1);
-					}
-					else
-					{
-						BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics().BulletMass);
-					}					
-				}
-			}
-		}			
-	}
+        	if (ProjectileFactory)
+        	{
+        		AActor* SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
+        		if (SpawnedActorRef)
+        		{
+        			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
+        			if (BulletProjectileComponent)
+        			{
+        				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
+
+        				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
+        				{
+        					UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
+        					BulletProjectileComponent->SetBulletMass(1);
+        				}
+        				else
+        				{
+        					BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics().BulletMass);
+        				}
+        			}
+        		}
+        	}
+        	else
+        	{
+        		UE_LOG(LogTemp, Error, TEXT("ProjectileFactory is not valid."));
+        	}
+            
+        }
+    }
 }
 
 
@@ -342,6 +364,19 @@ void UWeaponSystemComponent::HideWeapon()
 	                                        UWeaponHelper::ConvertHolsterTypeToText(
 		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
 	CurrentWeaponInHands = nullptr;
+}
+
+void UWeaponSystemComponent::SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag)
+{
+	static const FGameplayTag AimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.Aiming"));	
+	if (NewStateTag == AimingTag)
+	{
+		bIsNeedCalculateShootInfo = true;
+	}
+	else
+	{
+		bIsNeedCalculateShootInfo = false;
+	}
 }
 
 

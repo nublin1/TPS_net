@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmmoData.h"
 #include "Engine/DataTable.h"
 
 #include "WeaponData.generated.h"
@@ -102,7 +101,7 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	EWeaponType HolsterType = EWeaponType::Primary;
 
 	UPROPERTY(EditAnywhere)
-	EBulletMode BulletMode;
+	EBulletMode BulletMode = EBulletMode::Projectile;
 
 	UPROPERTY(EditAnywhere)
 	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;

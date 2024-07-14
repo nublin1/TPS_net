@@ -3,6 +3,8 @@
 
 #include "Characters/NPCCharacter.h"
 
+#include "Components/CapsuleComponent.h"
+
 // Sets default values
 ANPCCharacter::ANPCCharacter(): IIHealthInterface(100.0f, 100.0f)
 {	
@@ -18,8 +20,6 @@ void ANPCCharacter::BeginPlay()
 
 void ANPCCharacter::TakeDamage(float DamageAmount)
 {
-	
-	
 	Health -= DamageAmount;
 	if (Health < 0.0f)
 	{
@@ -31,6 +31,8 @@ void ANPCCharacter::TakeDamage(float DamageAmount)
 	{
 		UE_LOG(LogTemp, Error, TEXT("HIT"));
 		result->SetSimulatePhysics(true);
+
+		FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
