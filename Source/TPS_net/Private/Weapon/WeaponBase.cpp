@@ -3,7 +3,7 @@
 
 #include "Weapon/WeaponBase.h"
 
-UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), WeaponAssetData()
+UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), WeaponAssetData(), SelectedAmmoData(nullptr)
 {
 }
 

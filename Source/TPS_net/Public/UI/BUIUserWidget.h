@@ -1,17 +1,19 @@
-﻿#pragma once
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Weapon/AmmoData.h"
+#include "Blueprint/UserWidget.h"
+#include "BUIUserWidget.generated.h"
 
-#include "AmmoBase.generated.h"
-
-
-
-UCLASS(Blueprintable)
-class TPS_NET_API UAmmoBase : public UObject
+/**
+ * 
+ */
+UCLASS()
+class TPS_NET_API UBUIUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -20,23 +22,14 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	UAmmoBase();
-	virtual ~UAmmoBase() override;
 
-	// getters
-	FAmmoCharacteristics GetAmmoCharacteristics() const {return AmmoCharacteristics;}
-
-	// Setters
-	void SetAmmoCharacteristics(const FAmmoCharacteristics& NewAmmoCharacteristics) {AmmoCharacteristics = NewAmmoCharacteristics;}
 protected:
-
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
-	FAmmoCharacteristics AmmoCharacteristics;
-	
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	
 };

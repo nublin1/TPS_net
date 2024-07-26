@@ -19,6 +19,9 @@ struct TPS_NET_API FAmmoCharacteristics
 
 	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
 	float BulletMass = 0.100f; // kilograms
+
+	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
+	uint8 NumberOfShotsPerRound = 1;	
 };
 
 USTRUCT(Blueprintable, meta=(ScriptName="FAmmoData"))

@@ -19,12 +19,11 @@
 #include "StateMachine/StateMachineComponent.h"
 
 // Sets default values for this component's properties
-UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
+UWeaponSystemComponent::UWeaponSystemComponent(): PlayerCamera(nullptr), CurrentWeaponInHands(nullptr),
+                                                  WeaponPistolHolster(nullptr),
                                                   WeaponPrimaryHolster(nullptr),
                                                   WeaponTable(nullptr), SkeletalMeshComponent(nullptr)
 {
-	ProjectileFactory = NewObject<UBulletProjectileFactory>();
-	
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
@@ -37,6 +36,8 @@ void UWeaponSystemComponent::PostInitProperties()
 {
 	Super::PostInitProperties();
 
+	ProjectileFactory = NewObject<UBulletProjectileFactory>();
+
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)
 	{
@@ -44,12 +45,10 @@ void UWeaponSystemComponent::PostInitProperties()
 		if (FindStateMachine_Aiming)
 		{
 			FindStateMachine_Aiming->StateChangedDelegate.AddDynamic(this, &UWeaponSystemComponent::SwitchStateMachine_Aiming);
-		}
-		
+		}		
 	}
 }
 
-// Called when the game startsKO
 void UWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -173,9 +172,10 @@ void UWeaponSystemComponent::ShootProjectile() const
     {
         FActorSpawnParameters SpawnParameters;
         FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
-        FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
+        FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset;
 
-        for (int i = 0; i < CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().NumberOfShotsPerRound; i++)
+    	auto AmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
+        for (int i = 0; i < AmmoCharacteristics.NumberOfShotsPerRound; i++)
         {
             // Угол разброса
             auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
@@ -196,7 +196,7 @@ void UWeaponSystemComponent::ShootProjectile() const
         			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
         			if (BulletProjectileComponent)
         			{
-        				BulletProjectileComponent->SetStartBulletSpeed(10.0f);
+        				BulletProjectileComponent->SetStartBulletSpeed(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity);
 
         				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
         				{
@@ -205,7 +205,7 @@ void UWeaponSystemComponent::ShootProjectile() const
         				}
         				else
         				{
-        					BulletProjectileComponent->SetBulletMass(CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics().BulletMass);
+        					BulletProjectileComponent->SetBulletMass(AmmoCharacteristics.BulletMass);
         				}
         			}
         		}
@@ -254,6 +254,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 					continue;
 
 				UAmmoBase* AmmoBase = NewObject<UAmmoBase>(this, UAmmoBase::StaticClass());
+				AmmoBase->SetAmmoCharacteristics(AData->AmmoCharacteristics);
 								
 				tempAmmo.Add(AmmoBase);
 			}

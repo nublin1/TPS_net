@@ -1,14 +1,17 @@
-﻿#pragma once
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Weapon/AmmoData.h"
+#include "UI/BUIUserWidget.h"
+#include "OptionsMenuWidget.generated.h"
 
-#include "AmmoBase.generated.h"
-
-
-
-UCLASS(Blueprintable)
-class TPS_NET_API UAmmoBase : public UObject
+class UUBUIWButton;
+/**
+ * 
+ */
+UCLASS()
+class TPS_NET_API UOptionsMenuWidget : public UBUIUserWidget
 {
 	GENERATED_BODY()
 
@@ -20,23 +23,28 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	UAmmoBase();
-	virtual ~UAmmoBase() override;
-
-	// getters
-	FAmmoCharacteristics GetAmmoCharacteristics() const {return AmmoCharacteristics;}
 
 	// Setters
-	void SetAmmoCharacteristics(const FAmmoCharacteristics& NewAmmoCharacteristics) {AmmoCharacteristics = NewAmmoCharacteristics;}
+	void SetPrevActiveWidget(TObjectPtr<UBUIUserWidget> PrevWidget) {PrevActiveWidget = PrevWidget;}
+	
 protected:
-
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
-	FAmmoCharacteristics AmmoCharacteristics;
+	UPROPERTY()
+	TObjectPtr<UBUIUserWidget> PrevActiveWidget;
+	
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	TObjectPtr<UUBUIWButton> Back_Button;
+
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION()
+	virtual void NativeConstruct() override;
+
+	
+	UFUNCTION()
+	void OnBackButtonClicked();
 };

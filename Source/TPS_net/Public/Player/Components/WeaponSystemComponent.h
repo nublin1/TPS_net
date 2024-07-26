@@ -9,6 +9,7 @@
 #include "WeaponSystemComponent.generated.h"
 
 
+class UCameraComponent;
 struct FGameplayTag;
 class IProjectileFactory;
 enum class EHolsterWeaponType : uint8;
@@ -94,7 +95,9 @@ protected:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//bool bIsSwitchingWeapon = false;
 
-	//Data
+	// Player Data
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCameraComponent* PlayerCamera;
 	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(BlueprintReadWrite)
@@ -106,6 +109,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FTransform LeftHandSocketTransform;
 
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator AimOffset;
 
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
