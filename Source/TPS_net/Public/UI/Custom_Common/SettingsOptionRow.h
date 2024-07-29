@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TextBlock.h"
 #include "UI/BUIUserWidget.h"
+#include "Utilities/GeneralUtils.h"
 #include "SettingsOptionRow.generated.h"
 
 class UUBUIWButton;
@@ -24,6 +26,14 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	void InitializeOption(FText OptionName, uint16 InitialValue, TArray<FText> PossibleValues);
+
+	// Getters
+	UFUNCTION()
+	TArray<FText> GetPossibleValuesText() const {return PossibleValuesText;}
+	UFUNCTION()
+	int32 GetCurrentIndex() const {return CurrentIndex;}
+
 
 protected:
 	//====================================================================
@@ -40,13 +50,16 @@ protected:
 	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUBUIWButton> IncreaseValueButton;
-
-	// defaults
+	
+	
+	// TEMPLATE VARIABLES
+	UPROPERTY()
+	TArray<FText> PossibleValuesText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText OptionNameText;
-	// defaults
-	UPROPERTY(EditAnywhere)
-	FText CurrentValueText;
+	UPROPERTY()
+	int32 CurrentIndex = 0;
+	
 	
 	//====================================================================
 	// FUNCTIONS
@@ -55,4 +68,18 @@ protected:
 	virtual void NativePreConstruct() override;
 	UFUNCTION()
 	virtual void NativeConstruct() override;
+
+	//
+	UFUNCTION()
+	void OnDecreaseButtonClicked();
+	UFUNCTION()
+	void OnIncreaseButtonClicked();
+	UFUNCTION()
+	void UpdateOptionNameText() const;
+	UFUNCTION()
+	void UpdateCurrentValueText();
+	
+
+	UFUNCTION()
+	void ChangeValue(bool bIncrease);
 };

@@ -4,63 +4,66 @@
 
 #include "CoreMinimal.h"
 #include "UI/BUIUserWidget.h"
+#include "GraphicsSettings.generated.h"
 
-#include "OptionsMenuWidget.generated.h"
-
-class UWidgetSwitcher;
-class UGraphicsSettings;
-class UUBUIWButton;
+class USettingsOptionRow;
 /**
  * 
  */
 UCLASS()
-class TPS_NET_API UOptionsMenuWidget : public UBUIUserWidget
+class TPS_NET_API UGraphicsSettings : public UBUIUserWidget
 {
+
 	GENERATED_BODY()
 
 public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	// Getters
+	TObjectPtr<USettingsOptionRow> GetOption_WindowMode() const
+	{
+		return Option_WindowMode;
+	}
 
-	// Setters
-	void SetPrevActiveWidget(TObjectPtr<UBUIUserWidget> PrevWidget) {PrevActiveWidget = PrevWidget;}
-	
+	TObjectPtr<USettingsOptionRow> GetOption_Resolution() const
+	{
+		return Option_Resolution;
+	}
+
+	TObjectPtr<USettingsOptionRow> GetOption_VSync() const
+	{
+		return Option_VSync;
+	}
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY()
-	TObjectPtr<UBUIUserWidget> PrevActiveWidget;
-	
 	//
-	
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UWidgetSwitcher> WS_Settings;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UGraphicsSettings> WBP_GraphicsSettings;
-	
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USettingsOptionRow> Option_WindowMode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USettingsOptionRow> Option_Resolution;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USettingsOptionRow> Option_VSync;
+
 	//
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
-	TObjectPtr<UUBUIWButton> Back_Button;
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EWindowMode::Type> ChoosenWindowMode = EWindowMode::Fullscreen;
 
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
-	TObjectPtr<UUBUIWButton> Apply_Button;
 
+	FTimerHandle tim;
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	UFUNCTION()
 	virtual void NativeConstruct() override;
-	
-	UFUNCTION()
-	void OnBackButtonClicked();
-
-	UFUNCTION()
-	void OnApplyButtonClicked();
 };
