@@ -23,13 +23,7 @@ void UServerListWidget::NativeConstruct()
 
 	if (UMultiplayerGameInstance* GameInstance = Cast<UMultiplayerGameInstance>(GetGameInstance()))
 	{
-		const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
-		if (OnlineSubsystem)
-		{
-			//GameInstance->OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UServerListWidget::OnFindSessionsComplete);
-			//GameInstance->FindSessions(true, true);
-			
-		}		
+		GameInstance->FindSessionsCompleteDelegate.AddDynamic(this, &UServerListWidget::OnFindSessionsComplete);
 	}
 }
 
@@ -43,34 +37,29 @@ void UServerListWidget::OnRefleshButtonClicked()
 			//GameInstance->OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UServerListWidget::OnFindSessionsComplete);
 			GameInstance->FindSessions(true, true);
 			WS_ServerList->SetActiveWidgetIndex(0);
-		}		
+		}
 	}
 }
 
-void UServerListWidget::OnFindSessionsComplete(bool bWasSuccessful)
-{
-	UE_LOG(LogTemp, Warning, TEXT("WORK"));
-	
-	if (UMultiplayerGameInstance* GameInstance = Cast<UMultiplayerGameInstance>(GetGameInstance()))
+void UServerListWidget::OnFindSessionsComplete(TArray<FCustomSessionSearchResult> SessionSearchResult)
+{	
+	if (SessionSearchResult.Num() > 0)
 	{
-		auto SearchResults = GameInstance->GetSessionSearch()->SearchResults;
-		if (SearchResults.Num() > 0)
+		ServerListScrool->ClearChildren();
+		for (int32 SearchIdx = 0; SearchIdx < SessionSearchResult.Num(); SearchIdx++)
 		{
-			ServerListScrool->ClearChildren();
-			for (int32 SearchIdx = 0; SearchIdx <SearchResults.Num(); SearchIdx++)
+			if (UServerInfoRowWidget* ServerInfoRowWidget = CreateWidget<UServerInfoRowWidget>(
+				GetWorld(), ServerInfoRowWidgetClass))
 			{
-				if (UServerInfoRowWidget* ServerInfoRowWidget = CreateWidget<UServerInfoRowWidget>(GetWorld(), ServerInfoRowWidgetClass))
-				{
-					ServerInfoRowWidget->SetOnlineSession(SearchResults[SearchIdx]);
-					ServerInfoRowWidget->UpdateText();
-					ServerListScrool->AddChild(ServerInfoRowWidget);
-				}
+				ServerInfoRowWidget->SetOnlineSession(SessionSearchResult[SearchIdx]);
+				ServerInfoRowWidget->UpdateText();
+				ServerListScrool->AddChild(ServerInfoRowWidget);
 			}
-			WS_ServerList->SetActiveWidgetIndex(1);
 		}
-		else
-		{
-			WS_ServerList->SetActiveWidgetIndex(2);
-		}
+		WS_ServerList->SetActiveWidgetIndex(1);
+	}
+	else
+	{
+		WS_ServerList->SetActiveWidgetIndex(2);
 	}
 }

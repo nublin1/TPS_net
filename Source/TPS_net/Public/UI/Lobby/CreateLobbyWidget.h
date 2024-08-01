@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "CreateLobbyWidget.generated.h"
 
+class UCheckBox;
 class UUBUIWButton;
 class UEditableText;
 /**
@@ -31,7 +32,8 @@ protected:
 	//====================================================================
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UEditableText> ServerNameText ;
-
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UCheckBox> UseLANCheckBox ;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> WBP_CreateServerButton ;

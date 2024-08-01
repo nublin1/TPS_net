@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "OnlineSessionSettings.h"
+#include "GameInstance/MultiplayerGameInstance.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "UI/BUIUserWidget.h"
+#include "GameInstance/MultiplayerGameInstance.h"
 
 #include "ServerInfoRowWidget.generated.h"
 
@@ -31,14 +33,14 @@ public:
 	
 	// Setters
 	
-	virtual void SetOnlineSession(const FOnlineSessionSearchResult& NewOnlineSession) {OnlineSession = NewOnlineSession; };
+	virtual void SetOnlineSession(FCustomSessionSearchResult NewOnlineSession) {Session = NewOnlineSession; };
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	
-	FOnlineSessionSearchResult OnlineSession;
+	FCustomSessionSearchResult Session;
 	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> PlayerName ;
@@ -52,4 +54,6 @@ protected:
 	//====================================================================
 	UFUNCTION()
 	virtual void NativeConstruct() override;
+
+	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };

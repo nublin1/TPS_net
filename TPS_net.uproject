@@ -41,18 +41,6 @@
 				"IOS",
 				"TVOS"
 			]
-		},
-		{
-			"Name": "OnlineSubsystemNull",
-			"Enabled": false
-		},
-		{
-			"Name": "OnlineSubsystemSteam",
-			"Enabled": true
-		},
-		{
-			"Name": "SteamSockets",
-			"Enabled": true
 		}
 	]
 }

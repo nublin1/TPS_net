@@ -3,6 +3,7 @@
 
 #include "UI/Lobby/CreateLobbyWidget.h"
 
+#include "Components/CheckBox.h"
 #include "Components/EditableText.h"
 #include "GameInstance/MultiplayerGameInstance.h"
 #include "UI/Custom_Common/UBUIWButton.h"
@@ -26,6 +27,6 @@ void UCreateLobbyWidget::OnCreateServerButtonClicked()
 
 	if (UMultiplayerGameInstance* GameInstance = Cast<UMultiplayerGameInstance>(GetGameInstance()))
 	{
-		GameInstance->CreateServer(ServerName, MaxPlayers);
+		GameInstance->CreateServer(ServerName, MaxPlayers, UseLANCheckBox->IsChecked());
 	}
 }

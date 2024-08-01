@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "ServerListWidget.generated.h"
 
+struct FCustomSessionSearchResult;
 class UUBUIWButton;
 class UServerInfoRowWidget;
 class UScrollBox;
@@ -54,6 +55,7 @@ protected:
 	void OnRefleshButtonClicked();
 
 	//
-	void OnFindSessionsComplete(bool bWasSuccessful);
+	UFUNCTION()
+	void OnFindSessionsComplete(TArray<FCustomSessionSearchResult> SessionSearchResult);
 	
 };

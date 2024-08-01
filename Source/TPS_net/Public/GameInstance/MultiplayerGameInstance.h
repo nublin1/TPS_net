@@ -13,6 +13,28 @@
  * 
  */
 
+USTRUCT(BlueprintType)
+struct FCustomSessionSearchResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Session")
+	FString HostUserName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Session")
+	int32 MaxPlayers;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Session")
+	int32 CurrentPlayers;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Session")
+	int32 Ping;
+
+	FOnlineSessionSearchResult SearchResult;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFindSessionsCompleteDelegate, TArray<FCustomSessionSearchResult>, SessionSearchResult);
+
 UCLASS()
 class TPS_NET_API UMultiplayerGameInstance : public UGameInstance
 {
@@ -23,6 +45,9 @@ public:
 	//====================================================================
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
+
+
+	FFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -30,9 +55,11 @@ public:
 	UMultiplayerGameInstance(const FObjectInitializer& ObjectInitializer);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void CreateServer(FName ServerName, int32 MaxPlayers);
+	void CreateServer(FName ServerName, int32 MaxPlayers, bool bIsLAN);
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void FindSessions(bool bIsLAN, bool bIsPresence);
+	
+	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
 	// Getters
 	TSharedPtr<class FOnlineSessionSearch> GetSessionSearch() {return SessionSearch;}
@@ -53,18 +80,23 @@ protected:
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
 	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
 
+	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
+	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	virtual void Shutdown() override;
 	
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
-	
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);	
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	void StartCreateSession();
+	void DestroyCurrentSession();
+	
 
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
