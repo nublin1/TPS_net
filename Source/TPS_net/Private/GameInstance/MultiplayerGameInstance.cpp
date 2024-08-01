@@ -74,8 +74,9 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	OnFindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
 			
 	// Call the SessionInterface function. The Delegate gets called once this is finished
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *UserId->ToString()));
-	SessionInterface->FindSessions(*UserId, SearchSettingsRef);
+	const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
+	SessionInterface->FindSessions(*localPlayer->GetPreferredUniqueNetId(), SearchSettingsRef);
 
 	OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UMultiplayerGameInstance::OnFindSessionsComplete);
 }
@@ -150,9 +151,9 @@ void UMultiplayerGameInstance::StartCreateSession()
 		const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
 		if (OnlineSubsystem)
 		{
-			TSharedPtr<const FUniqueNetId> UserId = OnlineSubsystem->GetIdentityInterface()->GetUniquePlayerId(0);
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *UserId->ToString()));
-			SessionInterface->CreateSession(0,  PendingServerName, SessionSettings);
+			const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
+			SessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(),  PendingServerName, SessionSettings);
 		}
 		
 	}

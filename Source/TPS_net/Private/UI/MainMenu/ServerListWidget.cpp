@@ -26,7 +26,7 @@ void UServerListWidget::NativeConstruct()
 		const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
 		if (OnlineSubsystem)
 		{
-			GameInstance->OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UServerListWidget::OnFindSessionsComplete);
+			//GameInstance->OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UServerListWidget::OnFindSessionsComplete);
 			GameInstance->FindSessions(true, true);
 			
 		}		
