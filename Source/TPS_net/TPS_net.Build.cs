@@ -10,7 +10,7 @@ public class TPS_net : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI" ,"GameplayTags", "Slate", "SlateCore", "OnlineSubsystem", "OnlineSubsystemUtils" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem" });
 
         DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
 

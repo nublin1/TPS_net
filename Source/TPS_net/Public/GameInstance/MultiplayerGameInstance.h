@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "Engine/GameInstance.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Interfaces/OnlineSessionDelegates.h"
+#include "OnlineSessionSettings.h"
 #include "MultiplayerGameInstance.generated.h"
 
 /**

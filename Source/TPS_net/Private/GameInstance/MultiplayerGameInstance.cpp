@@ -21,7 +21,8 @@ void UMultiplayerGameInstance::CreateServer(FName ServerName, int32 MaxPlayers)
 	{
 		return;
 	}
-
+	
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("GetSubsystemName %s"), *OnlineSubsystem->GetSubsystemName().ToString()));
 	SessionInterface = OnlineSubsystem->GetSessionInterface();
 	if (SessionInterface.IsValid())
 	{
@@ -56,13 +57,11 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	{
 		OnFindSessionsComplete(false);
 	}
-
-	TSharedPtr<const FUniqueNetId> UserId = OnlineSubsystem->GetIdentityInterface()->GetUniquePlayerId(0);
-
+	
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	SessionSearch->bIsLanQuery = bIsLAN;
-	SessionSearch->MaxSearchResults = 20;
-	SessionSearch->PingBucketSize = 50;
+	SessionSearch->bIsLanQuery = true;
+	SessionSearch->MaxSearchResults = 50;
+	SessionSearch->PingBucketSize = 100;
 	
 	// Set this Query Setting if "bIsPresence" is true
 	if (bIsPresence)
@@ -133,29 +132,34 @@ void UMultiplayerGameInstance::OnStartOnlineGameComplete(FName SessionName, bool
 
 void UMultiplayerGameInstance::StartCreateSession()
 {
-	if (SessionInterface.IsValid())
+	if (const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get())
 	{
-		FOnlineSessionSettings SessionSettings ;
-		SessionSettings.bIsLANMatch = true;
-		SessionSettings.bUsesPresence = true;
-		SessionSettings.NumPublicConnections = PendingMaxPlayers;
-		SessionSettings.bShouldAdvertise = true;
-		SessionSettings.NumPrivateConnections = 0;
-		SessionSettings.bAllowInvites = true;
-		SessionSettings.bAllowJoinInProgress = true;
-		SessionSettings.bAllowJoinViaPresence = true;
-		SessionSettings.bAllowJoinViaPresenceFriendsOnly = false;
-		
-		OnCreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
-
-		const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
-		if (OnlineSubsystem)
+		IOnlineSessionPtr Session = OnlineSubsystem->GetSessionInterface();
+		if (Session.IsValid())
 		{
+			TSharedPtr<class FOnlineSessionSettings> newSessionSettings = MakeShareable(new FOnlineSessionSettings());
+			newSessionSettings-> bIsLANMatch = true;
+			newSessionSettings-> bUsesPresence = true;
+			newSessionSettings-> NumPublicConnections = PendingMaxPlayers;
+			newSessionSettings-> bShouldAdvertise = true;
+			newSessionSettings-> NumPrivateConnections = 0;
+			newSessionSettings-> bAllowInvites = true;
+			newSessionSettings-> bAllowJoinInProgress = true;
+			newSessionSettings-> bAllowJoinViaPresence = true;
+			newSessionSettings-> bAllowJoinViaPresenceFriendsOnly = false;
+			newSessionSettings->bUseLobbiesIfAvailable = true;
+		
+			OnCreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
+
 			const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
-			SessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(),  PendingServerName, SessionSettings);
+			SessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(),  PendingServerName, *newSessionSettings);
+			
 		}
-		
+	}
+	else
+	{
+		if(GEngine)GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("No OnlineSubsytem found!"));
 	}
 }
 
