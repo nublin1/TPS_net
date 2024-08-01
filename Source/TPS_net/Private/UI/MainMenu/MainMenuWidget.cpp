@@ -3,9 +3,11 @@
 
 #include "UI/MainMenu/MainMenuWidget.h"
 
+#include "Components/WidgetSwitcher.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/Custom_Common/UBUIWButton.h"
 #include "UI/MainMenu/OptionsMenuWidget.h"
+#include "UI/MainMenu/StartGameWidget.h"
 
 void UMainMenuWidget::NativeConstruct()
 {
@@ -30,17 +32,18 @@ void UMainMenuWidget::NativeConstruct()
 	{
 		Quit_Button->GetMainButton()->OnClicked.AddDynamic(this, &UMainMenuWidget::OnQuitButtonClicked);
 	}
+
+	if (WBP_StartGame && WBP_StartGame->GetBack_Button())
+	{
+		 WBP_StartGame->GetBack_Button()->GetMainButton()->OnClicked.AddDynamic(this, &UMainMenuWidget::OnInStartGameBackButtonClicked);
+	}
 }
 
 void UMainMenuWidget::OnStartButtonClicked()
 {
-	FName LevelName = FName("ThirdPersonMap");
-	UGameplayStatics::OpenLevel(this, LevelName);
-
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	PlayerController->bShowMouseCursor = (false);
-	const FInputModeGameOnly InputMode;
-	PlayerController->SetInputMode(InputMode);
+	SW_MainMenu->SetActiveWidgetIndex(1);
+	
+	
 }
 
 void UMainMenuWidget::OnSettingsButtonClicked()
@@ -59,4 +62,9 @@ void UMainMenuWidget::OnQuitButtonClicked()
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	UKismetSystemLibrary::QuitGame(this, PlayerController, EQuitPreference::Quit, true);
 	//FGenericPlatformMisc::RequestExit(true);
+}
+
+void UMainMenuWidget::OnInStartGameBackButtonClicked()
+{
+	SW_MainMenu->SetActiveWidgetIndex(0);
 }

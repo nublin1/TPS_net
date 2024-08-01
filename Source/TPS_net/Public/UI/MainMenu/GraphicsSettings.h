@@ -57,9 +57,7 @@ protected:
 	//
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EWindowMode::Type> ChoosenWindowMode = EWindowMode::Fullscreen;
-
-
-	FTimerHandle tim;
+	
 	
 	//====================================================================
 	// FUNCTIONS

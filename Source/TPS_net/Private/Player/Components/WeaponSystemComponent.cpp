@@ -19,10 +19,10 @@
 #include "StateMachine/StateMachineComponent.h"
 
 // Sets default values for this component's properties
-UWeaponSystemComponent::UWeaponSystemComponent(): PlayerCamera(nullptr), CurrentWeaponInHands(nullptr),
-                                                  WeaponPistolHolster(nullptr),
+UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
                                                   WeaponPrimaryHolster(nullptr),
-                                                  WeaponTable(nullptr), SkeletalMeshComponent(nullptr)
+                                                  WeaponTable(nullptr),
+                                                  PlayerCamera(nullptr), SkeletalMeshComponent(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }

@@ -34,30 +34,27 @@ void UGraphicsSettings::NativeConstruct()
 	{
 		if (UWorld* World = GEngine->GetCurrentPlayWorld())
 		{
-			World->GetTimerManager().SetTimer(tim, [this]
+			TArray<FScreenResolutionRHI> Resolutions;
+			UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
+			TArray<FText> PossibleValuesText;
+			if (RHIGetAvailableResolutions(Resolutions, true) && UserSettings)
 			{
-				TArray<FScreenResolutionRHI> Resolutions;
-				UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
-				TArray<FText> PossibleValuesText;
-				if (RHIGetAvailableResolutions(Resolutions, true) && UserSettings)
+				for (const FScreenResolutionRHI& Resolution : Resolutions)
 				{
-					for (const FScreenResolutionRHI& Resolution : Resolutions)
-					{
-						UE_LOG(LogTemp, Log, TEXT("Supported resolution: %dx%d @ %d Hz"), Resolution.Width,
-						       Resolution.Height, Resolution.RefreshRate);
-						PossibleValuesText.Add(UGeneralUtils::ScreenResolutionRHIToText(Resolution, true));
-					}
-					FIntPoint Resolution = UserSettings->GetLastConfirmedScreenResolution();
-					FText CurrentResolutionText = UGeneralUtils::IntPointToText(Resolution);
-					int32 CurrentResolutionIndex = PossibleValuesText.IndexOfByPredicate([&](const FText& Text)
-					{
-						return Text.EqualTo(CurrentResolutionText);
-					});
-					
-					Option_Resolution->InitializeOption(FText::FromString(TEXT("Resolution")), CurrentResolutionIndex,
-					                                    PossibleValuesText);
+					UE_LOG(LogTemp, Log, TEXT("Supported resolution: %dx%d @ %d Hz"), Resolution.Width,
+					       Resolution.Height, Resolution.RefreshRate);
+					PossibleValuesText.Add(UGeneralUtils::ScreenResolutionRHIToText(Resolution, true));
 				}
-			}, 1.0f, false);
+				FIntPoint Resolution = UserSettings->GetLastConfirmedScreenResolution();
+				FText CurrentResolutionText = UGeneralUtils::IntPointToText(Resolution);
+				int32 CurrentResolutionIndex = PossibleValuesText.IndexOfByPredicate([&](const FText& Text)
+				{
+					return Text.EqualTo(CurrentResolutionText);
+				});
+
+				Option_Resolution->InitializeOption(FText::FromString(TEXT("Resolution")), CurrentResolutionIndex,
+				                                    PossibleValuesText);
+			}
 		}
 	}
 

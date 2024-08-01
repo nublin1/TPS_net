@@ -6,6 +6,8 @@
 #include "UI/BUIUserWidget.h"
 #include "MainMenuWidget.generated.h"
 
+class UStartGameWidget;
+class UWidgetSwitcher;
 class UOptionsMenuWidget;
 class UUBUIWButton;
 /**
@@ -32,6 +34,12 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	TObjectPtr<UWidgetSwitcher> SW_MainMenu;
+	UPROPERTY(EditAnywhere, meta=(OptionalWidget))
+	TObjectPtr<UStartGameWidget> WBP_StartGame;
+	
+	
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> Start_Button;
 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
@@ -53,4 +61,7 @@ protected:
 	void OnSettingsButtonClicked();
 	UFUNCTION()
 	void OnQuitButtonClicked();
+
+	UFUNCTION()
+	void OnInStartGameBackButtonClicked();
 };
