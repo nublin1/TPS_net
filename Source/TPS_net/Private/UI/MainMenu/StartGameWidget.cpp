@@ -37,10 +37,10 @@ void UStartGameWidget::OnSingleButtonClicked() const
 
 void UStartGameWidget::OnCreate_ButtonClicked()
 {
-	WS_StartGame->SetActiveWidgetIndex(2);
+	WS_StartGame->SetActiveWidgetIndex(1);
 }
 
 void UStartGameWidget::OnServerlist_ButtonClicked()
 {
-	WS_StartGame->SetActiveWidgetIndex(1);
+	WS_StartGame->SetActiveWidgetIndex(0);
 }

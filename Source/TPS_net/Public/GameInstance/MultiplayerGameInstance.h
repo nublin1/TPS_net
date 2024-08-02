@@ -33,7 +33,7 @@ struct FCustomSessionSearchResult
 	FOnlineSessionSearchResult SearchResult;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFindSessionsCompleteDelegate, TArray<FCustomSessionSearchResult>, SessionSearchResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFindSessionsCompleteDelegate, bool, bWasSuccessful, TArray<FCustomSessionSearchResult>, SessionSearchResult);
 
 UCLASS()
 class TPS_NET_API UMultiplayerGameInstance : public UGameInstance
@@ -94,10 +94,10 @@ protected:
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
-	void StartCreateSession();
+	void StartCreateSession(bool bIsLAN);
 	void DestroyCurrentSession();
+	void RegisterPlayer(FName SessionName, const FUniqueNetIdRepl& PlayerID, bool bWasInvited = false);
 	
-
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
 private:

@@ -56,6 +56,6 @@ protected:
 
 	//
 	UFUNCTION()
-	void OnFindSessionsComplete(TArray<FCustomSessionSearchResult> SessionSearchResult);
+	void OnFindSessionsComplete(bool bWasSuccessful, TArray<FCustomSessionSearchResult> SessionSearchResult);
 	
 };

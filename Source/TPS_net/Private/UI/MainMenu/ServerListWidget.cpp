@@ -41,7 +41,7 @@ void UServerListWidget::OnRefleshButtonClicked()
 	}
 }
 
-void UServerListWidget::OnFindSessionsComplete(TArray<FCustomSessionSearchResult> SessionSearchResult)
+void UServerListWidget::OnFindSessionsComplete(bool bWasSuccessful, TArray<FCustomSessionSearchResult> SessionSearchResult)
 {	
 	if (SessionSearchResult.Num() > 0)
 	{
