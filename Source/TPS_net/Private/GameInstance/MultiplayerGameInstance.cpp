@@ -81,7 +81,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	if (localPlayer)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
-		SessionInterface->FindSessions(*localPlayer->GetPreferredUniqueNetId(), SearchSettingsRef);
+		SessionInterface->FindSessions(0, SearchSettingsRef);
 	}
 	else
 	{
