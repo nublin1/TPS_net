@@ -63,6 +63,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = bIsLAN;
+	if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{SessionSearch->bIsLanQuery = false;}
 	SessionSearch->MaxSearchResults = 50;
 	SessionSearch->PingBucketSize = 100;
 	
@@ -195,6 +196,7 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 		{			
 			TSharedPtr<class FOnlineSessionSettings> newSessionSettings = MakeShareable(new FOnlineSessionSettings());
 			newSessionSettings-> bIsLANMatch = bIsLAN;
+			if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{newSessionSettings->bIsLANMatch = false;}
 			newSessionSettings-> bUsesPresence = true;
 			newSessionSettings-> NumPublicConnections = PendingMaxPlayers;
 			newSessionSettings-> bShouldAdvertise = true;
