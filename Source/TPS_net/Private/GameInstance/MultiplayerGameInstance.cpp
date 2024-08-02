@@ -207,13 +207,13 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 			newSessionSettings-> bAllowJoinViaPresenceFriendsOnly = false;
 			newSessionSettings->bUseLobbiesIfAvailable = true;
 
-			newSessionSettings->Set(SETTING_MAPNAME, FString("Lobby"), EOnlineDataAdvertisementType::ViaOnlineService);
+			//newSessionSettings->Set(SETTING_MAPNAME, FString("Lobby"), EOnlineDataAdvertisementType::ViaOnlineService);
 		
 			OnCreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
 			const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
-			SessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(),  PendingServerName, *newSessionSettings);
+			SessionInterface->CreateSession(0,  PendingServerName, *newSessionSettings);
 			
 		}
 	}
