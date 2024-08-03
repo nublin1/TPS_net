@@ -6,6 +6,12 @@
 #include "GameInstance/MultiplayerGameInstance.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 
+void AMainMenuGameMode::OnPostLogin(AController* NewPlayer)
+{
+	Super::OnPostLogin(NewPlayer);
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OnPostLogin")));
+}
+
 void AMainMenuGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

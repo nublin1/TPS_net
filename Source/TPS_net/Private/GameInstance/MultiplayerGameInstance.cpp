@@ -183,6 +183,7 @@ void UMultiplayerGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinS
 			const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 			RegisterPlayer(SessionName, localPlayer->GetPreferredUniqueNetId(), false);
 			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			
 		}
 	}
 }

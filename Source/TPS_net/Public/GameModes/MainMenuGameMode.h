@@ -31,7 +31,7 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-
+	virtual void OnPostLogin(AController* NewPlayer) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	virtual void Logout(AController* Exiting) override;

@@ -35,7 +35,7 @@ void UServerListWidget::OnRefleshButtonClicked()
 		if (OnlineSubsystem)
 		{
 			//GameInstance->OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UServerListWidget::OnFindSessionsComplete);
-			GameInstance->FindSessions(true, true);
+			GameInstance->FindSessions(false, true);
 			WS_ServerList->SetActiveWidgetIndex(0);
 		}
 	}
