@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "ServerListWidget.generated.h"
 
+struct FBlueprintSessionResult;
 struct FCustomSessionSearchResult;
 class UUBUIWButton;
 class UServerInfoRowWidget;
@@ -32,13 +33,13 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> RefleshButton;
 	
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> WS_ServerList;
 
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UScrollBox> ServerListScrool;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -55,7 +56,9 @@ protected:
 	void OnRefleshButtonClicked();
 
 	//
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnFindSessionsComplete(bool bWasSuccessful, TArray<FCustomSessionSearchResult> SessionSearchResult);
+
+	
 	
 };

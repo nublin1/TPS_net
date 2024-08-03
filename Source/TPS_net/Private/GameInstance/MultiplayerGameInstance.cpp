@@ -302,6 +302,7 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 			TArray<FCustomSessionSearchResult> Results;
 			FindSessionsCompleteDelegate.Broadcast(bWasSuccessful, Results);
 		}
+		
 	}
 }
 		

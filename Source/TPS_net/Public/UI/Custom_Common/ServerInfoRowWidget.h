@@ -32,8 +32,8 @@ public:
 	virtual void UpdateText();
 	
 	// Setters
-	
-	virtual void SetOnlineSession(FCustomSessionSearchResult NewOnlineSession) {Session = NewOnlineSession; };
+	UFUNCTION(BlueprintCallable)
+	virtual void SetOnlineSession(FCustomSessionSearchResult NewOnlineSession) {Session = NewOnlineSession; }
 
 protected:
 	//====================================================================
@@ -42,11 +42,11 @@ protected:
 	
 	FCustomSessionSearchResult Session;
 	
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> PlayerName ;
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	UTextBlock* PlayerName ;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UTextBlock> NumPlayers ;
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UTextBlock> Ping ;
 	
 	//====================================================================

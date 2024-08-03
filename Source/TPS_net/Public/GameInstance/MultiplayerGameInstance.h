@@ -13,6 +13,8 @@
  * 
  */
 
+struct FBlueprintSessionResult;
+
 USTRUCT(BlueprintType)
 struct FCustomSessionSearchResult
 {
@@ -29,8 +31,9 @@ struct FCustomSessionSearchResult
 
 	UPROPERTY(BlueprintReadOnly, Category = "Session")
 	int32 Ping;
-
+	
 	FOnlineSessionSearchResult SearchResult;
+
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFindSessionsCompleteDelegate, bool, bWasSuccessful, TArray<FCustomSessionSearchResult>, SessionSearchResult);

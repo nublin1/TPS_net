@@ -29,7 +29,8 @@ public:
 	UUBUIWButton();
 
 	// Getters
-	TObjectPtr<UButton> GetMainButton() const {return MainButton;}
+	UFUNCTION(BlueprintCallable)
+	UButton* GetMainButton() const {return MainButton;}
 	
 protected:
 	//====================================================================
@@ -46,7 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bIsToggleOn;
 		
-	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  meta=(BindWidget))
 	TObjectPtr<UButton> MainButton;
 	
 	//====================================================================
