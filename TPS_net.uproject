@@ -41,6 +41,10 @@
 				"IOS",
 				"TVOS"
 			]
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true
 		}
 	]
 }

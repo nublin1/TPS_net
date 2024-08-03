@@ -63,6 +63,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = bIsLAN;
+	if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{SessionSearch->bIsLanQuery = false;}
 	SessionSearch->MaxSearchResults = 50;
 	SessionSearch->PingBucketSize = 100;
 	
@@ -80,7 +81,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	if (localPlayer)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
-		SessionInterface->FindSessions(*localPlayer->GetPreferredUniqueNetId(), SearchSettingsRef);
+		SessionInterface->FindSessions(0, SearchSettingsRef);
 	}
 	else
 	{
@@ -195,6 +196,7 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 		{			
 			TSharedPtr<class FOnlineSessionSettings> newSessionSettings = MakeShareable(new FOnlineSessionSettings());
 			newSessionSettings-> bIsLANMatch = bIsLAN;
+			if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{newSessionSettings->bIsLANMatch = false;}
 			newSessionSettings-> bUsesPresence = true;
 			newSessionSettings-> NumPublicConnections = PendingMaxPlayers;
 			newSessionSettings-> bShouldAdvertise = true;
@@ -211,7 +213,7 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 
 			const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("UserId %s"), *localPlayer->GetPreferredUniqueNetId()->ToString()));
-			SessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(),  PendingServerName, *newSessionSettings);
+			SessionInterface->CreateSession(0,  PendingServerName, *newSessionSettings);
 			
 		}
 	}
@@ -259,11 +261,6 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 	// Clear the Delegate handle, since we finished this call
 	SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
-
-	// Just debugging the Number of Search results. Can be displayed in UMG or something later on
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Num Search Results: %d"), SessionSearch->SearchResults.Num()));
-
-	
 	
 	if (SessionSearch->SearchResults.Num() > 0)
 	{
@@ -300,6 +297,7 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 			TArray<FCustomSessionSearchResult> Results;
 			FindSessionsCompleteDelegate.Broadcast(bWasSuccessful, Results);
 		}
+		
 	}
 }
 		

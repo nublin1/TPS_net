@@ -30,12 +30,12 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UEditableText> ServerNameText ;
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UCheckBox> UseLANCheckBox ;
 
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> WBP_CreateServerButton ;
 
 	

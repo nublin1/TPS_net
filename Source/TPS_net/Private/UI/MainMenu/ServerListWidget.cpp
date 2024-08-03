@@ -42,7 +42,10 @@ void UServerListWidget::OnRefleshButtonClicked()
 }
 
 void UServerListWidget::OnFindSessionsComplete(bool bWasSuccessful, TArray<FCustomSessionSearchResult> SessionSearchResult)
-{	
+{
+	// Just debugging the Number of Search results. Can be displayed in UMG or something later on
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Num Search Results: %d"), SessionSearchResult.Num()));
+	
 	if (SessionSearchResult.Num() > 0)
 	{
 		ServerListScrool->ClearChildren();
@@ -63,3 +66,5 @@ void UServerListWidget::OnFindSessionsComplete(bool bWasSuccessful, TArray<FCust
 		WS_ServerList->SetActiveWidgetIndex(2);
 	}
 }
+
+

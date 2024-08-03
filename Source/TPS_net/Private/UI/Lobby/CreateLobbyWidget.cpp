@@ -27,6 +27,6 @@ void UCreateLobbyWidget::OnCreateServerButtonClicked()
 
 	if (UMultiplayerGameInstance* GameInstance = Cast<UMultiplayerGameInstance>(GetGameInstance()))
 	{
-		GameInstance->CreateServer(ServerName, MaxPlayers, UseLANCheckBox->IsChecked());
+		//GameInstance->CreateServer(ServerName, MaxPlayers, UseLANCheckBox->IsChecked());
 	}
 }
