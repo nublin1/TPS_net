@@ -207,7 +207,7 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 			newSessionSettings-> bAllowJoinViaPresenceFriendsOnly = false;
 			newSessionSettings->bUseLobbiesIfAvailable = true;
 
-			//newSessionSettings->Set(SETTING_MAPNAME, FString("Lobby"), EOnlineDataAdvertisementType::ViaOnlineService);
+			newSessionSettings->Set(SETTING_MAPNAME, FString("Lobby"), EOnlineDataAdvertisementType::ViaOnlineService);
 		
 			OnCreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
@@ -261,11 +261,6 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 	// Clear the Delegate handle, since we finished this call
 	SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
-
-	// Just debugging the Number of Search results. Can be displayed in UMG or something later on
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Num Search Results: %d"), SessionSearch->SearchResults.Num()));
-
-	
 	
 	if (SessionSearch->SearchResults.Num() > 0)
 	{

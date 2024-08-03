@@ -56,7 +56,7 @@ protected:
 	void OnRefleshButtonClicked();
 
 	//
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void OnFindSessionsComplete(bool bWasSuccessful, TArray<FCustomSessionSearchResult> SessionSearchResult);
 
 	
