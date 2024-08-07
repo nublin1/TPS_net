@@ -2,6 +2,8 @@
 
 
 #include "Utilities/GeneralUtils.h"
+
+#include "Engine/UserInterfaceSettings.h"
 #include "UObject/UnrealType.h"
 
 
@@ -83,4 +85,17 @@ FIntPoint UGeneralUtils::TextToIntPoint(const FText& ResolutionText)
 	}
 
 	return Resolution;
+}
+
+FVector2D UGeneralUtils::GetViewportScaledSize()
+{
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+		
+	// Получение коэффициента масштабирования DPI
+	const float ViewportScale = GetDefault<UUserInterfaceSettings>(UUserInterfaceSettings::StaticClass())->GetDPIScaleBasedOnSize(FIntPoint(ViewportSize.X, ViewportSize.Y));
+
+	ViewportSize = ViewportSize/ViewportScale;
+	//UE_LOG(LogTemp, Log, TEXT("ViewportSize: %s"), *ViewportSize.ToString());
+	return ViewportSize;	
 }

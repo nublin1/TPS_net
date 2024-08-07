@@ -27,10 +27,13 @@ public:
 	// FUNCTIONS
 	//====================================================================	
 	UUBUIWButton();
-
+	
 	// Getters
 	UFUNCTION(BlueprintCallable)
 	UButton* GetMainButton() const {return MainButton;}
+
+	UFUNCTION(BlueprintCallable)
+	bool GetToggleState() const { return bIsToggleOn; }
 	
 protected:
 	//====================================================================
@@ -41,6 +44,8 @@ protected:
 	TObjectPtr<UTextBlock> MainLabel;
 	UPROPERTY(EditAnywhere, meta=(EditCondition="MainLabel"))
 	FText ButtonText;
+	UPROPERTY(EditAnywhere, meta=(EditCondition="MainLabel"))
+	float FontSize = 24;
 		
 	UPROPERTY(EditAnywhere)
 	bool bIsToggleButton;
@@ -55,5 +60,9 @@ protected:
 	//====================================================================
 	UFUNCTION()
 	virtual void NativePreConstruct() override;
-	
+
+
+	//
+	UFUNCTION(BlueprintCallable)
+	void HandleButtonClicked();
 };

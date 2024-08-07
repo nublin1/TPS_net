@@ -51,4 +51,7 @@ public:
 
 	static FText IntPointToText(const FIntPoint Resolution);
 	static FIntPoint TextToIntPoint(const FText& ResolutionText);
+
+	UFUNCTION(BlueprintCallable)
+	static FVector2D GetViewportScaledSize();
 };
