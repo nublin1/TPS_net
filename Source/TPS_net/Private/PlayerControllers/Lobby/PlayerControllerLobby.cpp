@@ -3,3 +3,6 @@
 
 #include "PlayerControllers/Lobby/PlayerControllerLobby.h"
 
+APlayerControllerLobby::APlayerControllerLobby()
+{
+}

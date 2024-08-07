@@ -10,9 +10,10 @@
 
 class UTextBlock;
 class UButton;
-/**
- * 
- */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedButton);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggleStateChanged, bool, bIsToggledOn);
+
 UCLASS()
 class TPS_NET_API UUBUIWButton : public UBUIUserWidget
 {
@@ -27,6 +28,11 @@ public:
 	// FUNCTIONS
 	//====================================================================	
 	UUBUIWButton();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnClickedButton OnClickedButton;
+	UPROPERTY(BlueprintAssignable)
+	FOnToggleStateChanged OnToggleStateChanged;
 	
 	// Getters
 	UFUNCTION(BlueprintCallable)

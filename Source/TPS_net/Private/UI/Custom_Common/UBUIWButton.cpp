@@ -36,5 +36,13 @@ void UUBUIWButton::HandleButtonClicked()
 	if (bIsToggleButton)
 	{
 		bIsToggleOn = !bIsToggleOn;
+		OnToggleStateChanged.Broadcast(bIsToggleOn);
+	}
+	else
+	{
+		if (OnClickedButton.IsBound())
+		{
+			OnClickedButton.Broadcast();
+		}
 	}
 }

@@ -26,6 +26,9 @@ public:
 	//====================================================================
 	ULobbyUIWidget();
 
+	// Getters
+	TObjectPtr<UUBUIWButton> GetTogglingReady_Button() {return TogglingReady_Button;}
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
