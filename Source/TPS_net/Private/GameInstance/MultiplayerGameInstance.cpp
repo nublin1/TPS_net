@@ -3,9 +3,11 @@
 
 #include "GameInstance/MultiplayerGameInstance.h"
 
+#include "AdvancedSteamFriendsLibrary.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlineUserInterface.h"
 #include "Online/OnlineSessionNames.h"
 
 UMultiplayerGameInstance::UMultiplayerGameInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -295,10 +297,11 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	{
 		if (FindSessionsCompleteDelegate.IsBound())
 		{
-			TArray<FCustomSessionSearchResult> Results;
+			const TArray<FCustomSessionSearchResult> Results;
 			FindSessionsCompleteDelegate.Broadcast(bWasSuccessful, Results);
 		}
 		
 	}
 }
-		
+
+

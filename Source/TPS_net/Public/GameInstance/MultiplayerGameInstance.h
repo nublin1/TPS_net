@@ -103,6 +103,8 @@ protected:
 	
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
+	
+
 private:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
