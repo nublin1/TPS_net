@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "PlayerControllerLobby.generated.h"
 
+class UChatOnScreen;
 class ULobbyUIWidget;
 /**
  * 
@@ -32,6 +33,9 @@ protected:
 	//====================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ULobbyUIWidget* LobbyUIWidget;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UChatOnScreen* ChatOnScreen;
 
 	//====================================================================
 	// FUNCTIONS
