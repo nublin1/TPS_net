@@ -28,7 +28,7 @@ public:
 	virtual FOnChatMessageSendToGS& GetOnChatMessageSendToGSDelegate() override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void BindToChatMessage_Implementation(const UObject* Object, FName FunctionName);
+	virtual void BindToChatMessage_Implementation(UObject* Object, FName FunctionName);
 
 	UFUNCTION(BlueprintCallable)
 	void SendChatMessage_Implementation(FString Sender, FString Message);

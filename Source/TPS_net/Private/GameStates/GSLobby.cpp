@@ -8,9 +8,13 @@ FOnChatMessageSendToGS& AGSLobby::GetOnChatMessageSendToGSDelegate()
 	return OnChatMessageSendToGS;
 }
 
-void AGSLobby::BindToChatMessage_Implementation(const UObject* Object, FName FunctionName)
+void AGSLobby::BindToChatMessage_Implementation(UObject* Object, FName FunctionName)
 {
-	//OnChatMessageSendToGS.AddDynamic(const_cast<UObject*>(Object), FunctionName);
+	if (Object)
+	{
+		// Привязываем функцию к делегату
+		//OnChatMessageSendToGS.AddDynamic(Object, FunctionName);
+	}
 }
 
 void AGSLobby::SendChatMessage_Implementation(FString Sender, FString Message)

@@ -22,8 +22,10 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UChat();
+	
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	void AddMessage222(const FString& Sender, const FString& Message);
+	void AddMessage(const FString& Sender,  const FString& Message);
 
 protected:
 	//====================================================================
@@ -33,5 +35,7 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
+	void SetupChat();
 	
 };

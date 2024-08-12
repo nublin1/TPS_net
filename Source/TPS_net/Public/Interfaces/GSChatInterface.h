@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "GSChatInterface.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChatMessageSendToGS, FString, Sender, FString, Message);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChatMessageSendToGS, const FString&, Sender, const FString&, Message);
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, Blueprintable)
@@ -35,7 +35,7 @@ public:
 	virtual FOnChatMessageSendToGS& GetOnChatMessageSendToGSDelegate() = 0;
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	void BindToChatMessage(const UObject* Object, FName FunctionName);
+	void BindToChatMessage(UObject* Object, FName FunctionName);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void SendChatMessage(const FString& Sender, const FString& Message);
