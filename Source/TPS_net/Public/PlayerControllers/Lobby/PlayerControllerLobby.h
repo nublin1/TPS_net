@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Interfaces/PCChatInterface.h"
 #include "PlayerControllerLobby.generated.h"
 
 class UChatOnScreen;
@@ -12,7 +13,7 @@ class ULobbyUIWidget;
  * 
  */
 UCLASS()
-class TPS_NET_API APlayerControllerLobby : public APlayerController
+class TPS_NET_API APlayerControllerLobby : public APlayerController, public IPCChatInterface
 {
 	GENERATED_BODY()
 
@@ -26,6 +27,9 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	APlayerControllerLobby();
+
+	UFUNCTION(BlueprintCallable)
+	void SendMessageTo_PcGs_Implementation(FString Sender, FString Message);
 
 protected:
 	//====================================================================

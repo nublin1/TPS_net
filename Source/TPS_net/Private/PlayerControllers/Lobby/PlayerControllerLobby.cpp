@@ -6,3 +6,8 @@
 APlayerControllerLobby::APlayerControllerLobby()
 {
 }
+
+void APlayerControllerLobby::SendMessageTo_PcGs_Implementation(FString Sender, FString Message)
+{
+	
+}

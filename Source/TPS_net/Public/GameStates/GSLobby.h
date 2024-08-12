@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Interfaces/GSChatInterface.h"
 #include "GSLobby.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMessageSendToGS, FString, Sender, FString, Message);
-
 UCLASS()
-class TPS_NET_API AGSLobby : public AGameStateBase
+class TPS_NET_API AGSLobby : public AGameStateBase, public IGSChatInterface
 {
 	GENERATED_BODY()
 	
@@ -18,12 +17,21 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable, BlueprintCallable)
-	FOnMessageSendToGS OnMessageSendToGS;
+	FOnChatMessageSendToGS OnChatMessageSendToGS;
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION()
+	virtual FOnChatMessageSendToGS& GetOnChatMessageSendToGSDelegate() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void BindToChatMessage_Implementation(const UObject* Object, FName FunctionName);
+
+	UFUNCTION(BlueprintCallable)
+	void SendChatMessage_Implementation(FString Sender, FString Message);
 
 	protected:
 	//====================================================================
