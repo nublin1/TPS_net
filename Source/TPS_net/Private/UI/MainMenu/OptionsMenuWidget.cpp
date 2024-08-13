@@ -38,19 +38,31 @@ void UOptionsMenuWidget::OnApplyButtonClicked()
 	{
 		return;		
 	}
-	
-	UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
-	if (UserSettings)
+
+	if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
 	{
+		//
 		UserSettings->SetFullscreenMode(EWindowMode::ConvertIntToWindowMode(WBP_GraphicsSettings->GetOption_WindowMode()->GetCurrentIndex()));
-		
+
+		//
 		FText CurrentResolutionText = WBP_GraphicsSettings->GetOption_Resolution()->GetPossibleValuesText()[WBP_GraphicsSettings->GetOption_Resolution()->GetCurrentIndex()];
 		auto Resol = UGeneralUtils::TextToIntPoint(CurrentResolutionText);
 		UE_LOG(LogTemp, Log, TEXT("Formatted Text: %s"), *CurrentResolutionText.ToString());
 		UE_LOG(LogTemp, Log, TEXT("Parsed Resolution: %d x %d"), Resol.X, Resol.Y);
 		UserSettings->SetScreenResolution(Resol);
 
+		//
+		const auto VsyncValue = WBP_GraphicsSettings->GetOption_VSync()->GetCurrentIndex();
+		UserSettings->SetVSyncEnabled(VsyncValue == 0? true: false);
+		UE_LOG(LogTemp, Log, TEXT("Vsync Mode: %d"), static_cast<int32>(VsyncValue));
+
+		auto ScalabilityValue = WBP_GraphicsSettings->GetOption_Scalability()->GetCurrentIndex();
+		UserSettings->SetOverallScalabilityLevel(ScalabilityValue);
+		
+
+		//		
 		UserSettings->ApplySettings(true);
+		
 		
 		// Get the current screen resolution
 		FIntPoint Resolution = UserSettings->GetScreenResolution();
@@ -60,8 +72,13 @@ void UOptionsMenuWidget::OnApplyButtonClicked()
 		EWindowMode::Type FullscreenMode = UserSettings->GetFullscreenMode();
 		UE_LOG(LogTemp, Log, TEXT("Fullscreen Mode: %d"), static_cast<int32>(FullscreenMode));
 
+		// get the VSync mode
+		//UserSettings->GetFramePace();
+
+		
+
 		// Get the graphics quality settings
-		int32 GraphicsQuality = UserSettings->GetOverallScalabilityLevel();
+		auto GraphicsQuality = UserSettings->GetOverallScalabilityLevel();
 		UE_LOG(LogTemp, Log, TEXT("Graphics Quality: %d"), GraphicsQuality);
 	}
 	

@@ -63,4 +63,21 @@ void UGraphicsSettings::NativeConstruct()
 		TArray<FText> PossibleValuesText = {FText::FromString("True"), FText::FromString("False")};
 		Option_VSync->InitializeOption(FText::FromString(TEXT("VSync")), 0, PossibleValuesText);
 	}
+
+	if (Option_Scalability)
+	{
+		TArray<EPerQualityLevels> QualityLevelses = {
+			EPerQualityLevels::Low, EPerQualityLevels::Medium, EPerQualityLevels::High, EPerQualityLevels::Epic
+		};
+
+		TArray<FText> PossibleValuesText;
+		for (const auto& Value : QualityLevelses)
+		{
+			FString enumString = UGeneralUtils::EnumToString(TEXT("EPerQualityLevels"), Value, TEXT("Invalid"));
+			PossibleValuesText.Add(FText::FromString(enumString));
+		}
+
+		Option_Scalability->InitializeOption(FText::FromString(TEXT("Graphics")),
+											1, PossibleValuesText);
+	}
 }

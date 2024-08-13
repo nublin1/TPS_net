@@ -40,6 +40,8 @@ public:
 		return Option_VSync;
 	}
 
+	TObjectPtr<USettingsOptionRow> GetOption_Scalability() const {return Option_Scalability;}
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -53,6 +55,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<USettingsOptionRow> Option_VSync;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USettingsOptionRow> Option_Scalability;
 
 	//
 	UPROPERTY(EditAnywhere)
