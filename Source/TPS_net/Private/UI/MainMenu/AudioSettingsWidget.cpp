@@ -3,3 +3,14 @@
 
 #include "UI/MainMenu/AudioSettingsWidget.h"
 
+#include "UI/Custom_Common/SettingsOptionSliderRow.h"
+
+void UAudioSettingsWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (OptionMasterValue)
+	{
+		OptionMasterValue->InitializeOption(FText::FromString("MasterValue"), 100);
+	}
+}

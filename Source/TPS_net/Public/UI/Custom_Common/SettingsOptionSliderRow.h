@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/Slider.h"
 #include "UI/BUIUserWidget.h"
 #include "SettingsOptionSliderRow.generated.h"
 
@@ -25,6 +26,9 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	void InitializeOption(FText OptionName, uint16 InitialValue);
+
+	// Getters
+	float GetCurrentValue() const {return CurrentValueSlider->GetValue();}
 	
 protected:
 	//====================================================================
@@ -38,9 +42,22 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UTextBlock> CurrentValueTextBlock;
+
+	// TEMPLATE VARIABLES
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText OptionNameText;
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	
+	UFUNCTION()
+	virtual void NativePreConstruct() override;
+	UFUNCTION()
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	virtual void UpdateOptionNameText();
+
+	UFUNCTION()
+	virtual void OnSliderValueChanged(float NewValue);
 };

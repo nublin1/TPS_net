@@ -3,14 +3,27 @@
 
 #include "UI/MainMenu/OptionsMenuWidget.h"
 
+#include "Components/WidgetSwitcher.h"
 #include "GameFramework/GameUserSettings.h"
 #include "UI/Custom_Common/SettingsOptionRow.h"
+#include "UI/Custom_Common/SettingsOptionSliderRow.h"
 #include "UI/Custom_Common/UBUIWButton.h"
+#include "UI/MainMenu/AudioSettingsWidget.h"
 #include "UI/MainMenu/GraphicsSettings.h"
 
 void UOptionsMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (Audio_Button)
+	{
+		Audio_Button->GetMainButton()->OnClicked.AddDynamic(this, &UOptionsMenuWidget::OnAudioButtonClicked);
+	}
+
+	if (Graphics_Button)
+	{
+		Graphics_Button->GetMainButton()->OnClicked.AddDynamic(this, &UOptionsMenuWidget::OnGraphicsButtonClicked);
+	}
 
 	if (Back_Button)
 	{
@@ -21,6 +34,16 @@ void UOptionsMenuWidget::NativeConstruct()
 	{
 		Apply_Button->GetMainButton()->OnClicked.AddDynamic(this, &UOptionsMenuWidget::OnApplyButtonClicked);
 	}
+}
+
+void UOptionsMenuWidget::OnAudioButtonClicked()
+{
+	WS_Settings->SetActiveWidget(WBP_AudioSettings);
+}
+
+void UOptionsMenuWidget::OnGraphicsButtonClicked()
+{
+	WS_Settings->SetActiveWidget(WBP_GraphicsSettings);
 }
 
 void UOptionsMenuWidget::OnBackButtonClicked()
@@ -41,6 +64,10 @@ void UOptionsMenuWidget::OnApplyButtonClicked()
 
 	if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
 	{
+		auto MasterVolume = WBP_AudioSettings->GetOptionMasterVolum()->GetCurrentValue();
+		UserSettings->SetAudioQualityLevel(MasterVolume);
+
+		
 		//
 		UserSettings->SetFullscreenMode(EWindowMode::ConvertIntToWindowMode(WBP_GraphicsSettings->GetOption_WindowMode()->GetCurrentIndex()));
 
@@ -57,29 +84,23 @@ void UOptionsMenuWidget::OnApplyButtonClicked()
 		UE_LOG(LogTemp, Log, TEXT("Vsync Mode: %d"), static_cast<int32>(VsyncValue));
 
 		auto ScalabilityValue = WBP_GraphicsSettings->GetOption_Scalability()->GetCurrentIndex();
-		UserSettings->SetOverallScalabilityLevel(ScalabilityValue);
-		
+		UserSettings->SetOverallScalabilityLevel(ScalabilityValue);		
 
 		//		
 		UserSettings->ApplySettings(true);
 		
 		
-		// Get the current screen resolution
+		/*// Get the current screen resolution
 		FIntPoint Resolution = UserSettings->GetScreenResolution();
 		UE_LOG(LogTemp, Log, TEXT("Current Resolution: %dx%d"), Resolution.X, Resolution.Y);
 
 		// Get the fullscreen mode
 		EWindowMode::Type FullscreenMode = UserSettings->GetFullscreenMode();
 		UE_LOG(LogTemp, Log, TEXT("Fullscreen Mode: %d"), static_cast<int32>(FullscreenMode));
-
-		// get the VSync mode
-		//UserSettings->GetFramePace();
-
 		
-
 		// Get the graphics quality settings
 		auto GraphicsQuality = UserSettings->GetOverallScalabilityLevel();
-		UE_LOG(LogTemp, Log, TEXT("Graphics Quality: %d"), GraphicsQuality);
+		UE_LOG(LogTemp, Log, TEXT("Graphics Quality: %d"), GraphicsQuality);*/
 	}
 	
 }

@@ -8,6 +8,7 @@
 #include "OptionsMenuWidget.generated.h"
 
 class UWidgetSwitcher;
+class UAudioSettingsWidget;
 class UGraphicsSettings;
 class UUBUIWButton;
 /**
@@ -38,9 +39,16 @@ protected:
 	TObjectPtr<UBUIUserWidget> PrevActiveWidget;
 	
 	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	TObjectPtr<UUBUIWButton> Audio_Button;
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	TObjectPtr<UUBUIWButton> Graphics_Button;
 	
+	//
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> WS_Settings;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UAudioSettingsWidget> WBP_AudioSettings;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UGraphicsSettings> WBP_GraphicsSettings;
 	
@@ -57,6 +65,11 @@ protected:
 	//====================================================================
 	UFUNCTION()
 	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void OnAudioButtonClicked();
+	UFUNCTION()
+	void OnGraphicsButtonClicked();
 	
 	UFUNCTION()
 	void OnBackButtonClicked();

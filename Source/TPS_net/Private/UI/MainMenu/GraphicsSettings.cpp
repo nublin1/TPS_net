@@ -11,7 +11,7 @@
 
 void UGraphicsSettings::NativeConstruct()
 {
-	Super::NativePreConstruct();
+	Super::NativeConstruct();
 
 	if (Option_WindowMode)
 	{

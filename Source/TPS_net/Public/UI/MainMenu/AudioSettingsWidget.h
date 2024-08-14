@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "AudioSettingsWidget.generated.h"
 
+class USettingsOptionSliderRow;
 /**
  * 
  */
@@ -14,4 +15,28 @@ class TPS_NET_API UAudioSettingsWidget : public UBUIUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
+
+	//Getters
+	TObjectPtr<USettingsOptionSliderRow> GetOptionMasterVolum() const {return OptionMasterValue;};
+
+protected:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USettingsOptionSliderRow> OptionMasterValue;
+	
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
+	UFUNCTION()
+	virtual void NativeConstruct() override;
 };

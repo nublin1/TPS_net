@@ -68,7 +68,9 @@ Saved/*
 
 # Compiled source files for the engine to use
 Intermediate/*
-Plugins/*/Intermediate/*
+Plugins/**/Intermediate/*
+Plugins/**/Binaries/*
+Plugins/**/Saved/*
 
 # Cache files for the editor to use
 DerivedDataCache/*

@@ -17,11 +17,12 @@ void UChat::SetupChat()
 	{
 		if (IGSChatInterface* GSChatInterface = Cast<IGSChatInterface>(GameState))
 		{
-			// Привязываем функцию Blueprint к делегату
-			//GSChatInterface->BindToChatMessage(this, FName("HandleChatMessage"));
-
 			GSChatInterface->GetOnChatMessageSendToGSDelegate().AddDynamic(this, &UChat::AddMessage);
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameState has not Implement ChatInterface"));
 	}
 }
 
