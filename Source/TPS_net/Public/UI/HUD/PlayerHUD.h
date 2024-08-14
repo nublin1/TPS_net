@@ -29,15 +29,7 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	// Classes
-	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
-	TSubclassOf<UMainHUDLayout> MainHUDLayoutWidgetClass;
 	
-	// Widgets
-	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
-	UMainHUDLayout* MainHUDContainer;
-	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
-	UGameCoreHUDLayout* GameCoreHudLayout;
 
 	//====================================================================
 	// FUNCTIONS

@@ -7,6 +7,9 @@
 #include "Interfaces/PCChatInterface.h"
 #include "PlayerController_TPS.generated.h"
 
+class UChatOnScreen;
+class UGameCoreHUDLayout;
+class UMainHUDLayout;
 /**
  * 
  */
@@ -32,6 +35,19 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	// Classes
+	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
+	TSubclassOf<UMainHUDLayout> MainHUDLayoutWidgetClass;
+	
+	// Widgets
+	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
+	UMainHUDLayout* MainHUDContainer;
+	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
+	UGameCoreHUDLayout* GameCoreHudLayout;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UChatOnScreen* ChatOnScreen;
+
 	
 	//====================================================================
 	// FUNCTIONS

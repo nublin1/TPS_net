@@ -74,3 +74,5 @@ Plugins/**/Saved/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate
