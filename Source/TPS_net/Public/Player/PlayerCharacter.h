@@ -5,18 +5,26 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/ClimbableInterface.h"
+#include "Interfaces/WeaponSystemInterface.h"
 #include "PlayerCharacter.generated.h"
 
 class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ACharacter, public IClimbableInterface
+class TPS_NET_API APlayerCharacter : public ACharacter, public IClimbableInterface, public IWeaponSystemInterface
 {
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	APlayerCharacter();
+
+	// Getters
+	UFUNCTION()
+	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
 
 protected:
 	//====================================================================
@@ -40,6 +48,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector AimingCameraPosition;
 
+	// Components
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	UStateMachineComponent* StateMachine_Movemant;
 	UPROPERTY(BlueprintReadWrite)

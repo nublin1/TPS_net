@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Weapon/WeaponData.h"
 #include "GameFramework/Actor.h"
 #include "MasterWeapon.generated.h"
 

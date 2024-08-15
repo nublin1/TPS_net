@@ -3,7 +3,8 @@
 
 #include "PlayerControllers/TPS/PlayerController_TPS.h"
 
-APlayerController_TPS::APlayerController_TPS()
+APlayerController_TPS::APlayerController_TPS(): MainHUDContainer(nullptr), GameCoreHudLayout(nullptr),
+                                                ChatOnScreen(nullptr)
 {
 }
 

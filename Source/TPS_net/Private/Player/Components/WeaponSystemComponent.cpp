@@ -207,6 +207,9 @@ void UWeaponSystemComponent::ShootProjectile() const
         				{
         					BulletProjectileComponent->SetBulletMass(AmmoCharacteristics.BulletMass);
         				}
+
+        				if (OnShootDelegate.IsBound())
+        					OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
         			}
         		}
         	}
@@ -218,7 +221,6 @@ void UWeaponSystemComponent::ShootProjectile() const
         }
     }
 }
-
 
 void UWeaponSystemComponent::InitStartingWeapon()
 {
@@ -351,6 +353,9 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 	case EHolsterWeaponType::AlternativePrimary:
 		break;
 	}
+
+	if (OnTakeupArmsDelegate.IsBound())
+		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);
 }
 
 void UWeaponSystemComponent::HideWeapon()

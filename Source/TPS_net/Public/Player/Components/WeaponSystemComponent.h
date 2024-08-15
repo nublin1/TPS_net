@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Data/Weapon/WeaponData.h"
 #include "Engine/TimerHandle.h"
+#include "Weapon/WeaponBase.h"
 #include "WeaponSystemComponent.generated.h"
 
 
@@ -34,12 +35,23 @@ enum EWeaponTransitionType: uint8
 	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMagazine);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
+
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
 class TPS_NET_API UWeaponSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	UPROPERTY()
+	FOnShootSignature OnShootDelegate;
+	UPROPERTY()
+	FOnTakeupArmsSignature OnTakeupArmsDelegate;
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================	
