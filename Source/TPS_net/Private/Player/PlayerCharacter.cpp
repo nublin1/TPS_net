@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/Components/WeaponSystemComponent.h"
 #include "StateMachine/StateMachineComponent.h"
 #include "World/Ladders/ProceduralLadder.h"
 
@@ -22,22 +23,22 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 	AimingCameraPosition = FVector(100,60,60);
 
 	StateMachine_Movemant = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
-	//StateMachine_Movemant->RegisterComponent();
-	//this->AddInstanceComponent(StateMachine_Movemant);
 	StateMachine_Movemant->OnComponentCreated();
 	StateMachine_Movemant->SetIsReplicated(true);
 
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
-	//StateMachine_Aiming->RegisterComponent();
-	//this->AddInstanceComponent(StateMachine_Aiming);
-	StateMachine_Aiming->OnComponentCreated();	
-	
-	
+	StateMachine_Aiming->OnComponentCreated();
 }
 
 void APlayerCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
+	if (WeaponSystemComponentClass)
+	{
+		WeaponSystemComponent = NewObject<UWeaponSystemComponent>(this, WeaponSystemComponentClass);
+		WeaponSystemComponent->OnComponentCreated();
+		WeaponSystemComponent->SetIsReplicated(true);
+	}
 }
 
 void APlayerCharacter::BeginPlay()
@@ -171,5 +172,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 
 	DOREPLIFETIME(APlayerCharacter, StateMachine_Movemant);
+	DOREPLIFETIME(APlayerCharacter, WeaponSystemComponent);
 }
 

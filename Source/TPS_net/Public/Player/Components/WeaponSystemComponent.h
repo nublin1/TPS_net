@@ -90,7 +90,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandWeaponSocketName;
+	FName HandWeaponSocketName = "SocketWeapon";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* WeaponPistolHolster;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Blueprintable)

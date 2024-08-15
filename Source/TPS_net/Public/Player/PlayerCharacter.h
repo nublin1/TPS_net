@@ -54,6 +54,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UWeaponSystemComponent> WeaponSystemComponentClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	TObjectPtr<UWeaponSystemComponent> WeaponSystemComponent;
+	
 	//Ladder
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* LadderTarget;

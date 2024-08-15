@@ -134,7 +134,9 @@ bool UWeaponSystemComponent::CheckIsCanShoot()
 void UWeaponSystemComponent::Shoot() 
 {
 	if (!CurrentWeaponInHands)
-		return;	
+		return;
+
+	CurrentWeaponInHands->DecreaseRoundsInMagazine(); 
 
 	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
 	{
@@ -148,7 +150,7 @@ void UWeaponSystemComponent::Shoot()
 	}
 
 	AvailableShootsCount--;
-	CurrentWeaponInHands->DecreaseRoundsInMagazine(); 
+	
 	bIsReadyToNextShoot = false;
 	
 	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
@@ -316,10 +318,16 @@ void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInst
 void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 {
 	if (HandWeaponSocketName.IsNone())
+	{
+		UE_LOG(LogTemp, Error, TEXT("HandWeaponSocketName is not set. Cannot attach weapon to socket."));
 		return;
+	}
 
 	if (!SkeletalMeshComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("SkeletalMeshComponent is null. Cannot attach weapon to the skeletal mesh."));
 		return;
+	}
 
 	if (LastUsedHolsterType != Holster && CurrentWeaponInHands)
 	{
