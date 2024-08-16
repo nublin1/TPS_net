@@ -5,20 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "Interfaces/StateMachineInterface.h"
 #include "StateMachineComponent.generated.h"
 
-#pragma region Delegates
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateChangedSignature, const FGameplayTag&, NewStateTag);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInitStateSignature, const FGameplayTag&, StateTag);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FExitStateSignature, const FGameplayTag&, StateTag);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTickStateSinganture, float, DeltaTime, const FGameplayTag&, StateTag);
-#pragma endregion
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TPS_NET_API UStateMachineComponent : public UActorComponent
+class TPS_NET_API UStateMachineComponent : public UActorComponent, public IStateMachineInterface
 {
 	GENERATED_BODY()
 
@@ -41,15 +36,21 @@ public:
 	UStateMachineComponent();
 
 	UFUNCTION(BlueprintCallable)
-	bool SwitchState(FGameplayTag _StateTag);
+	virtual bool SwitchState(FGameplayTag _StateTag) override;
 	UFUNCTION()
-	void OnRep_CurrentStateTag();
+	virtual void OnRep_CurrentStateTag() override;
 
 	//Getters
+	// Implement the delegate accessors
+	virtual FInitStateSignature& OnInitState() override { return InitStateDelegate; }
+	virtual FExitStateSignature& OnExitState() override { return ExitStateDelegate; }
+	virtual FTickStateSinganture& OnTickState() override { return TickStateDelegate; }
+	virtual FStateChangedSignature& OnStateChanged() override { return StateChangedDelegate; }
+	
 	UFUNCTION()
-	FGameplayTag GetCurrentStateTag() const { return CurrentStateTag; }
+	virtual FGameplayTag GetCurrentStateTag() const override { return CurrentStateTag; }
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
-	FString GetCurrentStateTagName() const {return CurrentStateTag.ToString();}
+	virtual FString GetCurrentStateTagName() const override {return CurrentStateTag.ToString();}
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
@@ -61,12 +62,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDebug = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FGameplayTag> StateHistory;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int StateHistoryLenght = 5;
-
-
 	virtual void BeginPlay() override;
 
 public:
@@ -74,10 +69,9 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	bool bCanTickState = false;
-	void InitState() const;
-	void TickState(float DeltaTime) const;
-	void ExitState();
+	virtual void InitState() const override;
+	virtual void TickState(float DeltaTime) const override;
+	virtual void ExitState() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Data/Weapon/WeaponData.h"
 #include "Engine/TimerHandle.h"
+#include "Interfaces/StateMachineInterface.h"
 #include "Weapon/WeaponBase.h"
 #include "WeaponSystemComponent.generated.h"
 
@@ -35,11 +36,16 @@ enum EWeaponTransitionType: uint8
 	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
 };
 
+#pragma region Delegates
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMagazine);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
 
+#pragma endregion
+
+
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
-class TPS_NET_API UWeaponSystemComponent : public UActorComponent
+class TPS_NET_API UWeaponSystemComponent : public UActorComponent, public IStateMachineInterface
 {
 	GENERATED_BODY()
 
@@ -51,6 +57,16 @@ public:
 	FOnShootSignature OnShootDelegate;
 	UPROPERTY()
 	FOnTakeupArmsSignature OnTakeupArmsDelegate;
+	
+	UPROPERTY(BlueprintAssignable)
+	FInitStateSignature InitStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FExitStateSignature ExitStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FTickStateSinganture TickStateDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FStateChangedSignature StateChangedDelegate;
+
 	
 	//====================================================================
 	// FUNCTIONS
@@ -75,7 +91,26 @@ public:
 	UFUNCTION()
 	void ShootProjectile() const;
 
+	// State
+	UFUNCTION(BlueprintCallable)
+	virtual bool SwitchState(FGameplayTag _StateTag) override;
+	UFUNCTION()
+	virtual void OnRep_CurrentStateTag() override;
+	
+
 	//Getters
+	// Implement the delegate accessors
+	virtual FInitStateSignature& OnInitState() override { return InitStateDelegate; }
+	virtual FExitStateSignature& OnExitState() override { return ExitStateDelegate; }
+	virtual FTickStateSinganture& OnTickState() override { return TickStateDelegate; }
+	virtual FStateChangedSignature& OnStateChanged() override { return StateChangedDelegate; }
+
+	UFUNCTION()
+	virtual FGameplayTag GetCurrentStateTag() const override { return CurrentStateTag; }
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	virtual FString GetCurrentStateTagName() const override {return CurrentStateTag.ToString();}
+	
+	UFUNCTION()
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
 
 protected:
@@ -135,7 +170,14 @@ protected:
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
 
-
+	// State
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	FGameplayTag CurrentStateTag;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTag InitialStateTag;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDebug = false;
+	
 	
 	//====================================================================
 	// FUNCTIONS
@@ -161,4 +203,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+
+
+private:
+	virtual void InitState() const override;
+	virtual void TickState(float DeltaTime) const override;
+	virtual void ExitState() override;
 };

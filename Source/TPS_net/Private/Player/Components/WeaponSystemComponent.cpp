@@ -224,6 +224,45 @@ void UWeaponSystemComponent::ShootProjectile() const
     }
 }
 
+bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
+{
+	if (!_StateTag.MatchesTagExact(CurrentStateTag))
+	{
+		bCanTickState = false;
+		
+		ExitState();
+		CurrentStateTag = _StateTag;
+		InitState();
+
+		bCanTickState= true;
+		OnRep_CurrentStateTag();
+		if(StateChangedDelegate.IsBound())
+		{
+			
+			StateChangedDelegate.Broadcast(CurrentStateTag);
+		}
+		return true;
+	}
+	else
+	{
+		if (bDebug)
+		{
+			
+		}
+	}
+
+	return false;
+}
+
+void UWeaponSystemComponent::OnRep_CurrentStateTag()
+{
+	InitState();
+	if (StateChangedDelegate.IsBound())
+	{
+		StateChangedDelegate.Broadcast(CurrentStateTag);
+	}
+}
+
 void UWeaponSystemComponent::InitStartingWeapon()
 {
 	if (!WeaponTable)
@@ -409,4 +448,37 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	TArray<FLifetimeProperty> OutLifetimeProps;
 
 	DOREPLIFETIME(UWeaponSystemComponent, WeaponInteraction);
+	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
+}
+
+void UWeaponSystemComponent::InitState() const
+{
+	if (InitStateDelegate.IsBound())
+	{
+		InitStateDelegate.Broadcast(CurrentStateTag);
+	}
+}
+
+void UWeaponSystemComponent::TickState(float DeltaTime) const
+{
+	if (TickStateDelegate.IsBound())
+	{
+		TickStateDelegate.Broadcast(DeltaTime, CurrentStateTag);
+	}
+}
+
+void UWeaponSystemComponent::ExitState()
+{
+	if (StateHistory.Num()>= StateHistoryLenght)
+	{
+		StateHistory.RemoveAt(0);
+	}
+	StateHistory.Push(CurrentStateTag);
+	
+	if (ExitStateDelegate.IsBound())
+	{
+		ExitStateDelegate.Broadcast(CurrentStateTag);
+	}
+
+	
 }
