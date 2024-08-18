@@ -25,11 +25,15 @@ public:
 	// Getters
 	UFUNCTION()
 	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
+	UFUNCTION()
+	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	UPROPERTY(BlueprintReadWrite)
+	FVector2D MovementVector;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
 	bool IsAiming;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -64,6 +68,8 @@ protected:
 	AActor* LadderTarget;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsUpLadderEntry;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ladder")
+	bool LadderIsNextLeftArm;
 
 	//Timers
 	UPROPERTY()

@@ -108,7 +108,9 @@ public:
 	virtual FGameplayTag GetCurrentStateTag() const override { return CurrentStateTag; }
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
 	virtual FString GetCurrentStateTagName() const override {return CurrentStateTag.ToString();}
-	
+
+	UFUNCTION()
+	AMasterWeapon* GetCurrentWeaponInHands() {return CurrentWeaponInHands;}
 	UFUNCTION()
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
 
@@ -191,6 +193,10 @@ protected:
 	virtual void HideWeapon();
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsCanStartReload();
+
+	//
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void GetAPistol();
 	
 
 	UFUNCTION()
@@ -198,11 +204,13 @@ protected:
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 
 
 private:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	virtual void InitState() override;
 	virtual void TickState(float DeltaTime) const override;
 	virtual void ExitState() override;
