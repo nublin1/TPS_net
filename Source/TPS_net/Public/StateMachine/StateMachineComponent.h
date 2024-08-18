@@ -69,7 +69,7 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	virtual void InitState() const override;
+	virtual void InitState() override;
 	virtual void TickState(float DeltaTime) const override;
 	virtual void ExitState() override;
 

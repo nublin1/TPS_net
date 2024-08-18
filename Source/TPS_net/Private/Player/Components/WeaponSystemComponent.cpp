@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+#include "NativeGameplayTags.h"
 #include "Data/Weapon/WeaponData.h"
 #include "Weapon/WeaponBase.h"
 #include "Engine/EngineTypes.h"
@@ -54,6 +55,8 @@ void UWeaponSystemComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+
+	SwitchState(InitialStateTag);
 }
 
 bool UWeaponSystemComponent::bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const
@@ -109,8 +112,8 @@ void UWeaponSystemComponent::PreShoot()
 
 bool UWeaponSystemComponent::CheckIsCanShoot()
 {
-	if (WeaponInteraction != EWeaponInteraction::None)
-		return false;
+	//if (WeaponInteraction != EWeaponInteraction::None)
+		//return false;
 	
 	if (!CurrentWeaponInHands)
 		return false;
@@ -417,6 +420,26 @@ void UWeaponSystemComponent::HideWeapon()
 	                                        UWeaponHelper::ConvertHolsterTypeToText(
 		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
 	CurrentWeaponInHands = nullptr;
+
+	if (OnHideArmsDelegate.IsBound())
+		OnHideArmsDelegate.Broadcast();
+}
+
+bool UWeaponSystemComponent::IsCanStartReload()
+{
+	if (CurrentWeaponInHands == nullptr)
+		return false;
+	
+	if (bIsAnyWeaponInHands() == false)
+		return false;
+
+	if (CurrentWeaponInHands->GetRoundsInMagazine() >= CurrentWeaponInHands->GetMagazineSize())
+		return false;
+
+	if (!CurrentStateTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))))
+		return false;
+	
+	return true;
 }
 
 void UWeaponSystemComponent::SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag)
@@ -447,15 +470,24 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	TArray<FLifetimeProperty> OutLifetimeProps;
 
-	DOREPLIFETIME(UWeaponSystemComponent, WeaponInteraction);
+	
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
 }
 
-void UWeaponSystemComponent::InitState() const
+void UWeaponSystemComponent::InitState()
 {
 	if (InitStateDelegate.IsBound())
 	{
 		InitStateDelegate.Broadcast(CurrentStateTag);
+	}
+
+	if (CurrentStateTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload"))))
+	{
+		CurrentWeaponInHands->Reload();
+		if (OnCompleteReloadDelegate.IsBound())
+			OnCompleteReloadDelegate.Broadcast(CurrentWeaponInHands);
+		
+		SwitchState(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")));
 	}
 }
 

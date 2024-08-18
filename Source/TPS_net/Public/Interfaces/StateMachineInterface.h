@@ -50,7 +50,7 @@ protected:
 	int StateHistoryLenght = 5;
 
 	//
-	virtual void InitState() const = 0;
+	virtual void InitState() = 0;
 	virtual void TickState(float DeltaTime) const= 0;
 	virtual void ExitState()= 0;
 };

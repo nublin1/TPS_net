@@ -19,14 +19,6 @@ class UWeaponBase;
 enum class EWeaponType : uint8;
 class AMasterWeapon;
 
-UENUM(BlueprintType)
-enum class EWeaponInteraction : uint8
-{
-	None            UMETA(DisplayName = "None"),
-	Reload          UMETA(DisplayName = "Reload"),
-	Switch          UMETA(DisplayName = "Switch"),
-	Shoot			UMETA(DisplayName = "Shoot"),
-};
 
 UENUM(Blueprintable, BlueprintType)
 enum EWeaponTransitionType: uint8
@@ -40,6 +32,8 @@ enum EWeaponTransitionType: uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMagazine);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHideArmsSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
 
 #pragma endregion
 
@@ -57,6 +51,11 @@ public:
 	FOnShootSignature OnShootDelegate;
 	UPROPERTY()
 	FOnTakeupArmsSignature OnTakeupArmsDelegate;
+	UPROPERTY()
+	FOnHideArmsSignature OnHideArmsDelegate;
+	UPROPERTY()
+	FOnCompleteReloadSignature OnCompleteReloadDelegate;
+	
 	
 	UPROPERTY(BlueprintAssignable)
 	FInitStateSignature InitStateDelegate;
@@ -136,11 +135,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> StartingWeapons;
 
-	//
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
-	EWeaponInteraction WeaponInteraction = EWeaponInteraction::None;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//bool bIsSwitchingWeapon = false;
 
 	// Player Data
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -195,6 +189,9 @@ protected:
 	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsCanStartReload();
+	
 
 	UFUNCTION()
 	void SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag);
@@ -206,7 +203,7 @@ public:
 
 
 private:
-	virtual void InitState() const override;
+	virtual void InitState() override;
 	virtual void TickState(float DeltaTime) const override;
 	virtual void ExitState() override;
 };

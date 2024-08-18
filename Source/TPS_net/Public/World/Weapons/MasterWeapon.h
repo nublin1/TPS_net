@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Weapon/WeaponBase.h"
 #include "MasterWeapon.generated.h"
 
 class UWeaponBase;
@@ -34,6 +35,7 @@ public:
 	UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
 
 	uint16 GetRoundsInMagazine() const {return RoundsInMagazine;}
+	uint16 GetMagazineSize() const {return WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;}
 
 	//Setters
 	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }

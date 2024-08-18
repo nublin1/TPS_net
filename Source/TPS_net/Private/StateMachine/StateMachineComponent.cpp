@@ -48,7 +48,7 @@ bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 	
 }
 
-void UStateMachineComponent::InitState() const
+void UStateMachineComponent::InitState()
 {
 	if (InitStateDelegate.IsBound())
 	{

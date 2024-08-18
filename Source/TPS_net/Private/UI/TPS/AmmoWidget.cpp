@@ -19,6 +19,8 @@ void UAmmoWidget::NativeConstruct()
 
 void UAmmoWidget::SighUp()
 {
+	this->SetVisibility(ESlateVisibility::Collapsed);
+	
 	APawn* OwningPawn = GetOwningPlayer()->GetPawn();
 	if (!OwningPawn)
 	{
@@ -45,6 +47,10 @@ void UAmmoWidget::SighUp()
 
 	WeaponSystemComponent->OnShootDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	WeaponSystemComponent->OnTakeupArmsDelegate.AddDynamic(this, &UAmmoWidget::UAmmoWidget::RefreshWeaponDetails);
+	WeaponSystemComponent->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
+	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::CollapseWidget);
+
+	
 }
 
 void UAmmoWidget::SetCurrentAmmo(int32 RoundsInMagazine)
@@ -60,4 +66,11 @@ void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
 	
 	if(MaxMagazineAmmo)
 		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponInfo->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MagazineSize));
+
+	this->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UAmmoWidget::CollapseWidget()
+{
+	this->SetVisibility(ESlateVisibility::Collapsed);
 }

@@ -81,7 +81,7 @@ void AMasterWeapon::UpdateVisual() const
 
 void AMasterWeapon::Reload()
 {
-	RoundsInMagazine = 10;
+	RoundsInMagazine = WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;
 }
 
 void AMasterWeapon::Tick(float DeltaTime)

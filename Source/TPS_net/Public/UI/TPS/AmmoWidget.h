@@ -47,7 +47,8 @@ protected:
 
 	UFUNCTION()
 	void SetCurrentAmmo(int32 RoundsInMagazine);
-
 	UFUNCTION()
 	void RefreshWeaponDetails(AMasterWeapon* WeaponInfo);
+	UFUNCTION()
+	void CollapseWidget();
 };
