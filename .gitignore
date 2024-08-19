@@ -75,3 +75,9 @@ Plugins/**/Saved/*
 # Cache files for the editor to use
 DerivedDataCache/*
 Plugins/AdvancedSessions/AdvancedSessions/Intermediate/**
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build/Win64
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build/Win64/UnrealEditor
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build/Win64/UnrealEditor/Inc
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedSessions
+/Plugins/AdvancedSessions/AdvancedSessions/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedSessions/UHT

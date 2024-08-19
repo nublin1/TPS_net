@@ -54,16 +54,20 @@ void UPlayerAnimInstance::HoldWeapon()
 			IsLeftHandNeeded = false;
 		}
 
-		if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
-			|| WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")))
-		{
-			IsUseHoldWeaponPose = true;
-		}
+		
 	}
 
-	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
+	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
+		|| (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))
+			&& IsHoldWeapon
+			&& (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponType() != EWeaponType::Pistol
+				|| Character->GetStateMachine_Aiming()->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.Aiming")))))
 	{
 		IsUseHoldWeaponPose = true;
+	}
+	else
+	{
+		IsUseHoldWeaponPose = false;
 	}
 }
 
