@@ -38,6 +38,8 @@ protected:
 	FVector ReloadPosition;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool IsLeftHandNeeded = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool IsUseHoldWeaponPose = false;
 
 	//
 	UPROPERTY(BlueprintReadWrite, Category="References")

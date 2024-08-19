@@ -53,7 +53,17 @@ void UPlayerAnimInstance::HoldWeapon()
 		{
 			IsLeftHandNeeded = false;
 		}
-		
+
+		if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
+			|| WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")))
+		{
+			IsUseHoldWeaponPose = true;
+		}
+	}
+
+	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
+	{
+		IsUseHoldWeaponPose = true;
 	}
 }
 

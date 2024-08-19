@@ -66,7 +66,7 @@ void UOptionsMenuWidget::OnApplyButtonClicked()
 	{
 		auto MasterVolume = WBP_AudioSettings->GetOptionMasterVolum()->GetCurrentValue();
 		UserSettings->SetAudioQualityLevel(MasterVolume);
-
+		UserSettings->bUseDynamicResolution = true;
 		
 		//
 		UserSettings->SetFullscreenMode(EWindowMode::ConvertIntToWindowMode(WBP_GraphicsSettings->GetOption_WindowMode()->GetCurrentIndex()));
