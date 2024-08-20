@@ -53,6 +53,9 @@ public:
 	virtual FString GetCurrentStateTagName() const override {return CurrentStateTag.ToString();}
 
 protected:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FGameplayTag CurrentStateTag;
 	
@@ -62,6 +65,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDebug = false;
 
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	virtual void BeginPlay() override;
 
 public:

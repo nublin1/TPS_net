@@ -7,6 +7,7 @@
 #include "Interfaces/PCChatInterface.h"
 #include "PlayerController_TPS.generated.h"
 
+class UTPSMenuWidget;
 class UChatOnScreen;
 class UGameCoreHUDLayout;
 class UMainHUDLayout;
@@ -47,6 +48,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UChatOnScreen* ChatOnScreen;
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UTPSMenuWidget> TPSMenuWidget;
 
 	
 	//====================================================================
