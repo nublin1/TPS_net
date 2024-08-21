@@ -93,8 +93,21 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	
 }
 
+void UMultiplayerGameInstance::DestroyCurrentSession()
+{
+	if (SessionInterface.IsValid())
+	{		
+		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(PendingServerName);
+		if (ExistingSession != nullptr)
+		{
+			OnDestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
+			SessionInterface->DestroySession(PendingServerName);
+		}
+	}
+}
+
 bool UMultiplayerGameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
-	const FOnlineSessionSearchResult& SearchResult)
+                                           const FOnlineSessionSearchResult& SearchResult)
 {
 	bool bSuccessful = false;
 	const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
@@ -136,6 +149,8 @@ void UMultiplayerGameInstance::OnCreateSessionComplete(FName SessionName, bool b
 
 void UMultiplayerGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OnDestroySessionComplete %s, %d"), *SessionName.ToString(), bWasSuccessful));
+	
 	if (SessionInterface)
 	{
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
@@ -223,20 +238,6 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 	else
 	{
 		if(GEngine)GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("No OnlineSubsytem found!"));
-	}
-}
-
-void UMultiplayerGameInstance::DestroyCurrentSession()
-{
-	if (SessionInterface.IsValid())
-	{
-		
-		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(PendingServerName);
-		if (ExistingSession != nullptr)
-		{
-			OnDestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
-			SessionInterface->DestroySession(PendingServerName);
-		}
 	}
 }
 

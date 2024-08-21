@@ -21,11 +21,14 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
+	void CloseWidget();
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	// Widgets
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> ResumeButton ;
 
@@ -34,6 +37,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UUBUIWButton> QuitButton ;
+
+	
 	
 	//====================================================================
 	// FUNCTIONS

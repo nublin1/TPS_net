@@ -61,8 +61,11 @@ public:
 	void CreateServer(FName ServerName, int32 MaxPlayers, bool bIsLAN);
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void FindSessions(bool bIsLAN, bool bIsPresence);
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void DestroyCurrentSession();
 	
 	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
+	
 
 	// Getters
 	TSharedPtr<class FOnlineSessionSearch> GetSessionSearch() {return SessionSearch;}
@@ -98,7 +101,7 @@ protected:
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	void StartCreateSession(bool bIsLAN);
-	void DestroyCurrentSession();
+	
 	void RegisterPlayer(FName SessionName, const FUniqueNetIdRepl& PlayerID, bool bWasInvited = false);
 	
 	void OnFindSessionsComplete(bool bWasSuccessful);

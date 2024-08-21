@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "ChatMessage.generated.h"
 
+class UMultiLineEditableTextBox;
 class UTextBlock;
 /**
  * 
