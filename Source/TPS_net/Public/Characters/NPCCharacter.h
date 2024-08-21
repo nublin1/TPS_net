@@ -13,6 +13,9 @@ class TPS_NET_API ANPCCharacter : public ACharacter, public IIHealthInterface
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	// Sets default values for this character's properties
 	ANPCCharacter();
 
@@ -24,9 +27,15 @@ public:
 	virtual float GetMaxHealth() const override { return MaxHealth; }
 
 protected:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	virtual void BeginPlay() override;
 
 public:
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

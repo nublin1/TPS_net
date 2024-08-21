@@ -18,6 +18,20 @@ void ANPCCharacter::BeginPlay()
 	
 }
 
+// Called every frame
+void ANPCCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called to bind functionality to input
+void ANPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+}
+
 void ANPCCharacter::TakeDamage(float DamageAmount)
 {
 	Health -= DamageAmount;
@@ -37,18 +51,4 @@ void ANPCCharacter::TakeDamage(float DamageAmount)
 }
 
 
-
-// Called every frame
-void ANPCCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void ANPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
 
