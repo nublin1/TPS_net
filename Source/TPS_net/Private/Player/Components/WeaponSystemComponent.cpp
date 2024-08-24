@@ -115,14 +115,13 @@ bool UWeaponSystemComponent::CheckIsCanShoot()
 	//if (WeaponInteraction != EWeaponInteraction::None)
 		//return false;
 	
-	if (!CurrentWeaponInHands)
+	if (!CurrentWeaponInHands
+		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
+		|| CurrentWeaponInHands->GetRoundsInMagazine()<=0)
 		return false;
 	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
-		return false;
-	
-	if(CurrentWeaponInHands->GetRoundsInMagazine()<=0)
-		return false;
+		return false;		
 	
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
 	{			

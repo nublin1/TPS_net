@@ -52,10 +52,10 @@ void UPlayerAnimInstance::HoldWeapon()
 		else
 		{
 			IsLeftHandNeeded = false;
-		}
-
-		
+		}		
 	}
+
+	
 
 	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 		|| (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))
@@ -69,6 +69,10 @@ void UPlayerAnimInstance::HoldWeapon()
 	{
 		IsUseHoldWeaponPose = false;
 	}
+
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("GetCurrentStateTag %s"), *WeaponSysComponent->GetCurrentStateTag().ToString() ));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("IsHoldWeapon %s"), IsHoldWeapon ? TEXT("true") : TEXT("false")));
+
 }
 
 void UPlayerAnimInstance::CleanWeaponData()

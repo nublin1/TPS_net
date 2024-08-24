@@ -14,6 +14,12 @@ class TPS_NET_API ANPCCharacter : public ACharacter, public IIHealthInterface
 
 public:
 	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FOnKilledSignature OnKilledDelegate;
+	
+	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	// Sets default values for this character's properties
@@ -22,8 +28,12 @@ public:
 	UFUNCTION()
 	virtual void TakeDamage(float DamageAmount) override;
 
+	UFUNCTION()
+	virtual FOnKilledSignature& GetOnKilledSignature() override {return OnKilledDelegate;}
+	
+	UFUNCTION()
 	virtual float GetHealth() const override { return Health; }
-
+	UFUNCTION()
 	virtual float GetMaxHealth() const override { return MaxHealth; }
 
 protected:

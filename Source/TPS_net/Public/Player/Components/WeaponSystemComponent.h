@@ -99,6 +99,7 @@ public:
 
 	//Getters
 	// Implement the delegate accessors
+	
 	virtual FInitStateSignature& OnInitState() override { return InitStateDelegate; }
 	virtual FExitStateSignature& OnExitState() override { return ExitStateDelegate; }
 	virtual FTickStateSinganture& OnTickState() override { return TickStateDelegate; }

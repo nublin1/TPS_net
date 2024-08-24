@@ -18,8 +18,6 @@ UCustomBulletProjectile::UCustomBulletProjectile()
 void UCustomBulletProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 	
 }
 

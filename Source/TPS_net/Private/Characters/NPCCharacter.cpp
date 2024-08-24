@@ -43,11 +43,22 @@ void ANPCCharacter::TakeDamage(float DamageAmount)
 	auto result = FindComponentByClass<USkeletalMeshComponent>();
 	if (result)
 	{
-		UE_LOG(LogTemp, Error, TEXT("HIT"));
 		result->SetSimulatePhysics(true);
-
+		result->SetCollisionProfileName(TEXT("Ragdoll"), true);
 		FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	//auto AControlller = this->GetController();
+	//AAIController* myAIEnemyController;
+
+	if (OnKilledDelegate.IsBound())
+		OnKilledDelegate.Broadcast(this);
+
+	FTimerHandle UnusedHandle;
+	GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
+	{
+		Destroy();
+	}, 5.0f, false);
 }
 
 
