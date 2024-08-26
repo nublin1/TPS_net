@@ -16,8 +16,7 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
-	FOnKilledSignature OnKilledDelegate;
+
 	
 	//====================================================================
 	// FUNCTIONS
@@ -26,21 +25,23 @@ public:
 	ANPCCharacter();
 
 	UFUNCTION()
-	virtual void TakeDamage(float DamageAmount) override;
-
-	UFUNCTION()
-	virtual FOnKilledSignature& GetOnKilledSignature() override {return OnKilledDelegate;}
-	
-	UFUNCTION()
-	virtual float GetHealth() const override { return Health; }
-	UFUNCTION()
-	virtual float GetMaxHealth() const override { return MaxHealth; }
+	virtual class UHealthComponent* GetHealthComponent() const override {return HealthComponent;}
 
 protected:
 	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UHealthComponent> HealthComponentClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UHealthComponent> HealthComponent;
+	
+	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
+	
 
 public:
 	//====================================================================
