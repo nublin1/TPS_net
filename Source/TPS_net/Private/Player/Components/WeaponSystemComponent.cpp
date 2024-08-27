@@ -200,18 +200,21 @@ void UWeaponSystemComponent::ShootProjectile() const
         			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
         			if (BulletProjectileComponent)
         			{
-        				BulletProjectileComponent->SetStartBulletSpeed(CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity);
+        				
+        				FAmmoCharacteristics NewAmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
+        				NewAmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
 
         				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
         				{
         					UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
-        					BulletProjectileComponent->SetBulletMass(1);
-        				}
-        				else
-        				{
-        					BulletProjectileComponent->SetBulletMass(AmmoCharacteristics.BulletMass);
+        					NewAmmoCharacteristics.BulletMass = 1.0f;
+        					//BulletProjectileComponent->SetBulletMass(1);
         				}
 
+        				auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
+        				NewBulletAmmoData->SetAmmoCharacteristics(NewAmmoCharacteristics);
+        				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
+        				
         				if (OnShootDelegate.IsBound())
         					OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
         			}

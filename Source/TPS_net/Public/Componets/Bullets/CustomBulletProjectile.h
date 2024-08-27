@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Data/Weapon/AmmoData.h"
+#include "Weapon/AmmoBase.h"
 #include "CustomBulletProjectile.generated.h"
 
 #pragma region Delegates
+class UAmmoBase;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, HitResult);
 
 #pragma endregion
@@ -25,40 +28,22 @@ public:
 	UCustomBulletProjectile();
 
 	//Getters
-	float GetStartBulletSpeed() const { return StartBulletSpeed; }	
-	float GetBulletLifeTime() const { return BulletLifeTime; }	
-	float GetBulletMass() const { return BulletMass; }
-	float GetCrossSection() const { return CrossSection; }
+	UAmmoBase* GetAmmoData() {return BulletAmmoData;}
+	
+	float GetStartBulletSpeed() const { return BulletAmmoData->GetAmmoCharacteristics().StartBulletSpeed; }	
+	float GetBulletLifeTime() const { return BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime; }	
+	float GetBulletMass() const { return BulletAmmoData->GetAmmoCharacteristics().BulletMass; }
+	float GetCrossSection() const { return BulletAmmoData->GetAmmoCharacteristics().CrossSection; }
 
-	//Setters
-	void SetStartBulletSpeed(const float _StartBulletSpeed) { this->StartBulletSpeed = _StartBulletSpeed; }
-	void SetBulletMass(const float _BulletMass) { this->BulletMass = _BulletMass; }
-	void SetBulletLifeTime(const float _BulletLifeTime) { this->BulletLifeTime = _BulletLifeTime; }
-	void SetCrossSection(const float _CrossSection) { this->CrossSection = _CrossSection; }
+	// Setters
+	void SetAmmoData( TObjectPtr<UAmmoBase> NewAmmoData ) {BulletAmmoData = NewAmmoData;}
 
 protected:
 	UPROPERTY(BlueprintAssignable)
 	FHitSignature HitResultDelegate;
-	
-	//Bullet Params
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="Velocity"))
-	FVector Velocity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="StartBulletSpeed"))
-	float StartBulletSpeed = 75000; // cm/s
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="BulletLifeTime"))
-	float BulletLifeTime = 8;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="BulletMass"))
-	float BulletMass = 0.116f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Params", meta=(DisplayName="CrossSection"))
-	float CrossSection = 0.49f;
 
-	// Behaviour
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsCanRicochet"))
-	bool IsCanRicochet = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsEffectOfGravity"))
-	bool IsEffectOfGravity = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta=(DisplayName="IsEffectOfDragForce"))
-	bool IsEffectOfDragForce = true;
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAmmoBase> BulletAmmoData;
 
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

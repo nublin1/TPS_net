@@ -24,17 +24,27 @@ public:
 	virtual ~UAmmoBase() override;
 
 	// getters
-	FAmmoCharacteristics GetAmmoCharacteristics() const {return AmmoCharacteristics;}
+	UFUNCTION(BlueprintCallable)
+	FAmmoCharacteristics GetAmmoCharacteristics()  {return AmmoCharacteristics;}
+	FBulletBehaviour GetAmmoBehaviour() const {return AmmoBehaviour;}
 
 	// Setters
 	void SetAmmoCharacteristics(const FAmmoCharacteristics& NewAmmoCharacteristics) {AmmoCharacteristics = NewAmmoCharacteristics;}
+	void SetAmmoBehaviour(const FBulletBehaviour& NewAmmoBehaviour) {AmmoBehaviour = NewAmmoBehaviour;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetAmmoVelocity(FVector NewValue) {AmmoCharacteristics.Velocity = NewValue;}
+	
 protected:
 
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
 	FAmmoCharacteristics AmmoCharacteristics;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
+	FBulletBehaviour AmmoBehaviour;
 	
 	//====================================================================
 	// FUNCTIONS
