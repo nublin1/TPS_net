@@ -27,6 +27,9 @@ public:
 	// Sets default values for this component's properties
 	UCustomBulletProjectile();
 
+	UFUNCTION()
+	void Init();
+
 	//Getters
 	UAmmoBase* GetAmmoData() {return BulletAmmoData;}
 	
@@ -42,11 +45,15 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FHitSignature HitResultDelegate;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn="true"))
 	TObjectPtr<UAmmoBase> BulletAmmoData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsInitialized = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Velocity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector StartPosition;
 
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

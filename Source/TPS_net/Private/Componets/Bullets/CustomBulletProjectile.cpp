@@ -13,6 +13,22 @@ UCustomBulletProjectile::UCustomBulletProjectile()
 	// ...
 }
 
+void UCustomBulletProjectile::Init()
+{
+	if (!BulletAmmoData)
+		return;
+	
+	Velocity =  GetOwner()->GetActorForwardVector() * BulletAmmoData->GetAmmoCharacteristics().StartBulletSpeed;
+	StartPosition = GetOwner()->GetActorLocation();
+	IsInitialized = true;
+
+	FTimerHandle UsedHandle;
+	GetOwner()->GetWorldTimerManager().SetTimer(UsedHandle, [this]()
+	{
+		GetOwner()->Destroy();
+	}, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
+}
+
 
 // Called when the game starts
 void UCustomBulletProjectile::BeginPlay()

@@ -11,16 +11,16 @@ struct TPS_NET_API FAmmoCharacteristics
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties")
 	FName Name = "";
 
-	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Bullet Properties")
 	float Damage = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties")
 	float BulletMass = 0.100f; // kilograms
 
-	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties")
 	uint8 NumberOfShotsPerRound = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties", meta = (DisplayName = "StartBulletSpeed"))
@@ -38,7 +38,7 @@ struct FBulletBehaviour
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta = (DisplayName = "IsCanRicochet"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta = (DisplayName = "IsCanRicochet", ToolTip = "Don't work when is true."))
 	bool IsCanRicochet = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behaviour", meta = (DisplayName = "IsEffectOfGravity"))

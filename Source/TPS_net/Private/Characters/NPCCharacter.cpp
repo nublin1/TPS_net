@@ -7,17 +7,17 @@
 #include "Player/Components/HealthComponent.h"
 
 // Sets default values
-ANPCCharacter::ANPCCharacter()
-{	
+ANPCCharacter::ANPCCharacter(): HealthComponentBlueprint(nullptr)
+{
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 void ANPCCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
-	if (HealthComponentClass)
+	if (HealthComponentBlueprint)
 	{
-		HealthComponent = NewObject<UHealthComponent>(this, HealthComponentClass);
+		HealthComponent =  NewObject<UHealthComponent>(this, HealthComponentBlueprint->GeneratedClass);
 		HealthComponent->OnComponentCreated();
 		HealthComponent->SetIsReplicated(true);
 	}

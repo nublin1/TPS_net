@@ -23,6 +23,7 @@ public:
 		const FRotator& SpawnRotation,
 		const FActorSpawnParameters& SpawnParameters) override
 	{
+		//return World->SpawnActorDeferred<AActor>(BulletBlueprint->GeneratedClass, FTransform::Identity);
 		return World->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
 	}
 };

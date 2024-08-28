@@ -42,6 +42,7 @@ void AMasterWeapon::PostInitializeComponents()
 			WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
 			WeaponBaseRef->SetWeaponType(WData->HolsterType);
 
+			Reload();
 			UpdateVisual();
 		}			
 	}

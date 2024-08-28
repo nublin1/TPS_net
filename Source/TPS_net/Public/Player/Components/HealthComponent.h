@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledSignature, AActor*, KilledA
 
 #pragma endregion
 
-UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -42,10 +42,10 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY()
-	float Health;
-	UPROPERTY()
-	float MaxHealth;
+	UPROPERTY(BlueprintReadWrite)
+	float Health = 100.0f;
+	UPROPERTY(BlueprintReadWrite)
+	float MaxHealth = 100.0f;
 	
 	//====================================================================
 	// FUNCTIONS

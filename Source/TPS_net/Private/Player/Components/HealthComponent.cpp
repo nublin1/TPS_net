@@ -33,27 +33,31 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 	if (Health < 0.0f)
 	{
 		Health = 0.0f;
+
+		auto result = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		if (result)
+		{
+			result->SetSimulatePhysics(true);
+			result->SetCollisionProfileName(TEXT("Ragdoll"), true);
+			GetOwner()->FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
+		//auto AControlller = this->GetController();
+		//AAIController* myAIEnemyController;
+
+		if (OnKilledDelegate.IsBound())
+			OnKilledDelegate.Broadcast(GetOwner());
+
+		FTimerHandle UnusedHandle;
+		GetOwner()->GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
+		{
+			GetOwner()->Destroy();
+		}, 5.0f, false);
 	}
 
-	auto result = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-	if (result)
-	{
-		result->SetSimulatePhysics(true);
-		result->SetCollisionProfileName(TEXT("Ragdoll"), true);
-		GetOwner()->FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+	
 
-	//auto AControlller = this->GetController();
-	//AAIController* myAIEnemyController;
-
-	if (OnKilledDelegate.IsBound())
-		OnKilledDelegate.Broadcast(GetOwner());
-
-	FTimerHandle UnusedHandle;
-	GetOwner()->GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
-	{
-		GetOwner()->Destroy();
-	}, 5.0f, false);
+	
 }
 
 

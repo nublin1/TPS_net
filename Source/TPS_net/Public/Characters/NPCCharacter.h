@@ -32,9 +32,9 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UHealthComponent> HealthComponentClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UHealthComponent> HealthComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBlueprint* HealthComponentBlueprint;
 	
 	//====================================================================
 	// FUNCTIONS

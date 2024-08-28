@@ -174,11 +174,11 @@ void UWeaponSystemComponent::ShootProjectile() const
     UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
     if (BulletBlueprint)
     {
-        FActorSpawnParameters SpawnParameters;
-    	SpawnParameters.bDeferConstruction = false;
-    	
-        FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
-        FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset;
+		if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found"))
+			return;
+		}
 
     	auto AmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
         for (int i = 0; i < AmmoCharacteristics.NumberOfShotsPerRound; i++)
@@ -192,6 +192,10 @@ void UWeaponSystemComponent::ShootProjectile() const
                 0.0f                                        // Roll (не нужно для разброса)
             );
 
+        	FActorSpawnParameters SpawnParameters;
+    	
+        	FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
+        	FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset;
             SpawnRotation += RandomSpread;        	
 
         	auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
@@ -207,7 +211,7 @@ void UWeaponSystemComponent::ShootProjectile() const
         			
         			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
         			if (BulletProjectileComponent)
-        			{
+        			{        				
         				// Ammo
         				AmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
         				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
@@ -218,7 +222,7 @@ void UWeaponSystemComponent::ShootProjectile() const
         				}
         				
         				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
-        	
+        				BulletProjectileComponent->Init();
         			}        			
         			//SpawnedActorRef->FinishSpawning(FTransform(SpawnRotation, SpawnLocation));
         			SpawnedActorRef->SetActorTickEnabled(true);
@@ -342,6 +346,7 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform,
 	                                                              SpawnParameters);
 	Weapon->SetWeaponBaseRef(NewWeaponData);
+	Weapon->Reload();
 	Weapon->UpdateVisual();
 
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
@@ -526,5 +531,4 @@ void UWeaponSystemComponent::ExitState()
 		ExitStateDelegate.Broadcast(CurrentStateTag);
 	}
 
-	
 }
