@@ -3,6 +3,8 @@
 
 #include "Weapon/Bullets/BaseBulletActor.h"
 
+#include "Componets/Bullets/CustomBulletProjectile.h"
+
 // Sets default values
 ABaseBulletActor::ABaseBulletActor()
 {
@@ -10,6 +12,8 @@ ABaseBulletActor::ABaseBulletActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 }
+
+
 
 // Called when the game starts or when spawned
 void ABaseBulletActor::BeginPlay()

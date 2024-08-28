@@ -6,14 +6,16 @@
 #include "GameFramework/Actor.h"
 #include "BaseBulletActor.generated.h"
 
+class UAmmoBase;
+
 UCLASS()
 class TPS_NET_API ABaseBulletActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
-	ABaseBulletActor();
+	
+	ABaseBulletActor();	
 
 protected:
 	// Called when the game starts or when spawned

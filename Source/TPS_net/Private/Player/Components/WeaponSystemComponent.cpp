@@ -175,6 +175,8 @@ void UWeaponSystemComponent::ShootProjectile() const
     if (BulletBlueprint)
     {
         FActorSpawnParameters SpawnParameters;
+    	SpawnParameters.bDeferConstruction = false;
+    	
         FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
         FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset;
 
@@ -190,34 +192,40 @@ void UWeaponSystemComponent::ShootProjectile() const
                 0.0f                                        // Roll (не нужно для разброса)
             );
 
-            SpawnRotation += RandomSpread;
+            SpawnRotation += RandomSpread;        	
+
+        	auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
+        	NewBulletAmmoData->SetAmmoCharacteristics(AmmoCharacteristics);
 
         	if (ProjectileFactory)
         	{
         		AActor* SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
         		if (SpawnedActorRef)
         		{
+        			SpawnedActorRef->SetActorTickEnabled(false);
+        			SpawnedActorRef->SetActorHiddenInGame(true);
+        			
         			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
         			if (BulletProjectileComponent)
         			{
-        				
-        				FAmmoCharacteristics NewAmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
-        				NewAmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
-
+        				// Ammo
+        				AmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
         				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
         				{
         					UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
-        					NewAmmoCharacteristics.BulletMass = 1.0f;
+        					AmmoCharacteristics.BulletMass = 1.0f;
         					//BulletProjectileComponent->SetBulletMass(1);
         				}
-
-        				auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
-        				NewBulletAmmoData->SetAmmoCharacteristics(NewAmmoCharacteristics);
-        				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
         				
-        				if (OnShootDelegate.IsBound())
-        					OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
-        			}
+        				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
+        	
+        			}        			
+        			//SpawnedActorRef->FinishSpawning(FTransform(SpawnRotation, SpawnLocation));
+        			SpawnedActorRef->SetActorTickEnabled(true);
+        			SpawnedActorRef->SetActorHiddenInGame(false);
+
+        			if (OnShootDelegate.IsBound())
+        				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
         		}
         	}
         	else
@@ -406,6 +414,10 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 		break;
 	}
 
+	/*UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
+	if (BulletProjectileComponent)
+	{}*/
+	
 	if (OnTakeupArmsDelegate.IsBound())
 		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);
 }

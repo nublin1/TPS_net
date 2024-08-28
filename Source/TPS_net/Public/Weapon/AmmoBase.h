@@ -31,9 +31,6 @@ public:
 	// Setters
 	void SetAmmoCharacteristics(const FAmmoCharacteristics& NewAmmoCharacteristics) {AmmoCharacteristics = NewAmmoCharacteristics;}
 	void SetAmmoBehaviour(const FBulletBehaviour& NewAmmoBehaviour) {AmmoBehaviour = NewAmmoBehaviour;}
-
-	UFUNCTION(BlueprintCallable)
-	void SetAmmoVelocity(FVector NewValue) {AmmoCharacteristics.Velocity = NewValue;}
 	
 protected:
 

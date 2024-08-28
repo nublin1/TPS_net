@@ -17,15 +17,12 @@ struct TPS_NET_API FAmmoCharacteristics
 	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
 	float Damage = 10.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties")
 	float BulletMass = 0.100f; // kilograms
 
 	UPROPERTY(EditAnywhere, Category = "Bullet Properties")
 	uint8 NumberOfShotsPerRound = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties", meta = (DisplayName = "Velocity"))
-	FVector Velocity;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet Properties", meta = (DisplayName = "StartBulletSpeed"))
 	float StartBulletSpeed = 75000; // cm/s
 

@@ -45,6 +45,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAmmoBase> BulletAmmoData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Velocity;
+
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FHitResult OutHit;
