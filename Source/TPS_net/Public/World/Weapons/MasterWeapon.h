@@ -28,13 +28,19 @@ public:
 	void DecreaseRoundsInMagazine() {RoundsInMagazine--;}
 	UFUNCTION(BlueprintCallable)
 	void Reload();
+	UFUNCTION(BlueprintCallable)
+	virtual void SwitchFireMode();
 
 	//Getters
 	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
 	UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
 
+	UFUNCTION(BlueprintCallable)
+	EFireMode GetSelectedFireMode() {return SelectedFireMode;}
+	UFUNCTION()
 	uint16 GetRoundsInMagazine() const {return RoundsInMagazine;}
+	UFUNCTION()
 	uint16 GetMagazineSize() const {return WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;}
 
 	//Setters
@@ -48,14 +54,18 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStaticMeshComponent* TargetPoint;
 
+	//
+	UPROPERTY()
+	uint16 RoundsInMagazine = 10;
+	UPROPERTY()
+	EFireMode SelectedFireMode = EFireMode::None;
+
+	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* WeaponTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName StartingWeapon;
-
-	//
-	uint16 RoundsInMagazine = 10;
-
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================

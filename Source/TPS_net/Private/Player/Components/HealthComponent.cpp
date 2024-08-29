@@ -54,12 +54,4 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 			GetOwner()->Destroy();
 		}, 5.0f, false);
 	}
-
-	
-
-	
 }
-
-
-
-

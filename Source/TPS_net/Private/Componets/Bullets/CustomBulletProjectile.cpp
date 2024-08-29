@@ -25,7 +25,8 @@ void UCustomBulletProjectile::Init()
 	FTimerHandle UsedHandle;
 	GetOwner()->GetWorldTimerManager().SetTimer(UsedHandle, [this]()
 	{
-		GetOwner()->Destroy();
+		if(GetOwner())
+			GetOwner()->Destroy();
 	}, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
 }
 

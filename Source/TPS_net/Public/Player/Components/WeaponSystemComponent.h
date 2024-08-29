@@ -166,6 +166,8 @@ protected:
 	uint8 AvailableShootsCount = 0;
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
+	UPROPERTY()
+	TObjectPtr<UBlueprint> BulletBlueprint;
 
 	// State
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
@@ -192,6 +194,7 @@ protected:
 	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
+	
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsCanStartReload();
 

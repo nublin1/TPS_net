@@ -37,9 +37,10 @@ enum class EBulletMode
 UENUM(BlueprintType)
 enum class EFireMode : uint8
 {
-	Single        UMETA(DisplayName = "Single"),
-	Burst         UMETA(DisplayName = "Burst"),
-	Full_Auto     UMETA(DisplayName = "Full_Auto"),
+	None        = 0   UMETA(DisplayName = "None"),
+	Single      = 1   UMETA(DisplayName = "Single"),
+	Burst       = 2   UMETA(DisplayName = "Burst"),
+	Full_Auto   = 3   UMETA(DisplayName = "Full_Auto"),
 };
 
 USTRUCT()
@@ -116,6 +117,8 @@ class TPS_NET_API UWeaponHelper : public UObject
 	GENERATED_BODY()
 	
 public:
+	
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	static FName ConvertHolsterTypeToText(const EWeaponType HolsterType)
 	{

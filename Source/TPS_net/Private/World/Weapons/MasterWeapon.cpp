@@ -42,37 +42,39 @@ void AMasterWeapon::PostInitializeComponents()
 			WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
 			WeaponBaseRef->SetWeaponType(WData->HolsterType);
 
+			SelectedFireMode = WData->CharacteristicsOfTheWeapon.AvailableShootingModes[0];
 			Reload();
 			UpdateVisual();
-		}			
+		}
 	}
 }
 
 void AMasterWeapon::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 }
 
 void AMasterWeapon::UpdateVisual() const
 {
 	if (!WeaponBaseRef)
 		return;
-	
+
 	SkeletalMeshWeapon->SetSkeletalMesh(WeaponBaseRef->GetWeaponAssetData().SkeletalMesh);
 
 	if (WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint)
-		SkeletalMeshWeapon->SetAnimInstanceClass(WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetAnimBlueprintGeneratedClass());
+		SkeletalMeshWeapon->SetAnimInstanceClass(
+			WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetAnimBlueprintGeneratedClass());
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"), *WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetBlueprintClass()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"),
+		       *WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetBlueprintClass()->GetName());
 	}
-	
+
 	//FString AnimClassName = TEXT("WeaponAnimClass_C");		
 	//UClass* AnimInstanceClass = FindObject<UClass>(ANY_PACKAGE, *AnimClassName);
 	//if (AnimInstanceClass)
-	{		
+	{
 		//SkeletalMeshWeapon->SetAnimInstanceClass(AnimInstanceClass);
-		
 	}
 	//else
 	{
@@ -85,10 +87,30 @@ void AMasterWeapon::Reload()
 	RoundsInMagazine = WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;
 }
 
+void AMasterWeapon::SwitchFireMode()
+{
+	if (SelectedFireMode == EFireMode::None)
+	{
+		SelectedFireMode = WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes[0];
+		return;
+	}
+
+	int32 CurrentIndex = WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes.IndexOfByKey(SelectedFireMode);
+	CurrentIndex++;
+	if (CurrentIndex < WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes.Num())
+	{
+		SelectedFireMode = WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes[CurrentIndex];
+	}
+	else
+		SelectedFireMode = WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes[0];
+	
+	
+	
+	
+	UE_LOG(LogTemp, Log, TEXT("Fire Mode: %d"), static_cast<int>(SelectedFireMode));
+}
+
 void AMasterWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-
-
-

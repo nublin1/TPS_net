@@ -94,7 +94,7 @@ void UWeaponSystemComponent::PreShoot()
 	if (!CurrentWeaponInHands)
 		return;
 	
-	EFireMode FireMode = EFireMode::Single;
+	EFireMode FireMode =CurrentWeaponInHands->GetSelectedFireMode();
 	switch (FireMode)
 	{
 	case EFireMode::Single:
@@ -106,6 +106,8 @@ void UWeaponSystemComponent::PreShoot()
 		break;
 	case EFireMode::Full_Auto:
 		AvailableShootsCount = CurrentWeaponInHands->GetRoundsInMagazine();
+		break;
+	default:
 		break;
 	}
 }
@@ -159,8 +161,6 @@ void UWeaponSystemComponent::Shoot()
 	{
 		bIsReadyToNextShoot = true;
 	},  60.0f / CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().RPM , false);
-	
-	
 }
 
 void UWeaponSystemComponent::ShootProjectile() const
@@ -171,7 +171,7 @@ void UWeaponSystemComponent::ShootProjectile() const
     auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
         CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
         ERelativeTransformSpace::RTS_World);
-    UBlueprint* BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+  
     if (BulletBlueprint)
     {
 		if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
@@ -203,14 +203,13 @@ void UWeaponSystemComponent::ShootProjectile() const
 
         	if (ProjectileFactory)
         	{
-        		AActor* SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
+        		auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
         		if (SpawnedActorRef)
         		{
         			SpawnedActorRef->SetActorTickEnabled(false);
         			SpawnedActorRef->SetActorHiddenInGame(true);
-        			
-        			UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
-        			if (BulletProjectileComponent)
+
+			        if (const TObjectPtr<UCustomBulletProjectile> BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>())
         			{        				
         				// Ammo
         				AmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
@@ -224,7 +223,6 @@ void UWeaponSystemComponent::ShootProjectile() const
         				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
         				BulletProjectileComponent->Init();
         			}        			
-        			//SpawnedActorRef->FinishSpawning(FTransform(SpawnRotation, SpawnLocation));
         			SpawnedActorRef->SetActorTickEnabled(true);
         			SpawnedActorRef->SetActorHiddenInGame(false);
 
@@ -346,6 +344,7 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform,
 	                                                              SpawnParameters);
 	Weapon->SetWeaponBaseRef(NewWeaponData);
+	Weapon->SwitchFireMode();
 	Weapon->Reload();
 	Weapon->UpdateVisual();
 
@@ -419,9 +418,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 		break;
 	}
 
-	/*UCustomBulletProjectile* BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>();
-	if (BulletProjectileComponent)
-	{}*/
+	BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
 	
 	if (OnTakeupArmsDelegate.IsBound())
 		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);

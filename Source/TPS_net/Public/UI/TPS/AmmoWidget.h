@@ -35,6 +35,8 @@ protected:
 	TObjectPtr<UTextBlock> CurrentAmmo;
 	UPROPERTY()
 	TObjectPtr<UTextBlock> MaxMagazineAmmo;
+	UPROPERTY(meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FireMode;
 	
 	//====================================================================
 	// FUNCTIONS
