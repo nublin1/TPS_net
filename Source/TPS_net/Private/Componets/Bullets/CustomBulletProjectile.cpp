@@ -21,9 +21,8 @@ void UCustomBulletProjectile::Init()
 	Velocity =  GetOwner()->GetActorForwardVector() * BulletAmmoData->GetAmmoCharacteristics().StartBulletSpeed;
 	StartPosition = GetOwner()->GetActorLocation();
 	IsInitialized = true;
-
-	FTimerHandle UsedHandle;
-	GetOwner()->GetWorldTimerManager().SetTimer(UsedHandle, [this]()
+	
+	GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, [this]()
 	{
 		if(GetOwner())
 			GetOwner()->Destroy();

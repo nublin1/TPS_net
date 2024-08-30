@@ -233,8 +233,7 @@ void UWeaponSystemComponent::ShootProjectile() const
         	else
         	{
         		UE_LOG(LogTemp, Error, TEXT("ProjectileFactory is not valid."));
-        	}
-            
+        	}            
         }
     }
 }

@@ -6,6 +6,7 @@
 #include "Components/TextBlock.h"
 #include "Player/Components/WeaponSystemComponent.h"
 #include "Player/Interfaces/WeaponSystemInterface.h"
+#include "Utilities/GeneralUtils.h"
 #include "World/Weapons/MasterWeapon.h"
 
 UAmmoWidget::UAmmoWidget()
@@ -53,6 +54,12 @@ void UAmmoWidget::SighUp()
 	
 }
 
+void UAmmoWidget::SetFireMode(EFireMode newFireMode)
+{
+	auto StringValue = UGeneralUtils::EnumToString(TEXT("EFireMode"), newFireMode, TEXT("None"));
+	FireMode->SetText(FText::FromString(StringValue));
+}
+
 void UAmmoWidget::SetCurrentAmmo(int32 RoundsInMagazine)
 {
 	if (CurrentAmmo)
@@ -61,11 +68,13 @@ void UAmmoWidget::SetCurrentAmmo(int32 RoundsInMagazine)
 
 void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
 {
-	if (CurrentAmmo)
-		CurrentAmmo->SetText(FText::AsNumber(WeaponInfo->GetRoundsInMagazine()));
+	SetCurrentAmmo(WeaponInfo->GetRoundsInMagazine());
 	
 	if(MaxMagazineAmmo)
 		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponInfo->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MagazineSize));
+	
+	if (FireMode)
+		SetFireMode(WeaponInfo->GetSelectedFireMode());
 
 	this->SetVisibility(ESlateVisibility::Visible);
 }

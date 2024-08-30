@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "AmmoWidget.generated.h"
 
+enum class EFireMode : uint8;
 class AMasterWeapon;
 class UWeaponBase;
 class UTextBlock;
@@ -26,6 +27,9 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	UAmmoWidget();
+
+	UFUNCTION()
+	virtual void SetFireMode(EFireMode newFireMode);
 
 protected:
 	//====================================================================
