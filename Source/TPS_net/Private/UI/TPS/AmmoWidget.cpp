@@ -50,7 +50,7 @@ void UAmmoWidget::SighUp()
 	WeaponSystemComponent->OnTakeupArmsDelegate.AddDynamic(this, &UAmmoWidget::UAmmoWidget::RefreshWeaponDetails);
 	WeaponSystemComponent->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
 	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::CollapseWidget);
-
+	WeaponSystemComponent->OnSwitchFireModeDelegate.AddDynamic(this, &UAmmoWidget::SetFireMode);
 	
 }
 

@@ -34,6 +34,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMa
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHideArmsSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchFireMode, EFireMode, FireMode);
 
 #pragma endregion
 
@@ -47,14 +48,17 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY()
+	// Delegates
+	UPROPERTY(BlueprintAssignable)
 	FOnShootSignature OnShootDelegate;
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FOnTakeupArmsSignature OnTakeupArmsDelegate;
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FOnHideArmsSignature OnHideArmsDelegate;
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FOnCompleteReloadSignature OnCompleteReloadDelegate;
+	UPROPERTY(BlueprintCallable)
+	FOnSwitchFireMode OnSwitchFireModeDelegate;
 	
 	
 	UPROPERTY(BlueprintAssignable)
