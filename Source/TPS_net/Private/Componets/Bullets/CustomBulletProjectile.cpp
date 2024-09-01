@@ -22,19 +22,15 @@ void UCustomBulletProjectile::Init()
 	StartPosition = GetOwner()->GetActorLocation();
 	IsInitialized = true;
 	
-	GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, [this]()
-	{
-		if(GetOwner())
-			GetOwner()->Destroy();
-	}, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
+	if(GetOwner()){
+		GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, this, &UCustomBulletProjectile::Destroy, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
+	    
+	}
 }
 
-
-// Called when the game starts
 void UCustomBulletProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UCustomBulletProjectile::HitDetected()
@@ -45,12 +41,19 @@ void UCustomBulletProjectile::HitDetected()
 	}
 }
 
+void UCustomBulletProjectile::Destroy()
+{
+	if (GetOwner()->GetWorldTimerManager().IsTimerActive(DestroyHandle))
+		GetOwner()->GetWorldTimerManager().ClearTimer(DestroyHandle);
+
+	if(GetOwner())
+		GetOwner()->K2_DestroyActor();
+}
+
 
 // Called every frame
 void UCustomBulletProjectile::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 

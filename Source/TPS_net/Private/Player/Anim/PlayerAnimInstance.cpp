@@ -45,7 +45,7 @@ void UPlayerAnimInstance::HoldWeapon()
 		ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(FName("AmmoEject"), RTS_Actor).GetLocation();
 
 		if (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponType() != EWeaponType::Pistol
-			&& Character->GetStateMachine_Aiming()->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.Aiming")))
+			&& WeaponSysComponent->GetCurrentStateTag() !=  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
 		{
 			IsLeftHandNeeded = true;
 		}
@@ -83,5 +83,4 @@ void UPlayerAnimInstance::CleanWeaponData()
 void UPlayerAnimInstance::UpdateWeaponData(AMasterWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
-	
 }

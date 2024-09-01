@@ -80,7 +80,7 @@ public:
 	bool bIsAnyWeaponInHands() const;
 	
 	UFUNCTION()
-	bool bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const; // true mean available
+	bool bCheckHolsterAvaibility(EWeaponType BeingCheckedType, int NumberOfHolster = 0) const; // true mean available
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateSocketsTransform();
@@ -134,8 +134,12 @@ protected:
 	FName HandWeaponSocketName = "SocketWeapon";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* WeaponPistolHolster;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int NumberOfWeaponPrimaryHolsters = 5;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Blueprintable)
-	AMasterWeapon* WeaponPrimaryHolster;
+	TArray<TObjectPtr<AMasterWeapon>> WeaponPrimaryHolster;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* WeaponTable;
@@ -191,11 +195,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
 	UFUNCTION(BlueprintCallable)
-	virtual void AddWeapon(UWeaponBase* NewWeaponData);
+	virtual AMasterWeapon* AddWeapon(UWeaponBase* NewWeaponData);
 	UFUNCTION(BlueprintCallable)
-	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData);
+	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot = 0);
 	UFUNCTION(BlueprintCallable)
-	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None);
+	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
 	
@@ -203,10 +207,6 @@ protected:
 	virtual bool IsCanStartReload();
 
 	//
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	void GetAPistol();
-	
-
 	UFUNCTION()
 	void SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag);
 

@@ -20,8 +20,7 @@
 #include "StateMachine/StateMachineComponent.h"
 
 // Sets default values for this component's properties
-UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),
-                                                  WeaponPrimaryHolster(nullptr),
+UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),                                                 
                                                   WeaponTable(nullptr),
                                                   PlayerCamera(nullptr), SkeletalMeshComponent(nullptr)
 {
@@ -38,6 +37,8 @@ void UWeaponSystemComponent::PostInitProperties()
 	Super::PostInitProperties();
 
 	ProjectileFactory = NewObject<UBulletProjectileFactory>();
+
+	WeaponPrimaryHolster.SetNum(NumberOfWeaponPrimaryHolsters);
 
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)
@@ -59,12 +60,12 @@ void UWeaponSystemComponent::BeginPlay()
 	SwitchState(InitialStateTag);
 }
 
-bool UWeaponSystemComponent::bCheckHolsterAvaibility(EWeaponType BeingCheckedType) const
+bool UWeaponSystemComponent::bCheckHolsterAvaibility(EWeaponType BeingCheckedType, int NumberOfHolster) const
 {
 	switch (BeingCheckedType)
 	{
 	case EWeaponType::Primary:
-		return WeaponPrimaryHolster == nullptr;
+		return WeaponPrimaryHolster[NumberOfHolster] == nullptr;
 
 	case EWeaponType::Pistol:
 		return WeaponPistolHolster == nullptr;
@@ -291,7 +292,26 @@ void UWeaponSystemComponent::InitStartingWeapon()
 		if (!WData)
 			continue;
 
-		if (bCheckHolsterAvaibility(WData->HolsterType) == false)
+		bool bIsFreeSlotFound = false;
+		int NumberSlot = 0;
+		if (WData->HolsterType == EWeaponType::Primary)
+		{
+			for(int i = 0; i < NumberOfWeaponPrimaryHolsters; i++)
+			{
+				if (bCheckHolsterAvaibility(WData->HolsterType, i) == true)
+				{
+					bIsFreeSlotFound = true;
+					NumberSlot = i;
+					break;
+				}
+			}
+		}
+		else if (WData->HolsterType ==EWeaponType::Pistol)
+		{
+			bIsFreeSlotFound = bCheckHolsterAvaibility (WData->HolsterType);
+		}
+		
+		if (bIsFreeSlotFound == false)
 			continue;
 
 		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
@@ -326,11 +346,12 @@ void UWeaponSystemComponent::InitStartingWeapon()
 			}
 		}
 
-		AddWeapon(WeaponBase);
+		AMasterWeapon* Weapon = AddWeapon(WeaponBase);
+		AssignWeaponToHolsterSlot(Weapon, NumberSlot);
 	}
 }
 
-void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
+AMasterWeapon* UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 {
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = GetOwner();
@@ -352,15 +373,15 @@ void UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
 	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetWeaponType()));
 
-	AssignWeaponToHolsterSlot(Weapon, NewWeaponData);
+	return Weapon;
 }
 
-void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, UWeaponBase* NewWeaponData)
+void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot)
 {
-	switch (NewWeaponData->GetWeaponType())
+	switch (WeaponInstance->GetWeaponBaseRef()->GetWeaponType())
 	{
 	case EWeaponType::Primary:
-		WeaponPrimaryHolster = WeaponInstance;
+		WeaponPrimaryHolster[NumberSlot] = WeaponInstance;		
 		break;
 	case EWeaponType::Pistol:
 		WeaponPistolHolster = WeaponInstance;
@@ -370,7 +391,7 @@ void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInst
 	}
 }
 
-void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
+void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOfHolster)
 {
 	if (HandWeaponSocketName.IsNone())
 	{
@@ -406,10 +427,10 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster)
 		break;
 
 	case EHolsterWeaponType::Primary:
-		if (!WeaponPrimaryHolster || WeaponPrimaryHolster == CurrentWeaponInHands)
+		if (!WeaponPrimaryHolster[NumberOfHolster] || WeaponPrimaryHolster[NumberOfHolster] == CurrentWeaponInHands)
 			break;
-		WeaponPrimaryHolster->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
-		CurrentWeaponInHands = WeaponPrimaryHolster;
+		WeaponPrimaryHolster[NumberOfHolster]->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
+		CurrentWeaponInHands = WeaponPrimaryHolster[NumberOfHolster];
 		LastUsedHolsterType = Holster;
 		break;
 

@@ -68,6 +68,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void HitDetected();
 
+	UFUNCTION(BlueprintCallable)
+	virtual void Destroy();
+
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
