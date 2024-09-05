@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Director/Director.h"
+#include "DefenceGame/Director/Director.h"
 
 // Sets default values
 ADirector::ADirector()
