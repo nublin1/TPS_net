@@ -5,11 +5,11 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 
-UUBTTaskNode::UUBTTaskNode()
+UBTTask_SetTargetFromPoints::UBTTask_SetTargetFromPoints()
 {
 }
 
-EBTNodeResult::Type UUBTTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_SetTargetFromPoints::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (BlackboardComp)

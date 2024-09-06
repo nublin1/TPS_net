@@ -17,29 +17,18 @@ public:
 	TArray<FVector> Points;
 };
 
-UCLASS()
-class UPointArrayStructKey : public UBlackboardKeyType_Object
-{
-	GENERATED_BODY()
 
-public:
-	UPointArrayStructKey(const FObjectInitializer& ObjectInitializer)
-		: Super(ObjectInitializer)
-	{
-		BaseClass = UPointArrayObject::StaticClass();
-	}
-};
 
 /**
  * 
  */
-UCLASS()
-class TPS_NET_API UUBTTaskNode : public UBTTaskNode
+UCLASS(Blueprintable)
+class TPS_NET_API UBTTask_SetTargetFromPoints  : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UUBTTaskNode();
+	UBTTask_SetTargetFromPoints();
 	
 protected:
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
