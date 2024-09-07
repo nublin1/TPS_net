@@ -9,7 +9,7 @@ public class TPS_net : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI" ,"GameplayTags",
-			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule"
+			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule", "GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

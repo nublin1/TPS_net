@@ -23,12 +23,12 @@ public:
  * 
  */
 UCLASS(Blueprintable)
-class TPS_NET_API UBTTask_SetTargetFromPoints  : public UBTTaskNode
+class TPS_NET_API UBTTask_SetTargetPoint  : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UBTTask_SetTargetFromPoints();
+	UBTTask_SetTargetPoint();
 	
 protected:
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
