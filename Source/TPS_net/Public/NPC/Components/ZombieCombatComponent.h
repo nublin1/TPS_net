@@ -3,52 +3,58 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/IHealthInterface.h"
-#include "NPCCharacter.generated.h"
+#include "Components/ActorComponent.h"
+#include "ZombieCombatComponent.generated.h"
 
-UCLASS()
-class TPS_NET_API ANPCCharacter : public ACharacter, public IIHealthInterface
+
+class UBoxComponent;
+
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class TPS_NET_API UZombieCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:
+public:	
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 
-	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	// Sets default values for this character's properties
-	ANPCCharacter();
+	UZombieCombatComponent();
 
+	//Getters
 	UFUNCTION()
-	virtual class UHealthComponent* GetHealthComponent() const override {return HealthComponent;}
+	TArray<FVector> GetPoints() {return Points;}
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UHealthComponent> HealthComponent;
+	TSubclassOf<AActor> TargetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBlueprint* HealthComponentBlueprint;
-	
+	TObjectPtr<AActor> TargetObject;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FVector> Points;
+	UPROPERTY()
+	float PointOffset = 50;
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void RerunConstructionScripts() override;
-	virtual void PreInitializeComponents() override;
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
-	
 
-public:
-	//====================================================================
-	// FUNCTIONS
-	//====================================================================
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void DrawPoints(float PointSize = 10.0f, FColor PointColor = FColor::Red);
+	UFUNCTION(BlueprintCallable)
+	TArray<FVector> CalculateRectanglePointsFromCollision(int32 PointsPerSide);
+
+public:	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+		
 };

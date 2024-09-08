@@ -12,9 +12,15 @@ ANPCCharacter::ANPCCharacter(): HealthComponentBlueprint(nullptr)
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void ANPCCharacter::PostInitProperties()
+void ANPCCharacter::RerunConstructionScripts()
 {
-	Super::PostInitProperties();
+	Super::RerunConstructionScripts();
+	
+}
+
+void ANPCCharacter::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
 	if (HealthComponentBlueprint)
 	{
 		HealthComponent =  NewObject<UHealthComponent>(this, HealthComponentBlueprint->GeneratedClass);
@@ -25,6 +31,12 @@ void ANPCCharacter::PostInitProperties()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("HealthComponentClass is not set! HealthComponent could not be created."));
 	}
+}
+
+void ANPCCharacter::PostInitProperties()
+{
+	Super::PostInitProperties();
+	
 }
 
 void ANPCCharacter::BeginPlay()

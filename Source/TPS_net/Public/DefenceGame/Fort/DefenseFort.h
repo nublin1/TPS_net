@@ -23,27 +23,17 @@ public:
 	//====================================================================
 	ADefenseFort();
 
-	//Getters
-	UFUNCTION()
-	TArray<FVector> GetPoints() {return Points;}
-	
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FVector> Points;
-	UPROPERTY()
-	float PointOffset = 50;
+	
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-
-	void DrawPoints(float PointSize = 10.0f, FColor PointColor = FColor::Red);
-	TArray<FVector> CalculateRectanglePointsFromCollision(UBoxComponent* BoxComponent, FVector TargetLocation, int32 PointsPerSide);
 
 public:	
 	// Called every frame
