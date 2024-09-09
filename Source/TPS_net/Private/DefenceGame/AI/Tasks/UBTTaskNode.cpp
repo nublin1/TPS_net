@@ -16,6 +16,9 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 	if (BlackboardComp)
 	{
 		UPointArrayObject* PointsArray =  Cast<UPointArrayObject>(BlackboardComp->GetValueAsObject(TEXT("PointArrayStruct")));
+		if (!PointsArray)
+			return EBTNodeResult::Failed;
+		
 		int32 NumPoints = PointsArray->Points.Num();
 		if (NumPoints > 0)
 		{

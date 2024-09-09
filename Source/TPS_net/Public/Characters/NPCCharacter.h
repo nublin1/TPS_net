@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/IHealthInterface.h"
+#include "NPC/Inrfaces/ZombieCombatInterface.h"
 #include "NPCCharacter.generated.h"
 
 UCLASS()
-class TPS_NET_API ANPCCharacter : public ACharacter, public IIHealthInterface
+class TPS_NET_API ANPCCharacter : public ACharacter, public IIHealthInterface, public IZombieCombatInterface
 {
 	GENERATED_BODY()
 
@@ -26,6 +27,8 @@ public:
 
 	UFUNCTION()
 	virtual class UHealthComponent* GetHealthComponent() const override {return HealthComponent;}
+	UFUNCTION()
+	virtual class UZombieCombatComponent* GetZombieCombatComponent() const override {return ZombieCombatComponent;}
 
 protected:
 	//====================================================================
@@ -35,6 +38,8 @@ protected:
 	TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBlueprint* HealthComponentBlueprint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UZombieCombatComponent* ZombieCombatComponent;
 	
 	//====================================================================
 	// FUNCTIONS

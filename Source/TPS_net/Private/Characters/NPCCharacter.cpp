@@ -3,6 +3,7 @@
 
 #include "Characters/NPCCharacter.h"
 
+#include "Characters/NPC/Components/ZombieCombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Player/Components/HealthComponent.h"
 
@@ -10,6 +11,10 @@
 ANPCCharacter::ANPCCharacter(): HealthComponentBlueprint(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	ZombieCombatComponent = CreateDefaultSubobject<UZombieCombatComponent>(TEXT("ZombieCombatComponent"));
+	ZombieCombatComponent->OnComponentCreated();
+	ZombieCombatComponent->SetIsReplicated(true);
 }
 
 void ANPCCharacter::RerunConstructionScripts()
@@ -31,6 +36,8 @@ void ANPCCharacter::PreInitializeComponents()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("HealthComponentClass is not set! HealthComponent could not be created."));
 	}
+
+	
 }
 
 void ANPCCharacter::PostInitProperties()

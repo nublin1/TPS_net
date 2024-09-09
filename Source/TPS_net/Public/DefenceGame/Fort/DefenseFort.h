@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/IHealthInterface.h"
 #include "DefenseFort.generated.h"
 
 class UBoxComponent;
 
 UCLASS()
-class TPS_NET_API ADefenseFort : public AActor
+class TPS_NET_API ADefenseFort : public AActor, public IIHealthInterface
 {
 	GENERATED_BODY()
 	
@@ -23,6 +24,10 @@ public:
 	//====================================================================
 	ADefenseFort();
 
+	//
+	UFUNCTION()
+	virtual class UHealthComponent* GetHealthComponent() const override;
+	
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -32,7 +37,7 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void PostInitializeComponents() override;
+	virtual void PreInitializeComponents() override;
 	virtual void BeginPlay() override;
 
 public:	

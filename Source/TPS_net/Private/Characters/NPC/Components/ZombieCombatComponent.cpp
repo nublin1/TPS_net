@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "NPC/Components/ZombieCombatComponent.h"
+#include "Characters/NPC/Components/ZombieCombatComponent.h"
 
 #include "Components/BoxComponent.h"
+#include "Interfaces/IHealthInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UZombieCombatComponent::UZombieCombatComponent(): TargetClass(nullptr)
@@ -105,12 +107,74 @@ TArray<FVector> UZombieCombatComponent::CalculateRectanglePointsFromCollision( i
 	return Points;
 }
 
+bool UZombieCombatComponent::HitDetect()
+{
+	
+	AActor* Owner = GetOwner();
+	if (!Owner) return false;
+	
+	USkeletalMeshComponent* SkeletalMesh = Owner->FindComponentByClass<USkeletalMeshComponent>();
+	if (!SkeletalMesh) return false;
+	
+	FVector SocketLocation = SkeletalMesh->GetSocketLocation(FName("hand_r"));
+	FVector Start = SocketLocation;
+	FVector End = Start;  // Можно варьировать в зависимости от того, как нужно двигать линию
+	float Radius = 35.0f;
+	
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+	
+	TArray<FHitResult> OutHits;
 
-// Called every frame
-void UZombieCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+	// Multi Sphere Trace
+	bool bHit = GetWorld()->SweepMultiByObjectType(
+		OutHits,
+		Start,
+		End,
+		FQuat::Identity,
+		FCollisionObjectQueryParams(ObjectTypes),
+		FCollisionShape::MakeSphere(Radius),
+		Params
+	);
+	
+	DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Red, false, 1.0f);
+	if (bHit)
+	{
+		DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Green, false, 1.0f);
+	}
+	
+	for (FHitResult Hit : OutHits)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && !AlreadyHitTargets.Contains(HitActor))
+		{
+			AlreadyHitTargets.Add(HitActor, false);
+			//UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *Hit.GetActor()->GetName());
+		}
+	}
+
+	if (AlreadyHitTargets.Num() <= 0)
+	{
+		return false;
+	}
+	for (auto& Hit : AlreadyHitTargets)
+	{	
+		if (Hit.Key->Implements<UIHealthInterface>() && Hit.Value == false)
+		{
+			UGameplayStatics::ApplyDamage(Hit.Key, 10.0f, nullptr, nullptr, nullptr);
+			Hit.Value = true;
+		}
+	}
+
+	return true;
+}
+
+void UZombieCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 

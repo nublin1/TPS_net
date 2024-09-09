@@ -42,6 +42,9 @@ protected:
 	UPROPERTY()
 	float PointOffset = 50;
 
+	UPROPERTY(BlueprintReadOnly)
+	TMap<AActor*, bool> AlreadyHitTargets;
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
@@ -52,9 +55,17 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	TArray<FVector> CalculateRectanglePointsFromCollision(int32 PointsPerSide);
 
+	UFUNCTION( BlueprintCallable)
+	bool HitDetect();
+
+	UFUNCTION(BlueprintCallable)
+	void ClearAlreadyHitTargets() {AlreadyHitTargets.Empty();}
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+
+private:
+	
 };
