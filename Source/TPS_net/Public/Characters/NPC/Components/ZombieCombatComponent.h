@@ -45,6 +45,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TMap<AActor*, bool> AlreadyHitTargets;
 
+	UPROPERTY(EditAnywhere)
+	bool IsDebug = false;
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================

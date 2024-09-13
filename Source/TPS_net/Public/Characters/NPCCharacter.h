@@ -25,8 +25,8 @@ public:
 	// Sets default values for this character's properties
 	ANPCCharacter();
 
-	UFUNCTION()
-	virtual class UHealthComponent* GetHealthComponent() const override {return HealthComponent;}
+	UFUNCTION(BlueprintCallable)
+	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
 	virtual class UZombieCombatComponent* GetZombieCombatComponent() const override {return ZombieCombatComponent;}
 
@@ -34,10 +34,8 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UHealthComponent> HealthComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBlueprint* HealthComponentBlueprint;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UZombieCombatComponent* ZombieCombatComponent;
 	

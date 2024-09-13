@@ -54,4 +54,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FVector2D GetViewportScaledSize();
+	
 };

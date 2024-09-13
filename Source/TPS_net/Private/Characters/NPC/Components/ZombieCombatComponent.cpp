@@ -109,7 +109,6 @@ TArray<FVector> UZombieCombatComponent::CalculateRectanglePointsFromCollision( i
 
 bool UZombieCombatComponent::HitDetect()
 {
-	
 	AActor* Owner = GetOwner();
 	if (!Owner) return false;
 	
@@ -118,7 +117,7 @@ bool UZombieCombatComponent::HitDetect()
 	
 	FVector SocketLocation = SkeletalMesh->GetSocketLocation(FName("hand_r"));
 	FVector Start = SocketLocation;
-	FVector End = Start;  // Можно варьировать в зависимости от того, как нужно двигать линию
+	FVector End = Start;  
 	float Radius = 35.0f;
 	
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -139,11 +138,14 @@ bool UZombieCombatComponent::HitDetect()
 		FCollisionShape::MakeSphere(Radius),
 		Params
 	);
-	
-	DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Red, false, 1.0f);
-	if (bHit)
+
+	if (IsDebug)
 	{
-		DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Green, false, 1.0f);
+		DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Red, false, 1.0f);
+		if (bHit)
+		{
+			DrawDebugSphere(GetWorld(), Start, Radius, 12, FColor::Green, false, 1.0f);
+		}
 	}
 	
 	for (FHitResult Hit : OutHits)

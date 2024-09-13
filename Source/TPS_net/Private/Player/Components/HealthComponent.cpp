@@ -3,6 +3,7 @@
 #include "Player/Components/HealthComponent.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Interfaces/IHealthInterface.h"
 
 class UCapsuleComponent;
 // Sets default values for this component's properties
@@ -11,16 +12,10 @@ UHealthComponent::UHealthComponent(): Health(100), MaxHealth(100)
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	
 }
 
-UHealthComponent::UHealthComponent(float Health, float MaxHealth): Health(Health),
-																	 MaxHealth(MaxHealth)
-{
-}
 
-// Called when the game starts
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -41,9 +36,7 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 			result->SetCollisionProfileName(TEXT("Ragdoll"), true);
 			GetOwner()->FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
-
-		//auto AControlller = this->GetController();
-		//AAIController* myAIEnemyController;
+		
 
 		if (OnKilledDelegate.IsBound())
 			OnKilledDelegate.Broadcast(GetOwner());

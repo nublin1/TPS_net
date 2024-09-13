@@ -8,42 +8,41 @@
 #include "Player/Components/HealthComponent.h"
 
 // Sets default values
-ANPCCharacter::ANPCCharacter(): HealthComponentBlueprint(nullptr)
+ANPCCharacter::ANPCCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	ZombieCombatComponent = CreateDefaultSubobject<UZombieCombatComponent>(TEXT("ZombieCombatComponent"));
 	ZombieCombatComponent->OnComponentCreated();
 	ZombieCombatComponent->SetIsReplicated(true);
+
+	if (Implements<UIHealthInterface>())
+	{
+		auto HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+		HealthComponent->OnComponentCreated();
+		HealthComponent->SetIsReplicated(true);
+	}
+	
+}
+
+UHealthComponent* ANPCCharacter::GetHealthComponent() const
+{
+	return FindComponentByClass<UHealthComponent>();
 }
 
 void ANPCCharacter::RerunConstructionScripts()
 {
 	Super::RerunConstructionScripts();
-	
 }
 
 void ANPCCharacter::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
-	if (HealthComponentBlueprint)
-	{
-		HealthComponent =  NewObject<UHealthComponent>(this, HealthComponentBlueprint->GeneratedClass);
-		HealthComponent->OnComponentCreated();
-		HealthComponent->SetIsReplicated(true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HealthComponentClass is not set! HealthComponent could not be created."));
-	}
-
-	
 }
 
 void ANPCCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
-	
 }
 
 void ANPCCharacter::BeginPlay()
@@ -62,4 +61,3 @@ void ANPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-

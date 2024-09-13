@@ -28,13 +28,11 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	UHealthComponent();
-	UHealthComponent(float Health, float MaxHealth);
 
 	UFUNCTION(BlueprintCallable )
 	virtual void TakeDamage(float DamageAmount);
 
 	// Getters
-
 	virtual float GetHealth() const {return Health;}
 	virtual float GetMaxHealth() const {return MaxHealth;}
 
@@ -43,6 +41,8 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(BlueprintReadWrite)
+	bool IsImmortal = false;
+	UPROPERTY(BlueprintReadWrite)
 	float Health = 100.0f;
 	UPROPERTY(BlueprintReadWrite)
 	float MaxHealth = 100.0f;
@@ -50,5 +50,6 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	
 	virtual void BeginPlay() override;
 };

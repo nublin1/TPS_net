@@ -22,17 +22,15 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 		int32 NumPoints = PointsArray->Points.Num();
 		if (NumPoints > 0)
 		{
-			// Генерируем случайный индекс
+			// Random
 			int32 RandomIndex = FMath::RandRange(0, NumPoints - 1);
 
 			FVector TargetLocation = PointsArray->Points[RandomIndex];
-			BlackboardComp->SetValueAsVector(TEXT("TargetLocation"), TargetLocation);
-
-			// Логируем текущие значения
-			UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
-
-			// Устанавливаем случайный индекс в Blackboard
+			BlackboardComp->SetValueAsVector(KeyTargetLocation.SelectedKeyName, TargetLocation);
+						
 			BlackboardComp->SetValueAsInt(TEXT("CurrentPointIndex"), RandomIndex);
+			// 
+			//UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
 
 			return EBTNodeResult::Succeeded;
 		}

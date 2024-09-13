@@ -25,7 +25,7 @@ public:
 	ADefenseFort();
 
 	//
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	
 protected:
