@@ -28,13 +28,19 @@ class TPS_NET_API UBTTask_SetTargetPoint  : public UBTTaskNode
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FBlackboardKeySelector AITarget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FBlackboardKeySelector PointArrayStruct;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector KeyTargetLocation;
 
 	
 	UBTTask_SetTargetPoint();
 	
 protected:
+	UPROPERTY()
+	TObjectPtr<UPointArrayObject> PointsArray;
 	
 	//
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

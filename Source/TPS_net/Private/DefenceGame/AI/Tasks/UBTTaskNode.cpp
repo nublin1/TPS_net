@@ -5,36 +5,62 @@
 
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/BoxComponent.h"
+#include "Utilities/PointHelper.h"
+
+class UPointHelper;
 
 UBTTask_SetTargetPoint::UBTTask_SetTargetPoint()
 {
+	PointsArray = NewObject<UPointArrayObject>();
 }
 
 EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (BlackboardComp)
+	if (!BlackboardComp)
 	{
-		UPointArrayObject* PointsArray =  Cast<UPointArrayObject>(BlackboardComp->GetValueAsObject(TEXT("PointArrayStruct")));
-		if (!PointsArray)
-			return EBTNodeResult::Failed;
-		
-		int32 NumPoints = PointsArray->Points.Num();
-		if (NumPoints > 0)
-		{
-			// Random
-			int32 RandomIndex = FMath::RandRange(0, NumPoints - 1);
-
-			FVector TargetLocation = PointsArray->Points[RandomIndex];
-			BlackboardComp->SetValueAsVector(KeyTargetLocation.SelectedKeyName, TargetLocation);
-						
-			BlackboardComp->SetValueAsInt(TEXT("CurrentPointIndex"), RandomIndex);
-			// 
-			//UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
-
-			return EBTNodeResult::Succeeded;
-		}
+		return EBTNodeResult::Failed;
 	}
-	return EBTNodeResult::Failed;
-	//return Super::ExecuteTask(OwnerComp, NodeMemory);
+
+	UObject* TargetObject = BlackboardComp->GetValueAsObject(AITarget.SelectedKeyName);
+	AActor* Target = Cast<AActor>(TargetObject);
+
+	if (!Target)
+		return EBTNodeResult::Failed;
+
+	if (Target->GetRootComponent()->Mobility == EComponentMobility::Movable)
+	{
+		BlackboardComp->SetValueAsVector(KeyTargetLocation.SelectedKeyName, Target->GetActorLocation());
+		return EBTNodeResult::Succeeded;
+	}
+
+	UBoxComponent* BoxCollision = Target->FindComponentByClass<UBoxComponent>();
+
+	auto Points = UPointHelper::CalculateRectanglePointsFromCollision(Target, BoxCollision? PointGenerationPattern_Box : PointGenerationPattern_Circle);
+	if (Points.Num() <= 0)
+		return EBTNodeResult::Failed;
+
+	if (PointsArray == nullptr)
+		PointsArray = NewObject<UPointArrayObject>();
+	
+	PointsArray->Points = Points;
+	
+	
+	BlackboardComp->SetValueAsObject(PointArrayStruct.SelectedKeyName, PointsArray);
+	UPointHelper::DrawPoints(GetWorld(),PointsArray->Points);
+	
+	// Random
+	int32 RandomIndex = FMath::RandRange(0, Points.Num()-1);
+
+	FVector TargetLocation = PointsArray->Points[RandomIndex];
+	BlackboardComp->SetValueAsVector(KeyTargetLocation.SelectedKeyName, TargetLocation);
+
+	BlackboardComp->SetValueAsInt(TEXT("CurrentPointIndex"), RandomIndex);
+	// 
+	//UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
+
+	return EBTNodeResult::Succeeded;
 }
+
+//return Super::ExecuteTask(OwnerComp, NodeMemory);

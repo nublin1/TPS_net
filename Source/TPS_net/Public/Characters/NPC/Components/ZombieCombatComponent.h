@@ -31,8 +31,8 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> TargetClass;
+	UPROPERTY(BlueprintReadOnly)
+	float AgroRange = 500;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<AActor> TargetObject;
 

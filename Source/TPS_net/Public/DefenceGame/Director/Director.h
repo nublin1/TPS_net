@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Director.generated.h"
 
+
 class ANPCCharacter;
 
 UCLASS()
@@ -27,6 +28,7 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TArray<ANPCCharacter*> Zombies; 
 	
