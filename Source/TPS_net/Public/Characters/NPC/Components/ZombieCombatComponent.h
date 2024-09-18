@@ -23,7 +23,7 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	UZombieCombatComponent();
-
+	
 	//Getters
 	
 
@@ -50,6 +50,8 @@ protected:
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 
+	
+
 	UFUNCTION( BlueprintCallable)
 	bool HitDetect();
 
@@ -62,5 +64,5 @@ public:
 
 
 private:
-	
+
 };

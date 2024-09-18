@@ -3,9 +3,11 @@
 
 #include "Characters/NPC/Components/ZombieCombatComponent.h"
 
+#include "AITypes.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/IHealthInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 // Sets default values for this component's properties
 UZombieCombatComponent::UZombieCombatComponent()
@@ -26,8 +28,9 @@ void UZombieCombatComponent::PostInitProperties()
 void UZombieCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
+
+
 
 bool UZombieCombatComponent::HitDetect()
 {
