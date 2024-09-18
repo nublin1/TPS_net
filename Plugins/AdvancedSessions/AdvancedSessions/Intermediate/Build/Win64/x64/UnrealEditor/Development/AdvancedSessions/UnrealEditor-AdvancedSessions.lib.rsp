@@ -6,9 +6,9 @@
 /NAME:"UnrealEditor-AdvancedSessions.dll"
 /IGNORE:4221
 /NODEFAULTLIB
-"G:\UEProjects\TPS_net\Intermediate\Build\Win64\x64\TPS_netEditor\Development\Engine\SharedPCH.Engine.Cpp20.InclOrderUnreal5_0.h.obj"
-"G:\UEProjects\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.1.cpp.obj"
-"G:\UEProjects\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.2.cpp.obj"
-"G:\UEProjects\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.3.cpp.obj"
-"G:\UEProjects\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Default.rc2.res"
-/OUT:"G:\UEProjects\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\UnrealEditor-AdvancedSessions.lib"
+"C:\GitHub\TPS_net\Intermediate\Build\Win64\x64\TPS_netEditor\Development\Engine\SharedPCH.Engine.Cpp20.InclOrderUnreal5_0.h.obj"
+"C:\GitHub\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.1.cpp.obj"
+"C:\GitHub\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.2.cpp.obj"
+"C:\GitHub\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Module.AdvancedSessions.3.cpp.obj"
+"C:\GitHub\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\Default.rc2.res"
+/OUT:"C:\GitHub\TPS_net\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\x64\UnrealEditor\Development\AdvancedSessions\UnrealEditor-AdvancedSessions.lib"
