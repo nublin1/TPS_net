@@ -33,6 +33,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector PointArrayStruct;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FBlackboardKeySelector IsNewTargetKey;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector KeyTargetLocation;
 
 	
@@ -44,4 +46,6 @@ protected:
 	
 	//
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

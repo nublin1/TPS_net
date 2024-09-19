@@ -15,7 +15,7 @@ void AZombieController::StartFollow(AActor* NewTargetActor,  FVector NewTargetLo
 	if (!GetWorld()->GetTimerManager().IsTimerActive(SeekTimerHandle))
 		GetWorld()->GetTimerManager().SetTimer(SeekTimerHandle, this, &AZombieController::Seek, 0.25f, true);
 
-	this->TargetActor = NewTargetActor;
+	this->CurrentTargetActor = NewTargetActor;
 	TargetLocation = NewTargetLocation;
 }
 
@@ -33,18 +33,19 @@ void AZombieController::Seek()
 {
 	FAIMoveRequest MoveRequest;
 
-	if (!TargetActor)
+	if (!CurrentTargetActor)
 		return;
 	
-	UE_LOG(LogTemp, Warning, TEXT("TargetActor: %s"), *TargetActor->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("TargetActor: %s"), *CurrentTargetActor->GetName());
 	
-	if(TargetActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
+	if(CurrentTargetActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
 	{
-		EPathFollowingRequestResult::Type MoveResult = MoveToActor(TargetActor, 50.0f);
+		EPathFollowingRequestResult::Type MoveResult = MoveToActor(CurrentTargetActor, 50.0f);
 	}
 	else
 	{
-		MoveToLocation(TargetLocation, 50.0f);
+		MoveToLocation(TargetLocation, 10.0f);
+		DrawDebugPoint(GetWorld(), TargetLocation, 10,FColor::Blue , false, 5, 0);
 	}
 
 	if (UPathFollowingComponent* NewPathFollowingComponent = GetPathFollowingComponent())
@@ -61,6 +62,11 @@ void AZombieController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollo
 	if (Result.IsSuccess())
 	{
 		bIsMoveCompleted = true;
+
+		if (UPathFollowingComponent* NewPathFollowingComponent = GetPathFollowingComponent())
+		{
+			NewPathFollowingComponent->OnRequestFinished.RemoveAll(this);
+		}
 	}
 	else
 	{

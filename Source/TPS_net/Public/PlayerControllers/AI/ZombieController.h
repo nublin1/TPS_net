@@ -37,9 +37,9 @@ protected:
 	UPROPERTY()
 	FTimerHandle SeekTimerHandle;
 
-	UPROPERTY()
-	TObjectPtr<AActor> TargetActor;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AActor> CurrentTargetActor;
+	UPROPERTY(BlueprintReadOnly)
 	FVector TargetLocation;
 
 	UPROPERTY(BlueprintReadOnly)

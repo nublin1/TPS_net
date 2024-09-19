@@ -41,7 +41,7 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(BlueprintReadWrite)
-	bool IsImmortal = false;
+	bool bIsGodMode = false;
 	UPROPERTY(BlueprintReadWrite)
 	float Health = 100.0f;
 	UPROPERTY(BlueprintReadWrite)

@@ -35,8 +35,6 @@ protected:
 	float AgroRange = 500;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AgroOutRange = 750;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<AActor> TargetObject;
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<AActor*, bool> AlreadyHitTargets;

@@ -25,13 +25,15 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 
 	UObject* TargetObject = BlackboardComp->GetValueAsObject(AITarget.SelectedKeyName);
 	AActor* Target = Cast<AActor>(TargetObject);
+	bool isNewTarget = BlackboardComp->GetValueAsBool(IsNewTargetKey.SelectedKeyName);
+	if (!isNewTarget)
+		return EBTNodeResult::Succeeded;
 
 	if (!Target)
 		return EBTNodeResult::Failed;
 
 	if (Target->GetRootComponent()->Mobility == EComponentMobility::Movable)
 	{
-		BlackboardComp->SetValueAsVector(KeyTargetLocation.SelectedKeyName, Target->GetActorLocation());
 		return EBTNodeResult::Succeeded;
 	}
 
@@ -61,6 +63,11 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 	//UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
 
 	return EBTNodeResult::Succeeded;
+}
+
+void UBTTask_SetTargetPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 }
 
 //return Super::ExecuteTask(OwnerComp, NodeMemory);

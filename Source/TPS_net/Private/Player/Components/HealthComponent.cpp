@@ -24,6 +24,12 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::TakeDamage(float DamageAmount)
 {
+
+	if (bIsGodMode)
+	{
+		return;
+	}
+	
 	Health -= DamageAmount;
 	if (Health < 0.0f)
 	{
