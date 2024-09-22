@@ -19,17 +19,14 @@ UZombieCombatComponent::UZombieCombatComponent()
 	ComponentTags.Add(FName("ZombieCombatComponentTag"));
 }
 
-void UZombieCombatComponent::PostInitProperties()
-{
-	Super::PostInitProperties();
-	
-}
-
 void UZombieCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
+	auto OwnerSkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+	if (OwnerSkeletalMeshComponent)
+		SkeletalMeshComponent = OwnerSkeletalMeshComponent;
+}
 
 
 bool UZombieCombatComponent::HitDetect()
@@ -99,8 +96,12 @@ bool UZombieCombatComponent::HitDetect()
 	return true;
 }
 
+void UZombieCombatComponent::SimpleAttack()
+{
+}
+
 void UZombieCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }

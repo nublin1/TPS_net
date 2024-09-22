@@ -42,19 +42,22 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool IsDebug = false;
 
+	//Anim
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
-
-	
 
 	UFUNCTION( BlueprintCallable)
 	bool HitDetect();
-
 	UFUNCTION(BlueprintCallable)
 	void ClearAlreadyHitTargets() {AlreadyHitTargets.Empty();}
+
+	UFUNCTION()
+	void SimpleAttack();
 
 public:	
 	// Called every frame

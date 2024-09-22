@@ -41,6 +41,7 @@ void AZombieController::Seek()
 	if(CurrentTargetActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
 	{
 		EPathFollowingRequestResult::Type MoveResult = MoveToActor(CurrentTargetActor, 50.0f);
+		
 	}
 	else
 	{

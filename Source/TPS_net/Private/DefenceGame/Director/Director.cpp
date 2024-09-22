@@ -18,7 +18,7 @@ void ADirector::BeginPlay()
 	
 }
 
-void ADirector::OnZombieKilled(ANPCCharacter* KilledActor)
+void ADirector::OnZombieKilled(ANPCZombie* KilledActor)
 {
 	Zombies.Remove(KilledActor);
 }

@@ -13,7 +13,9 @@ USTRUCT()
 struct FZombieAssetData
 {
 	GENERATED_USTRUCT_BODY()
-	
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* BasicAttackAnimMontage;
 };
 
 USTRUCT()
@@ -21,8 +23,16 @@ struct FCharacteristicsOfTheZombie
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, meta=(UIMin = 0.9f, UIMax = 1.1f))
-	float WorldScale; 
+	UPROPERTY(EditAnywhere)
+	float MinWorldScale = 0.9f;
+	UPROPERTY(EditAnywhere)
+	float MaxWorldScale = 1.1f;
+
+	UPROPERTY(EditAnywhere)
+	float RunSpeed = 500.0f;
+
+	UPROPERTY(EditAnywhere)
+	int MaxHealth = 100;
 };
 
 USTRUCT()

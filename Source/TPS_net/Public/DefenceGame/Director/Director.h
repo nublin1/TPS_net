@@ -7,7 +7,22 @@
 #include "Director.generated.h"
 
 
-class ANPCCharacter;
+class ANPCZombie;
+
+USTRUCT(Blueprintable)
+struct FZombieWaves
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	int ZombieCount = 10;
+	
+	FZombieWaves(){}
+	explicit FZombieWaves(const int ZombieCount)
+	{
+		this->ZombieCount = ZombieCount;
+	};
+};
 
 UCLASS()
 class TPS_NET_API ADirector : public AActor
@@ -28,9 +43,12 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FZombieWaves> ZombieWaves = {FZombieWaves(10) };
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TArray<ANPCCharacter*> Zombies; 
+	TArray<ANPCZombie*> Zombies; 
 	
 	//====================================================================
 	// FUNCTIONS
@@ -38,7 +56,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void OnZombieKilled(ANPCCharacter* KilledActor);
+	virtual void OnZombieKilled(ANPCZombie* KilledActor);
 
 public:
 	//====================================================================
