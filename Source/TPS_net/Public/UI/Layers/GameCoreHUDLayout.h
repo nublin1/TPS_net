@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameCoreHUDLayout.generated.h"
 
+class UBUIUserWidget;
 /**
  * 
  */
@@ -28,7 +29,8 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-
+	UPROPERTY(meta=(BindWidgetOptional))
+	TObjectPtr<UBUIUserWidget> TimerBlock;
 
 	//====================================================================
 	// FUNCTIONS

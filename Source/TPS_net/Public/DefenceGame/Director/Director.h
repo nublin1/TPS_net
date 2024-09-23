@@ -45,15 +45,20 @@ protected:
 	//====================================================================
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FZombieWaves> ZombieWaves = {FZombieWaves(10) };
-	
+	TArray<FZombieWaves> ZombieWaves = {FZombieWaves(10) };	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TArray<ANPCZombie*> Zombies; 
+	TArray<ANPCZombie*> Zombies;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int FirstWaveDelay = 15;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int DelayBetweenWaves = 60;
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	virtual void BeginPlay() override;
+	
 
 	UFUNCTION(BlueprintCallable)
 	virtual void OnZombieKilled(ANPCZombie* KilledActor);
