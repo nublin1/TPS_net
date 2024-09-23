@@ -2,11 +2,16 @@
 
 
 #include "UI/TPS/TimerWidget.h"
-
+#include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "DefenceGame/Director/Director.h"
 
 void UTimerWidget::SighUp()
 {
+	TArray<AActor*> FoundActors;	
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADirector::StaticClass(), FoundActors);
+
+	
 }
 
 void UTimerWidget::UpdateTimerName(FText NewText)

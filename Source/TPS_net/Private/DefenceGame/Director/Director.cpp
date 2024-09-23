@@ -15,6 +15,8 @@ ADirector::ADirector()
 void ADirector::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 	
 }
 
