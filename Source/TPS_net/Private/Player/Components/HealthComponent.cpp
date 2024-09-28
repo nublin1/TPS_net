@@ -16,16 +16,13 @@ UHealthComponent::UHealthComponent(): MaxHealth(100)
 	Health = MaxHealth;
 }
 
-
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UHealthComponent::TakeDamage(float DamageAmount)
 {
-
 	if (bIsGodMode)
 	{
 		return;

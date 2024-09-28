@@ -505,7 +505,6 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(LifetimeProperties);
 
 	TArray<FLifetimeProperty> OutLifetimeProps;
-
 	
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
 }

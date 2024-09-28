@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/BUIUserWidget.h"
 #include "GameCoreHUDLayout.generated.h"
 
 class UBUIUserWidget;
@@ -11,7 +12,7 @@ class UBUIUserWidget;
  * 
  */
 UCLASS()
-class TPS_NET_API UGameCoreHUDLayout : public UUserWidget
+class TPS_NET_API UGameCoreHUDLayout : public UBUIUserWidget
 {
 	GENERATED_BODY()
 
@@ -24,6 +25,9 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	//Getters
+	
+	UBUIUserWidget* GetTimerWidget() const {return TimerBlock;}
 	
 protected:
 	//====================================================================

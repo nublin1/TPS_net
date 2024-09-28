@@ -11,7 +11,7 @@ class UTextBlock;
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimerExpired); 
+
 
 UCLASS()
 class TPS_NET_API UTimerWidget : public UBUIUserWidget
@@ -22,8 +22,7 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY()
-	FOnTimerExpired OnTimerExpired;
+	
 
 	//====================================================================
 	// FUNCTIONS
@@ -34,17 +33,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateTimerName(FText NewText);
 	UFUNCTION(BlueprintCallable)
-	void UpdateTimerText(int32 Minutes, int32 Seconds);
+	void UpdateTimerText(int RemainingTime);
 
 	UFUNCTION(BlueprintCallable)
 	void SetTimerColor(FSlateColor NewColor);
-
-	UFUNCTION(BlueprintCallable)
-	void SetTimerDelay(int NewTime) {TimerDelay = NewTime;}
-	UFUNCTION(BlueprintCallable)
-	void StartTimer();
-	UFUNCTION(BlueprintCallable)
-	void StopTimer();
 
 protected:
 	//====================================================================
@@ -55,13 +47,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta =(BindWidget))
 	TObjectPtr<UTextBlock> TimerBlock;
 
-	UPROPERTY()
-	FTimerHandle TimerHandle;
-	UPROPERTY()
-	int TimerDelay = 60;
-
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	
+	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 };

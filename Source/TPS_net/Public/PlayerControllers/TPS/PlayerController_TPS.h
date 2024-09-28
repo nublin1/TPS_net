@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SendMessageTo_PcGs_Implementation(FString Sender, FString Message);
 
+	//Getters
+	UGameCoreHUDLayout* GetHUDLayout() const {return GameCoreHudLayout;}
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -44,7 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
 	UMainHUDLayout* MainHUDContainer;
 	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
-	UGameCoreHUDLayout* GameCoreHudLayout;
+	TObjectPtr<UGameCoreHUDLayout> GameCoreHudLayout;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UChatOnScreen* ChatOnScreen;
