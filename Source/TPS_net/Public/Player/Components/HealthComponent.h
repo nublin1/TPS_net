@@ -9,6 +9,7 @@
 #pragma region Delegates
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledSignature, AActor*, KilledActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, CurrentHealth);
 
 #pragma endregion
 
@@ -21,8 +22,11 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	UPROPERTY(VisibleAnywhere, BlueprintAssignable)
 	FOnKilledSignature OnKilledDelegate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintAssignable)
+	FOnHealthChangedSignature OnHealthChangedDelegate;
 
 	//====================================================================
 	// FUNCTIONS
@@ -31,6 +35,10 @@ public:
 
 	UFUNCTION(BlueprintCallable )
 	virtual void TakeDamage(float DamageAmount);
+	UFUNCTION(Server, Unreliable)
+	virtual void ServerTakeDamage(float DamageAmount);
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticastTakeDamage(float DamageAmount);
 
 	// Getters
 	virtual float GetHealth() const {return Health;}
@@ -40,11 +48,11 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsGodMode = false;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Health, BlueprintReadWrite)
 	float Health = 100.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.0f;
 	
 	//====================================================================
@@ -52,4 +60,8 @@ protected:
 	//====================================================================
 	
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+
+	UFUNCTION()
+	void OnRep_Health() const;
 };

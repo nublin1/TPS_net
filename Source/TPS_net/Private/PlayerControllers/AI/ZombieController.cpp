@@ -40,12 +40,12 @@ void AZombieController::Seek()
 	
 	if(CurrentTargetActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
 	{
-		EPathFollowingRequestResult::Type MoveResult = MoveToActor(CurrentTargetActor, 50.0f);
+		EPathFollowingRequestResult::Type MoveResult = MoveToActor(CurrentTargetActor, 5, false, true, false);
 		
 	}
 	else
 	{
-		MoveToLocation(TargetLocation, 10.0f);
+		MoveToLocation(TargetLocation, 5, false, true, false);
 		DrawDebugPoint(GetWorld(), TargetLocation, 10,FColor::Blue , false, 5, 0);
 	}
 

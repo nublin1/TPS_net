@@ -56,8 +56,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ClearAlreadyHitTargets() {AlreadyHitTargets.Empty();}
 
-	UFUNCTION()
-	void SimpleAttack();
 
 public:	
 	// Called every frame

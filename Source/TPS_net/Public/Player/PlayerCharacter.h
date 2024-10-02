@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/ClimbableInterface.h"
+#include "Interfaces/IHealthInterface.h"
 #include "Interfaces/WeaponSystemInterface.h"
 #include "PlayerCharacter.generated.h"
 
@@ -12,7 +13,7 @@ class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ACharacter, public IClimbableInterface, public IWeaponSystemInterface
+class TPS_NET_API APlayerCharacter : public ACharacter, public IIHealthInterface, public IWeaponSystemInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,8 @@ public:
 	APlayerCharacter();
 
 	// Getters
+	UFUNCTION(BlueprintCallable)
+	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
 	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
 	UFUNCTION()
@@ -57,6 +60,8 @@ protected:
 	UStateMachineComponent* StateMachine_Movemant;
 	UPROPERTY(BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	UStateMachineComponent* ActiveStateCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UWeaponSystemComponent> WeaponSystemComponentClass;
@@ -92,7 +97,7 @@ protected:
 
 	// Ladder climbing
 	UFUNCTION(BlueprintCallable)
-	virtual void StartClimbing() override;	
+	virtual void StartClimbing();	
 	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
 	void ServerStartClimbing(USceneComponent* TargetMoveToComponent);
 	UFUNCTION(NetMulticast, Unreliable)

@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/Components/HealthComponent.h"
 #include "Player/Components/WeaponSystemComponent.h"
 #include "StateMachine/StateMachineComponent.h"
 #include "World/Ladders/ProceduralLadder.h"
@@ -22,12 +23,27 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 	DefaultCameraLocation = FVector(250, 20, 30);
 	AimingCameraPosition = FVector(100,60,60);
 
+	if (Implements<UIHealthInterface>())
+	{
+		auto HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+		HealthComponent->OnComponentCreated();
+		HealthComponent->SetIsReplicated(true);
+	}
+
 	StateMachine_Movemant = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
 	StateMachine_Movemant->OnComponentCreated();
 	StateMachine_Movemant->SetIsReplicated(true);
 
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
 	StateMachine_Aiming->OnComponentCreated();
+
+	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
+	ActiveStateCharacter->OnComponentCreated();
+}
+
+UHealthComponent* APlayerCharacter::GetHealthComponent() const
+{
+	return FindComponentByClass<UHealthComponent>();
 }
 
 void APlayerCharacter::PostInitProperties()

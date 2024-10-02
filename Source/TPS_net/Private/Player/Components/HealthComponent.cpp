@@ -4,6 +4,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Interfaces/IHealthInterface.h"
+#include "Net/UnrealNetwork.h"
 
 class UCapsuleComponent;
 // Sets default values for this component's properties
@@ -21,7 +22,47 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthComponent, bIsGodMode);
+	DOREPLIFETIME(UHealthComponent, Health);
+	DOREPLIFETIME(UHealthComponent, MaxHealth);
+}
+
 void UHealthComponent::TakeDamage(float DamageAmount)
+{
+	const auto Controller = GetOwner()-> GetInstigatorController();
+	if (!GetOwner()-> GetInstigatorController())
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Controller is Null"));
+		return;
+	}
+
+	if (Controller->IsPlayerController())
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			NetMulticastTakeDamage(DamageAmount);
+		}
+		else
+		{
+			ServerTakeDamage(DamageAmount);
+		}
+	}
+	else
+	{
+		NetMulticastTakeDamage(DamageAmount);
+	}
+}
+
+void UHealthComponent::ServerTakeDamage_Implementation(float DamageAmount)
+{
+	NetMulticastTakeDamage(DamageAmount);
+}
+
+void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
 {
 	if (bIsGodMode)
 	{
@@ -29,26 +70,23 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 	}
 	
 	Health -= DamageAmount;
-	if (Health < 0.0f)
+	if (OnHealthChangedDelegate.IsBound())
+	{
+		OnHealthChangedDelegate.Broadcast(Health);
+	}
+	
+	if (Health <= 0.0f)
 	{
 		Health = 0.0f;
 
-		auto result = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-		if (result)
-		{
-			result->SetSimulatePhysics(true);
-			result->SetCollisionProfileName(TEXT("Ragdoll"), true);
-			GetOwner()->FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		
-
 		if (OnKilledDelegate.IsBound())
 			OnKilledDelegate.Broadcast(GetOwner());
-
-		FTimerHandle UnusedHandle;
-		GetOwner()->GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
-		{
-			GetOwner()->Destroy();
-		}, 5.0f, false);
 	}
+}
+
+
+void UHealthComponent::OnRep_Health() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
+	
 }

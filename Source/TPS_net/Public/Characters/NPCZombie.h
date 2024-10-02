@@ -38,6 +38,12 @@ protected:
 	//TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UZombieCombatComponent* ZombieCombatComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation")
+	float SprintSpeed = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ReadyToAttack = true;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -46,6 +52,26 @@ protected:
 	virtual void PreInitializeComponents() override;
 	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
+
+	// MovemantSpeed
+	UFUNCTION(BlueprintCallable)
+	void ChangeMaxMoveSpeed(float NewMaxSpeed);
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void ServerSetSpeed(float NewMaxSpeed);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastSetSpeed(float NewMaxSpeed);
+
+	// Attack
+	UFUNCTION(BlueprintCallable)
+	void SimpleAttack(UAnimMontage* MontageToPlay);
+
+	//
+	UFUNCTION()
+	void SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted);
+
+	//
+	UFUNCTION()
+	void NPCDead(AActor* KilledActor);
 	
 
 public:

@@ -44,6 +44,8 @@ bool UZombieCombatComponent::HitDetect()
 	
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 	
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
@@ -73,7 +75,9 @@ bool UZombieCombatComponent::HitDetect()
 	for (FHitResult Hit : OutHits)
 	{
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor && !AlreadyHitTargets.Contains(HitActor))
+		auto OwnerClass = GetOwner()->GetClass();
+		
+		if (HitActor && !AlreadyHitTargets.Contains(HitActor) && !HitActor->IsA(OwnerClass))
 		{
 			AlreadyHitTargets.Add(HitActor, false);
 			//UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *Hit.GetActor()->GetName());
@@ -96,9 +100,6 @@ bool UZombieCombatComponent::HitDetect()
 	return true;
 }
 
-void UZombieCombatComponent::SimpleAttack()
-{
-}
 
 void UZombieCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                            FActorComponentTickFunction* ThisTickFunction)
