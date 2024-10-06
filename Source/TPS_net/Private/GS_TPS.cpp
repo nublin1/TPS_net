@@ -3,7 +3,10 @@
 
 #include "GS_TPS.h"
 
+#include "GameplayTagContainer.h"
+
 FOnChatMessageSendToGS& AGS_TPS::GetOnChatMessageSendToGSDelegate()
 {
 	return OnChatMessageSendToGS;
 }
+

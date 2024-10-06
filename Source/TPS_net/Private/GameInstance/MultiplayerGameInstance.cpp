@@ -23,7 +23,7 @@ UMultiplayerGameInstance::UMultiplayerGameInstance(const FObjectInitializer& Obj
 
 void UMultiplayerGameInstance::CreateServer(FName ServerName, int32 MaxPlayers, bool bIsLAN)
 {
-	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	IOnlineSubsystem* OnlineSubsystem = Online::GetSubsystem(GetWorld());
 	if (!OnlineSubsystem)
 	{
 		return;
@@ -52,7 +52,7 @@ void UMultiplayerGameInstance::CreateServer(FName ServerName, int32 MaxPlayers, 
 
 void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 {
-	const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	const IOnlineSubsystem* OnlineSubsystem = Online::GetSubsystem(GetWorld());
 	if (!OnlineSubsystem)
 	{
 		OnFindSessionsComplete(false);
@@ -65,7 +65,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = bIsLAN;
-	if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{SessionSearch->bIsLanQuery = false;}
+	if (Online::GetSubsystem(GetWorld())->GetSubsystemName() == "STEAM")	{SessionSearch->bIsLanQuery = false;}
 	SessionSearch->MaxSearchResults = 50;
 	SessionSearch->PingBucketSize = 100;
 	
@@ -110,7 +110,7 @@ bool UMultiplayerGameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId
                                            const FOnlineSessionSearchResult& SearchResult)
 {
 	bool bSuccessful = false;
-	const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	const IOnlineSubsystem* OnlineSubsystem = Online::GetSubsystem(GetWorld());
 	if (!OnlineSubsystem)
 	{
 		return bSuccessful;
@@ -214,7 +214,7 @@ void UMultiplayerGameInstance::StartCreateSession(bool bIsLAN)
 		{			
 			TSharedPtr<class FOnlineSessionSettings> newSessionSettings = MakeShareable(new FOnlineSessionSettings());
 			newSessionSettings-> bIsLANMatch = bIsLAN;
-			if (IOnlineSubsystem::Get()->GetSubsystemName() == "STEAM")	{newSessionSettings->bIsLANMatch = false;}
+			if (Online::GetSubsystem(GetWorld())->GetSubsystemName() == "STEAM")	{newSessionSettings->bIsLANMatch = false;}
 			newSessionSettings-> bUsesPresence = true;
 			newSessionSettings-> NumPublicConnections = PendingMaxPlayers;
 			newSessionSettings-> bShouldAdvertise = true;
@@ -251,7 +251,7 @@ void UMultiplayerGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OFindSessionsComplete bSuccess: %d"), bWasSuccessful));
 
 	// Get OnlineSubsystem we want to work with
-	const IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	const IOnlineSubsystem* OnlineSubsystem = Online::GetSubsystem(GetWorld());
 	if (!OnlineSubsystem)
 	{
 		return;

@@ -40,53 +40,59 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 		return;
 	}
 
-	if (Controller->IsPlayerController())
+	if (!GetOwner()->HasAuthority())
 	{
-		if (GetOwner()->HasAuthority())
-		{
-			NetMulticastTakeDamage(DamageAmount);
-		}
-		else
-		{
-			ServerTakeDamage(DamageAmount);
-		}
+		ServerTakeDamage(DamageAmount);
+		return;
 	}
-	else
-	{
-		NetMulticastTakeDamage(DamageAmount);
-	}
+
+	ApplyDamage(DamageAmount);
 }
+
 
 void UHealthComponent::ServerTakeDamage_Implementation(float DamageAmount)
 {
 	NetMulticastTakeDamage(DamageAmount);
 }
 
-void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
+void UHealthComponent::ApplyDamage(float DamageAmount)
 {
 	if (bIsGodMode)
 	{
 		return;
 	}
 	
-	Health -= DamageAmount;
+	float OldHealth = Health;
+	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 	if (OnHealthChangedDelegate.IsBound())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на сервере: %f"), Health);
 		OnHealthChangedDelegate.Broadcast(Health);
 	}
 	
-	if (Health <= 0.0f)
+	if (Health <= 0.0f && OldHealth > 0.0f)
 	{
-		Health = 0.0f;
-
 		if (OnKilledDelegate.IsBound())
+		{
 			OnKilledDelegate.Broadcast(GetOwner());
+		}
 	}
 }
 
+void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
+{
+	if (!bIsGodMode)
+	{
+		Health -= DamageAmount;
+	}
+}
 
 void UHealthComponent::OnRep_Health() const
 {
 	UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
+	if (OnHealthChangedDelegate.IsBound())
+	{
+		OnHealthChangedDelegate.Broadcast(Health);
+	}
 	
 }

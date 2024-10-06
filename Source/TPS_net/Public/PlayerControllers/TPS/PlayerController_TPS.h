@@ -7,6 +7,7 @@
 #include "Interfaces/PCChatInterface.h"
 #include "PlayerController_TPS.generated.h"
 
+class UBUIUserWidget;
 class UTPSMenuWidget;
 class UChatOnScreen;
 class UGameCoreHUDLayout;
@@ -32,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SendMessageTo_PcGs_Implementation(FString Sender, FString Message);
 
+	UFUNCTION(Server, Reliable)
+	void RequestHitDetectOnServer(AActor* Zombie);
+
 	//Getters
 	UGameCoreHUDLayout* GetHUDLayout() const {return GameCoreHudLayout;}
 
@@ -43,6 +47,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
 	TSubclassOf<UMainHUDLayout> MainHUDLayoutWidgetClass;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUDSettings")
+	TSubclassOf<UUserWidget>GameOverWidgetClass;
+	
 	// Widgets
 	UPROPERTY(EditAnywhere, Category = "HUDSettings", BlueprintReadWrite)
 	UMainHUDLayout* MainHUDContainer;
@@ -50,12 +57,20 @@ protected:
 	TObjectPtr<UGameCoreHUDLayout> GameCoreHudLayout;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UChatOnScreen* ChatOnScreen;
+	TObjectPtr<UChatOnScreen> ChatOnScreen;
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UTPSMenuWidget> TPSMenuWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UBUIUserWidget> GameOverWidget;
 
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	virtual void PostInitializeComponents() override;
+	
+	virtual void GameHasEnded(AActor* EndGameFocus, bool bIsWinner) override;
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastGameHasEnded(AActor* EndGameFocus, bool bIsWinner);
 };

@@ -34,12 +34,12 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UZombieCombatComponent* ZombieCombatComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UZombieCombatComponent> ZombieCombatComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Transformation")
 	float SprintSpeed = 600.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -80,4 +80,5 @@ public:
 	//====================================================================
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 };

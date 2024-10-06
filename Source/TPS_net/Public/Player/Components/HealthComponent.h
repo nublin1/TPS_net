@@ -37,6 +37,8 @@ public:
 	virtual void TakeDamage(float DamageAmount);
 	UFUNCTION(Server, Unreliable)
 	virtual void ServerTakeDamage(float DamageAmount);
+	UFUNCTION()
+	void ApplyDamage(float DamageAmount);
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticastTakeDamage(float DamageAmount);
 
@@ -50,7 +52,7 @@ protected:
 	//====================================================================
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsGodMode = false;
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Health, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Health, EditAnywhere, BlueprintReadWrite)
 	float Health = 100.0f;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.0f;

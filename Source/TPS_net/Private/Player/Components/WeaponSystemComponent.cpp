@@ -254,7 +254,7 @@ bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
 		if(StateChangedDelegate.IsBound())
 		{
 			
-			StateChangedDelegate.Broadcast(CurrentStateTag);
+			StateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
 		}
 		return true;
 	}
@@ -274,7 +274,7 @@ void UWeaponSystemComponent::OnRep_CurrentStateTag()
 	InitState();
 	if (StateChangedDelegate.IsBound())
 	{
-		StateChangedDelegate.Broadcast(CurrentStateTag);
+		StateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
 	}
 }
 
@@ -478,7 +478,7 @@ bool UWeaponSystemComponent::IsCanStartReload()
 	return true;
 }
 
-void UWeaponSystemComponent::SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag)
+void UWeaponSystemComponent::SwitchStateMachine_Aiming(AActor* Actor, const FGameplayTag& NewStateTag)
 {
 	static const FGameplayTag AimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.Aiming"));	
 	if (NewStateTag == AimingTag)

@@ -7,6 +7,7 @@
 #include "Characters/NPC/Components/ZombieCombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
 
 // Sets default values
@@ -14,17 +15,15 @@ ANPCZombie::ANPCZombie()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent->OnComponentCreated();
+	HealthComponent->SetIsReplicated(true);
+	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
+	
 	ZombieCombatComponent = CreateDefaultSubobject<UZombieCombatComponent>(TEXT("ZombieCombatComponent"));
 	ZombieCombatComponent->OnComponentCreated();
 	ZombieCombatComponent->SetIsReplicated(true);
-
-	if (Implements<UIHealthInterface>())
-	{
-		auto HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-		HealthComponent->OnComponentCreated();
-		HealthComponent->SetIsReplicated(true);
-		HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
-	}
+	
 }
 
 UHealthComponent* ANPCZombie::GetHealthComponent() const
@@ -104,7 +103,7 @@ void ANPCZombie::SimpleAttack(UAnimMontage* MontageToPlay)
 void ANPCZombie::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
 {
 	ReadyToAttack = true;
-	ChangeMaxMoveSpeed(100.0f);
+	ChangeMaxMoveSpeed(SprintSpeed);
 }
 
 void ANPCZombie::NPCDead(AActor* KilledActor)
@@ -136,4 +135,12 @@ void ANPCZombie::Tick(float DeltaTime)
 void ANPCZombie::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ANPCZombie, SprintSpeed);
+	DOREPLIFETIME(ANPCZombie, ZombieCombatComponent);
 }

@@ -18,6 +18,7 @@ class TPS_NET_API APlayerCharacter : public ACharacter, public IIHealthInterface
 	GENERATED_BODY()
 
 public:
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
@@ -30,12 +31,14 @@ public:
 	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
+	UFUNCTION()
+	virtual UStateMachineComponent* GetActiveStateCharacter() {return ActiveStateCharacter;}
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	FVector2D MovementVector;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
 	bool IsAiming;
@@ -56,11 +59,13 @@ protected:
 	FVector AimingCameraPosition;
 
 	// Components
-	UPROPERTY(BlueprintReadWrite, Replicated)
-	UStateMachineComponent* StateMachine_Movemant;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UHealthComponent* HealthComponent;
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	UStateMachineComponent* StateMachine_Movement;
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
-	UPROPERTY(BlueprintReadWrite, Replicated)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	UStateMachineComponent* ActiveStateCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -85,7 +90,16 @@ protected:
 	// FUNCTIONS
 	//====================================================================
 	virtual void PostInitProperties() override;
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	
+	// deadth
+	UFUNCTION()
+	void OnHealthDepleted(AActor* Actor);
+	UFUNCTION(Server, Unreliable)
+	void ServerOnHealthDepleted();
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticastOnHealthDepleted();
 
 	// MovemantSpeed
 	UFUNCTION(BlueprintCallable)

@@ -208,7 +208,7 @@ protected:
 
 	//
 	UFUNCTION()
-	void SwitchStateMachine_Aiming(const FGameplayTag& NewStateTag);
+	void SwitchStateMachine_Aiming(AActor* Actor, const FGameplayTag& NewStateTag);
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

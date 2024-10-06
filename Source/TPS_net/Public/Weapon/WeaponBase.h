@@ -37,7 +37,7 @@ public:
 	FCharacteristicsOfTheWeapon GetCharacteristicsOfTheWeapon() const { return CharacteristicsOfTheWeapon; }
 
 	UFUNCTION()
-	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
+ 	FWeaponAssetData GetWeaponAssetData() const { return WeaponAssetData; }
 
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }

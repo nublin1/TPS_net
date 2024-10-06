@@ -9,7 +9,7 @@
 
 // Delegate declarations
 #pragma region Delegates
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateChangedSignature, const FGameplayTag&, NewStateTag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStateChangedSignature, AActor*, Actor, const FGameplayTag&, NewStateTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInitStateSignature, const FGameplayTag&, StateTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FExitStateSignature, const FGameplayTag&, ExitStateTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTickStateSinganture, float, DeltaTime, const FGameplayTag&, StateTag);

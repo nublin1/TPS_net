@@ -65,7 +65,7 @@ protected:
 	TArray<ANPCZombie*> Zombies;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int FirstWaveDelay = 15;
+	int FirstWaveDelay = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int DelayBetweenWaves = 60;
 

@@ -44,7 +44,7 @@ protected:
 	//
 	UPROPERTY(BlueprintReadWrite, Category="References")
 	TObjectPtr<UWeaponSystemComponent> WeaponSysComponent;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="References")
 	TObjectPtr<APlayerCharacter> Character;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -68,5 +68,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void CleanWeaponData();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void UpdateWeaponData(AMasterWeapon* newMasterWeapon); 
+	virtual void UpdateWeaponData(AMasterWeapon* newMasterWeapon);
+
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 };

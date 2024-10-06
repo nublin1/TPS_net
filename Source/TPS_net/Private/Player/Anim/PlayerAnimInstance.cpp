@@ -3,6 +3,7 @@
 
 #include "Player/Anim/PlayerAnimInstance.h"
 
+#include "Net/UnrealNetwork.h"
 #include "Player/PlayerCharacter.h"
 #include "Player/Components/WeaponSystemComponent.h"
 #include "StateMachine/StateMachineComponent.h"
@@ -83,4 +84,11 @@ void UPlayerAnimInstance::CleanWeaponData()
 void UPlayerAnimInstance::UpdateWeaponData(AMasterWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
+}
+
+void UPlayerAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UPlayerAnimInstance, Character);
 }

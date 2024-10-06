@@ -8,6 +8,7 @@
 #include "GS_TPS.generated.h"
 
 
+struct FGameplayTag;
 
 UCLASS()
 class TPS_NET_API AGS_TPS : public AGameStateBase, public IGSChatInterface
@@ -20,6 +21,11 @@ public:
 	//====================================================================
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable, BlueprintCallable)
 	FOnChatMessageSendToGS OnChatMessageSendToGS;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<APlayerController>> AlivePlayers;
+	UPROPERTY()
+	TArray<TObjectPtr<APlayerController>> DeadPlayers;
 
 	//====================================================================
 	// FUNCTIONS
@@ -31,6 +37,7 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	
 
 	//====================================================================
 	// FUNCTIONS

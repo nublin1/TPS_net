@@ -4,6 +4,7 @@
 #include "Player/PlayerCharacter.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
@@ -18,27 +19,25 @@ APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	CurrentCameraLocation= FVector(250, 20, 30);
-	DesiredCameraLocation = FVector(250, 20, 30);	
-	DefaultCameraLocation = FVector(250, 20, 30);
+	CurrentCameraLocation= FVector(350, 20, 30);
+	DesiredCameraLocation = FVector(350, 20, 30);	
+	DefaultCameraLocation = FVector(350, 20, 30);
 	AimingCameraPosition = FVector(100,60,60);
+	
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent->OnComponentCreated();
+	HealthComponent->SetIsReplicated(true);
 
-	if (Implements<UIHealthInterface>())
-	{
-		auto HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-		HealthComponent->OnComponentCreated();
-		HealthComponent->SetIsReplicated(true);
-	}
-
-	StateMachine_Movemant = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
-	StateMachine_Movemant->OnComponentCreated();
-	StateMachine_Movemant->SetIsReplicated(true);
+	StateMachine_Movement = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
+	StateMachine_Movement->OnComponentCreated();
+	StateMachine_Movement->SetIsReplicated(true);
 
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
 	StateMachine_Aiming->OnComponentCreated();
 
 	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
 	ActiveStateCharacter->OnComponentCreated();
+	ActiveStateCharacter->SetIsReplicated(true);
 }
 
 UHealthComponent* APlayerCharacter::GetHealthComponent() const
@@ -57,9 +56,56 @@ void APlayerCharacter::PostInitProperties()
 	}
 }
 
+void APlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (HasAuthority())
+	{
+		HealthComponent->OnKilledDelegate.AddUniqueDynamic(this, &APlayerCharacter::OnHealthDepleted);
+	}
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void APlayerCharacter::OnHealthDepleted(AActor* Actor)
+{
+	if (!ActiveStateCharacter)
+		return;
+
+	if (Actor != this)
+		return;
+	
+	if (HasAuthority())
+	{
+		ServerOnHealthDepleted();
+	}
+}
+
+void APlayerCharacter::ServerOnHealthDepleted_Implementation()
+{
+	ActiveStateCharacter->SwitchState(FGameplayTag::RequestGameplayTag(FName("State.Downed")));
+	if (const auto Capsule = FindComponentByClass<UCapsuleComponent>())
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("State changed on Server"));
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	GetCharacterMovement()->DisableMovement();
+	
+	NetMulticastOnHealthDepleted();
+}
+
+void APlayerCharacter::NetMulticastOnHealthDepleted_Implementation()
+{
+	if (const auto Capsule = FindComponentByClass<UCapsuleComponent>())
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("State changed on Client"));
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	GetCharacterMovement()->DisableMovement();
 }
 
 void APlayerCharacter::ChangeMaxMoveSpeed(float NewMaxSpeed)
@@ -136,7 +182,7 @@ bool APlayerCharacter::ServerStartClimbing_Validate(USceneComponent* TargetMoveT
 
 void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
 {		
-	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.EnteringLadder")));
+	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.EnteringLadder")));
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 	GetCharacterMovement()->MaxFlySpeed = 0.0f;
 	GetCharacterMovement()->BrakingDecelerationFlying = 3000.0f;	
@@ -149,7 +195,7 @@ void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* Ta
 		TargetMoveToComponent->GetComponentRotation(),
 		false, false, 0.5f,true, EMoveComponentAction::Type::Move, LatentInfo);
 
-	StateMachine_Movemant->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
+	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
 
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
@@ -182,12 +228,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, MovementVector);
 	
 	DOREPLIFETIME(APlayerCharacter, IsAiming);
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 
-	DOREPLIFETIME(APlayerCharacter, StateMachine_Movemant);
+	DOREPLIFETIME(APlayerCharacter, StateMachine_Movement);
+	DOREPLIFETIME(APlayerCharacter, StateMachine_Aiming);
 	DOREPLIFETIME(APlayerCharacter, WeaponSystemComponent);
+	DOREPLIFETIME(APlayerCharacter, ActiveStateCharacter);
 }
 

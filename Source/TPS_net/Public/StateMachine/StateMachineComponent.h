@@ -9,9 +9,6 @@
 #include "StateMachineComponent.generated.h"
 
 
-
-
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UStateMachineComponent : public UActorComponent, public IStateMachineInterface
 {
