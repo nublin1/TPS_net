@@ -90,7 +90,7 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 	}
 }
 
-void UWeaponSystemComponent::PreShoot()
+void UWeaponSystemComponent::InitializeFireSequence ()
 {
 	if (!CurrentWeaponInHands)
 		return;
@@ -99,7 +99,6 @@ void UWeaponSystemComponent::PreShoot()
 	switch (FireMode)
 	{
 	case EFireMode::Single:
-		
 		AvailableShootsCount = 1;
 		break;
 	case EFireMode::Burst:
@@ -129,14 +128,13 @@ bool UWeaponSystemComponent::CheckIsCanShoot()
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
 	{			
 		//UE_LOG(LogTemp, Warning, TEXT("Available Shoots Count: %d"), AvailableShootsCount);
-
 		return true;
 	}
 	
 	return false;
 }
 
-void UWeaponSystemComponent::Shoot() 
+void UWeaponSystemComponent::TriggerFireWeapon () 
 {
 	if (!CurrentWeaponInHands)
 		return;
@@ -148,7 +146,7 @@ void UWeaponSystemComponent::Shoot()
 	case EBulletMode::HitScan:
 		break;
 	case EBulletMode::Projectile:
-		ShootProjectile();
+		ConfigureSpawnedProjectile ();
 		break;
 	default:
 		break;
@@ -164,79 +162,93 @@ void UWeaponSystemComponent::Shoot()
 	},  60.0f / CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().RPM , false);
 }
 
-void UWeaponSystemComponent::ShootProjectile() const
+void UWeaponSystemComponent::ConfigureSpawnedProjectile ()
 {
 	if (!CurrentWeaponInHands->GetSkeletalMeshWeapon())
-        return;
+		return;
 
-    auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
-        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
-        ERelativeTransformSpace::RTS_World);
+	const auto BulletSpawnPointTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(
+		CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletSpawnSocketTransformName,
+		ERelativeTransformSpace::RTS_World);
   
-    if (BulletBlueprint)
-    {
+	if (BulletBlueprint)
+	{
 		if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
 		{
 			UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found"))
 			return;
 		}
 
-    	auto AmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
-        for (int i = 0; i < AmmoCharacteristics.NumberOfShotsPerRound; i++)
-        {
-            // Угол разброса
-            auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
-            // Отклонение для разброса
-            FRotator RandomSpread = FRotator(
-                FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
-                FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
-                0.0f                                        // Roll (не нужно для разброса)
-            );
+		auto AmmoCharacteristics = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData()->GetAmmoCharacteristics();
+		for (int i = 0; i < AmmoCharacteristics.NumberOfShotsPerRound; i++)
+		{
+			// Угол разброса
+			auto SpreadAngle = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().SpreadAngle;
+			// Отклонение для разброса
+			FRotator RandomSpread = FRotator(
+				FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
+				FMath::RandRange(-SpreadAngle, SpreadAngle), // Yaw
+				0.0f                                        // Roll (не нужно для разброса)
+			);
 
-        	FActorSpawnParameters SpawnParameters;
-    	
-        	FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
-        	FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset;
-            SpawnRotation += RandomSpread;        	
+			FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
+			FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset + RandomSpread;
 
-        	auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
-        	NewBulletAmmoData->SetAmmoCharacteristics(AmmoCharacteristics);
+			
+			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
+			if(OnShootDelegate.IsBound())
+				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
+		}
+	}
+}
 
-        	if (ProjectileFactory)
-        	{
-        		auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
-        		if (SpawnedActorRef)
-        		{
-        			SpawnedActorRef->SetActorTickEnabled(false);
-        			SpawnedActorRef->SetActorHiddenInGame(true);
+void UWeaponSystemComponent::ServerProjectileSpawn_Implementation(const FVector& SpawnLocation,
+	const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics)
+{
+	HandleProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
+}
 
-			        if (const TObjectPtr<UCustomBulletProjectile> BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>())
-        			{        				
-        				// Ammo
-        				AmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
-        				if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
-        				{
-        					UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
-        					AmmoCharacteristics.BulletMass = 1.0f;
-        					//BulletProjectileComponent->SetBulletMass(1);
-        				}
-        				
-        				BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
-        				BulletProjectileComponent->Init();
-        			}        			
-        			SpawnedActorRef->SetActorTickEnabled(true);
-        			SpawnedActorRef->SetActorHiddenInGame(false);
+void UWeaponSystemComponent::HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics)
+{
+	if (!ProjectileFactory)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileFactory is not valid."));
+		return;
+	}
 
-        			if (OnShootDelegate.IsBound())
-        				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
-        		}
-        	}
-        	else
-        	{
-        		UE_LOG(LogTemp, Error, TEXT("ProjectileFactory is not valid."));
-        	}            
-        }
-    }
+	const FActorSpawnParameters SpawnParameters;
+	auto NewBulletAmmoData = CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData();
+	auto NewAmmoCharacteristics = AmmoCharacteristics;
+	NewBulletAmmoData->SetAmmoCharacteristics(NewAmmoCharacteristics);
+
+	auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation, SpawnRotation, SpawnParameters);
+	if (SpawnedActorRef)
+	{
+		//ConfigureSpawnedProjectile(SpawnedActorRef, NewBulletAmmoData, AmmoCharacteristics);
+		
+
+		SpawnedActorRef->SetActorTickEnabled(false);
+		SpawnedActorRef->SetActorHiddenInGame(true);
+
+		if (const TObjectPtr<UCustomBulletProjectile> BulletProjectileComponent = SpawnedActorRef->FindComponentByClass<UCustomBulletProjectile>())
+		{        				
+			NewAmmoCharacteristics.StartBulletSpeed = CurrentWeaponInHands->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MuzzleVelocity;
+
+			if (!CurrentWeaponInHands->GetWeaponBaseRef()->GetSelectedAmmoData())
+			{
+				UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
+			}
+
+			/*if(OnShootDelegate.IsBound())
+				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());*/
+
+			BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
+			BulletProjectileComponent->Init();
+		}
+
+		SpawnedActorRef->SetActorTickEnabled(true);
+		SpawnedActorRef->SetActorHiddenInGame(false);
+	}
 }
 
 bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
@@ -283,6 +295,8 @@ void UWeaponSystemComponent::InitStartingWeapon()
 	if (!WeaponTable)
 		return;
 
+	//UE_LOG(LogTemp, Log, TEXT("WeaponSystemComponent Owner of %s is %s"), *GetName(), *GetOwner()->GetName());
+
 	for (auto StartingWeapon : StartingWeapons)
 	{
 		if (StartingWeapon.IsNone())
@@ -290,90 +304,145 @@ void UWeaponSystemComponent::InitStartingWeapon()
 
 		const FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(StartingWeapon, StartingWeapon.ToString());
 		if (!WData)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Not found %s"),* StartingWeapon.ToString());
 			continue;
-
-		bool bIsFreeSlotFound = false;
-		int NumberSlot = 0;
-		if (WData->HolsterType == EWeaponType::Primary)
-		{
-			for(int i = 0; i < NumberOfWeaponPrimaryHolsters; i++)
-			{
-				if (bCheckHolsterAvaibility(WData->HolsterType, i) == true)
-				{
-					bIsFreeSlotFound = true;
-					NumberSlot = i;
-					break;
-				}
-			}
-		}
-		else if (WData->HolsterType ==EWeaponType::Pistol)
-		{
-			bIsFreeSlotFound = bCheckHolsterAvaibility (WData->HolsterType);
-		}
-		
-		if (bIsFreeSlotFound == false)
-			continue;
-
-		UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
-		WeaponBase->SetID(WData->Name);
-		WeaponBase->SetBulletMode(WData->BulletMode);
-		WeaponBase->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
-		WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
-		WeaponBase->SetWeaponType(WData->HolsterType);
-
-		if(!WData->CharacteristicsOfTheWeapon.UsableAmmo.IsEmpty())
-		{
-			TArray<UAmmoBase*> tempAmmo;
-			for (auto Element : WData->CharacteristicsOfTheWeapon.UsableAmmo)
-			{		
-				const FAmmoData* AData = Element.DataTable->FindRow<FAmmoData>(Element.RowName, Element.RowName.ToString());
-				if (!AData)
-					continue;
-
-				UAmmoBase* AmmoBase = NewObject<UAmmoBase>(this, UAmmoBase::StaticClass());
-				AmmoBase->SetAmmoCharacteristics(AData->AmmoCharacteristics);
-								
-				tempAmmo.Add(AmmoBase);
-			}
-			if (tempAmmo.Num() > 0)
-			{
-				WeaponBase->SetSelectedAmmoData(tempAmmo[0]);
-				WeaponBase->SetUsableAmmo(tempAmmo);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found after processing."));
-			}
 		}
 
-		AMasterWeapon* Weapon = AddWeapon(WeaponBase);
-		AssignWeaponToHolsterSlot(Weapon, NumberSlot);
+		if (GetOwner() -> HasAuthority())
+		//if (GetOwnerRole() == ROLE_AutonomousProxy)
+		{
+			//UE_LOG(LogTemp, Error, TEXT("SERVER. WeaponName %s"),* StartingWeapon.ToString());
+			//
+			//ServerAddWEA(StartingWeapon);
+			//MulticastAddWEA(StartingWeapon, nullptr);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* StartingWeapon.ToString());
+			ServerAddWEA(StartingWeapon, GetOwner());
+			
+		}
 	}
 }
 
-AMasterWeapon* UWeaponSystemComponent::AddWeapon(UWeaponBase* NewWeaponData)
+void UWeaponSystemComponent::AddWeapon(AMasterWeapon* Weapon, int NumberSlot)
 {
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = GetOwner();
+	AssignWeaponToHolsterSlot(Weapon, NumberSlot);
+	
+}
+
+void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActor* ActorFrom)
+{
+	MulticastAddWEA(WeaponName, ActorFrom);
+
+	//
+}
+
+void UWeaponSystemComponent::MulticastAddWEA_Implementation(FName WeaponName, AActor* ActorFrom )
+{
+	const FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(WeaponName, WeaponName.ToString());
+	
+	if (!WData)
+		return;
+
+	bool bIsFreeSlotFound = false;
+	int NumberSlot = 0;
+	if (WData->HolsterType == EWeaponType::Primary)
+	{
+		for(int i = 0; i < NumberOfWeaponPrimaryHolsters; i++)
+		{
+			if (bCheckHolsterAvaibility(WData->HolsterType, i) == true)
+			{
+				bIsFreeSlotFound = true;
+				NumberSlot = i;
+				break;
+			}
+		}
+	}
+	else if (WData->HolsterType ==EWeaponType::Pistol)
+	{
+		bIsFreeSlotFound = bCheckHolsterAvaibility (WData->HolsterType);
+	}
+		
+	if (bIsFreeSlotFound == false)
+		return;
+
+	UWeaponBase* WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
+	WeaponBase->SetID(WData->Name);
+	WeaponBase->SetBulletMode(WData->BulletMode);
+	WeaponBase->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
+	WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
+	WeaponBase->SetWeaponType(WData->HolsterType);
+
+	if(!WData->CharacteristicsOfTheWeapon.UsableAmmo.IsEmpty())
+	{
+		TArray<UAmmoBase*> tempAmmo;
+		for (auto Element : WData->CharacteristicsOfTheWeapon.UsableAmmo)
+		{		
+			const FAmmoData* AData = Element.DataTable->FindRow<FAmmoData>(Element.RowName, Element.RowName.ToString());
+			if (!AData)
+				continue;
+
+			UAmmoBase* AmmoBase = NewObject<UAmmoBase>(this, UAmmoBase::StaticClass());
+			AmmoBase->SetAmmoCharacteristics(AData->AmmoCharacteristics);
+								
+			tempAmmo.Add(AmmoBase);
+		}
+		if (tempAmmo.Num() > 0)
+		{
+			WeaponBase->SetSelectedAmmoData(tempAmmo[0]);
+			WeaponBase->SetUsableAmmo(tempAmmo);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found after processing."));
+		}
+	}
+
+	// Set up spawn parameters
+	FActorSpawnParameters SpawnParameters;	
 	SpawnParameters.bNoFail = true;
 	SpawnParameters.SpawnCollisionHandlingOverride =
 		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
+	// Get the spawn location and transform
 	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
-	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform,
-	                                                              SpawnParameters);
-	Weapon->SetWeaponBaseRef(NewWeaponData);
+
+	// Spawn the weapon with the new name
+	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform, SpawnParameters);
+	
+	Weapon->SetWeaponBaseRef(WeaponBase);
 	Weapon->SwitchFireMode();
 	Weapon->Reload();
 	Weapon->UpdateVisual();
+	Weapon->SetWeaponTableAndName(WeaponTable, WeaponBase->GetID());
 
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-	                                           EAttachmentRule::SnapToTarget, true);
+											   EAttachmentRule::SnapToTarget, true);
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
-	                          UWeaponHelper::ConvertHolsterTypeToText(NewWeaponData->GetWeaponType()));
+							  UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetWeaponType()));
 
-	return Weapon;
+	// Append based on authority (Server or Client)
+	/*if (GetOwner()->HasAuthority()) // Server
+	{
+		UE_LOG(LogTemp, Error, TEXT("SERVER. WeaponName %s"),* WeaponName.ToString());
+	}
+	else // Client
+	{
+		//if (Weapon)
+		//	AddWeapon(Weapon, NumberSlot);
+		UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* WeaponName.ToString());
+	}*/
+	if (ActorFrom == this->GetOwner())
+	{
+		if (Weapon)
+		AddWeapon(Weapon, NumberSlot);
+		
+	}
+	
+	
 }
 
 void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot)
@@ -391,6 +460,27 @@ void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInst
 	}
 }
 
+bool UWeaponSystemComponent::CheckHolsterIsEmpty(EHolsterWeaponType Holster, int NumberOfHolster)
+{
+	switch (Holster)
+	{
+	case EHolsterWeaponType::None:
+		return true;
+
+	case EHolsterWeaponType::Pistol:
+		if (!WeaponPistolHolster)
+			return true;
+
+	case EHolsterWeaponType::Primary:
+		if (!WeaponPrimaryHolster[NumberOfHolster])
+
+	case EHolsterWeaponType::AlternativePrimary:
+		return true;
+	}
+
+	return false;
+}
+
 void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOfHolster)
 {
 	if (HandWeaponSocketName.IsNone())
@@ -401,13 +491,13 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 
 	if (!SkeletalMeshComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("SkeletalMeshComponent is null. Cannot attach weapon to the skeletal mesh."));
+		UE_LOG(LogTemp, Error, TEXT("Skeleal MeshComponent is null. Cannot attach weapon to the skeletal mesh."));
 		return;
 	}
 
 	if (LastUsedHolsterType != Holster && CurrentWeaponInHands)
 	{
-		HideWeapon();
+		//HideWeapon();
 	}
 
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
@@ -500,13 +590,14 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	UpdateSocketsTransform();
 }
 
-void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& LifetimeProperties) const
+void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(LifetimeProperties);
-
-	TArray<FLifetimeProperty> OutLifetimeProps;
-	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
+	DOREPLIFETIME(UWeaponSystemComponent, CurrentWeaponInHands);
+	DOREPLIFETIME(UWeaponSystemComponent, WeaponPrimaryHolster);
+	
 }
 
 void UWeaponSystemComponent::InitState()

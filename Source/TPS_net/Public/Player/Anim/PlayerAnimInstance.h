@@ -63,8 +63,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void SighUp();
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateHandPositions();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void HoldWeapon();
+	virtual void UpdateWeaponHoldPose();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void CleanWeaponData();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")

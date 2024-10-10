@@ -66,7 +66,7 @@ void UHealthComponent::ApplyDamage(float DamageAmount)
 	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 	if (OnHealthChangedDelegate.IsBound())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на сервере: %f"), Health);
+		//UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на сервере: %f"), Health);
 		OnHealthChangedDelegate.Broadcast(Health);
 	}
 	
@@ -89,7 +89,7 @@ void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
 
 void UHealthComponent::OnRep_Health() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
+	//UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
 	if (OnHealthChangedDelegate.IsBound())
 	{
 		OnHealthChangedDelegate.Broadcast(Health);

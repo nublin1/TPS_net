@@ -32,32 +32,40 @@ void UPlayerAnimInstance::SighUp()
 	IsInitilize = true;
 }
 
-void UPlayerAnimInstance::HoldWeapon()
+void UPlayerAnimInstance::UpdateHandPositions()
 {
-	if (!WeaponSysComponent)
+	if (!WeaponSysComponent || !IsHoldWeapon)
+	{
+		IsLeftHandNeeded = false;
+		IsUseHoldWeaponPose = false;
+		return;
+	}
+
+	// Получение позиции для левой руки и перезарядки
+	LeftHandPosition = WeaponSysComponent->GetLeftHandSocketTransform().GetLocation();
+	ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(
+		FName("AmmoEject"), RTS_Actor).GetLocation();
+
+	// Установка флага, нужен ли захват левой рукой
+	if (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponType() != EWeaponType::Pistol
+		&& WeaponSysComponent->GetCurrentStateTag() != FGameplayTag::RequestGameplayTag(
+			FName("WeaponInteractionStates.StartReload")))
+	{
+		IsLeftHandNeeded = true;
+	}
+	else
+	{
+		IsLeftHandNeeded = false;
+	}
+}
+
+void UPlayerAnimInstance::UpdateWeaponHoldPose()
+{
+	if (!WeaponSysComponent || !WeaponSysComponent->GetCurrentWeaponInHands())
 	{
 		return;
 	}
 	
-	LeftHandPosition = WeaponSysComponent->GetLeftHandSocketTransform().GetLocation();
-
-	if (IsHoldWeapon)
-	{
-		ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(FName("AmmoEject"), RTS_Actor).GetLocation();
-
-		if (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponType() != EWeaponType::Pistol
-			&& WeaponSysComponent->GetCurrentStateTag() !=  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
-		{
-			IsLeftHandNeeded = true;
-		}
-		else
-		{
-			IsLeftHandNeeded = false;
-		}		
-	}
-
-	
-
 	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 		|| (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))
 			&& IsHoldWeapon
@@ -79,11 +87,13 @@ void UPlayerAnimInstance::HoldWeapon()
 void UPlayerAnimInstance::CleanWeaponData()
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
+	UpdateHandPositions();
 }
 
 void UPlayerAnimInstance::UpdateWeaponData(AMasterWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
+	UpdateHandPositions();
 }
 
 void UPlayerAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

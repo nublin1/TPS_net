@@ -74,28 +74,32 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Data")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Weapon Data")
 	FName NameID;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	EWeaponType WeaponType;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::HitScan;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	FWeaponAssetData WeaponAssetData;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	TArray<UAmmoBase*> UsableAmmo;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	UAmmoBase* SelectedAmmoData;
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	virtual bool IsSupportedForNetworking() const override { return true; }
 };

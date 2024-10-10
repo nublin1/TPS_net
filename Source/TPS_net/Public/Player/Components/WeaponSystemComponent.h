@@ -86,15 +86,20 @@ public:
 	void UpdateSocketsTransform();
 
 	UFUNCTION(BlueprintCallable)
-	void PreShoot();
+	void InitializeFireSequence ();
 	UFUNCTION(BlueprintCallable)
 	bool CheckIsCanShoot();
 	UFUNCTION(BlueprintCallable)
-	void Shoot();
+	void TriggerFireWeapon();
 	UFUNCTION()
-	void ShootProjectile() const;
+	void ConfigureSpawnedProjectile() ;
+	UFUNCTION(Server, Unreliable)
+	void ServerProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics);
+	UFUNCTION()
+	void HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics) ;
+	
 
-	// State
+	// Stat
 	UFUNCTION(BlueprintCallable)
 	virtual bool SwitchState(FGameplayTag _StateTag) override;
 	UFUNCTION()
@@ -128,7 +133,7 @@ protected:
 	TScriptInterface<IProjectileFactory> ProjectileFactory;
 	
 	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName HandWeaponSocketName = "SocketWeapon";
@@ -137,7 +142,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	int NumberOfWeaponPrimaryHolsters = 5;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Blueprintable)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Blueprintable)
 	TArray<TObjectPtr<AMasterWeapon>> WeaponPrimaryHolster;
 	
 
@@ -178,13 +183,15 @@ protected:
 	TObjectPtr<UBlueprint> BulletBlueprint;
 
 	// State
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FGameplayTag CurrentStateTag;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTag InitialStateTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDebug = false;
-	
+
+	//UPROPERTY(Replicated)
+	//TObjectPtr<UWeaponBase> WeaponBase;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -195,9 +202,15 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
 	UFUNCTION(BlueprintCallable)
-	virtual AMasterWeapon* AddWeapon(UWeaponBase* NewWeaponData);
+	virtual void AddWeapon(AMasterWeapon* Weapon, int NumberSlot);
+	UFUNCTION(Server, Unreliable)
+	virtual void ServerAddWEA(FName WeaponName, AActor* ActorFrom);
+	UFUNCTION(NetMulticast, Unreliable)
+	virtual void MulticastAddWEA(FName WeaponName, AActor* ActorFrom );
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot = 0);
+	UFUNCTION(BlueprintCallable)
+	virtual bool CheckHolsterIsEmpty(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION(BlueprintCallable)
 	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION(BlueprintCallable)

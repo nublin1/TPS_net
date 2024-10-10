@@ -34,7 +34,9 @@ public:
 	void SendMessageTo_PcGs_Implementation(FString Sender, FString Message);
 
 	UFUNCTION(Server, Reliable)
-	void RequestHitDetectOnServer(AActor* Zombie);
+	void RequestHitDetectOnServer(AActor* Actor);
+	UFUNCTION(Server, Reliable)
+	void RequestClearAlreadyHitTargetsOnServer(AActor* Actor);
 
 	//Getters
 	UGameCoreHUDLayout* GetHUDLayout() const {return GameCoreHudLayout;}

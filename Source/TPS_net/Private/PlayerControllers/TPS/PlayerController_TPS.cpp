@@ -16,15 +16,25 @@ void APlayerController_TPS::SendMessageTo_PcGs_Implementation(FString Sender, FS
 {
 }
 
-void APlayerController_TPS::RequestHitDetectOnServer_Implementation(AActor* Zombie)
+void APlayerController_TPS::RequestClearAlreadyHitTargetsOnServer_Implementation(AActor* Actor)
 {
-	if (Zombie)
+	if (!Actor)
+		return;
+
+	if (UZombieCombatComponent* CombatComponent = Actor->FindComponentByClass<UZombieCombatComponent>())
 	{
-		UZombieCombatComponent* CombatComponent = Zombie->FindComponentByClass<UZombieCombatComponent>();
-		if (CombatComponent)
+		CombatComponent->ServerClearAlreadyHitTargets();
+	}
+	
+}
+
+void APlayerController_TPS::RequestHitDetectOnServer_Implementation(AActor* Actor)
+{
+	if (Actor)
+	{
+		if (UZombieCombatComponent* CombatComponent = Actor->FindComponentByClass<UZombieCombatComponent>())
 		{
-			// Сервер выполняет обнаружение удара
-			CombatComponent->HitDetect();
+			CombatComponent->Server_HitDetect();
 		}
 	}
 }

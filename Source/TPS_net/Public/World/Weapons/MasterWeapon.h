@@ -22,7 +22,9 @@ public:
 	//====================================================================	
 	AMasterWeapon();
 
-	void UpdateVisual() const;
+	void InitWeaponBaseData();
+	UFUNCTION()
+	void UpdateVisual();
 
 	UFUNCTION()
 	void DecreaseRoundsInMagazine() {RoundsInMagazine--;}
@@ -45,10 +47,11 @@ public:
 
 	//Setters
 	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }
+	void SetWeaponTableAndName(UDataTable* Table, FName Name);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	UWeaponBase* WeaponBaseRef;
+	TObjectPtr<UWeaponBase> WeaponBaseRef;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USkeletalMeshComponent* SkeletalMeshWeapon;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -71,8 +74,11 @@ protected:
 	//====================================================================
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	
 };

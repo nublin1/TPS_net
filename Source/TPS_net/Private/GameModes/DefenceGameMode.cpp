@@ -32,8 +32,15 @@ void ADefenceGameMode::PostLogin(APlayerController* NewPlayer)
 void ADefenceGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+	if (!NewPlayer)
+		return;
 
-	const auto StateMachine = Cast<APlayerCharacter>(NewPlayer->GetPawn())->GetActiveStateCharacter();
+	auto PlayerCharacter = Cast<APlayerCharacter>(NewPlayer->GetPawn());
+	//PlayerCharacter->SetOwner(GEngine->GetFirstLocalPlayerController(GetWorld()));
+
+	//UE_LOG(LogTemp, Log, TEXT("Owner of %s is %s"), *GetName(), *PlayerCharacter->GetOwner()->GetName());
+
+	const auto StateMachine = PlayerCharacter->GetActiveStateCharacter();
 	if (!StateMachine->StateChangedDelegate.IsAlreadyBound(this, &ADefenceGameMode::OnPlayerStateChanged))
 	{
 		StateMachine->StateChangedDelegate.AddDynamic(this, &ADefenceGameMode::OnPlayerStateChanged);

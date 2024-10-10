@@ -51,7 +51,9 @@ void APlayerCharacter::PostInitProperties()
 	if (WeaponSystemComponentClass)
 	{
 		WeaponSystemComponent = NewObject<UWeaponSystemComponent>(this, WeaponSystemComponentClass);
-		WeaponSystemComponent->OnComponentCreated();
+		
+		//WeaponSystemComponent->OnComponentCreated();
+	//	WeaponSystemComponent->RegisterComponent();
 		WeaponSystemComponent->SetIsReplicated(true);
 	}
 }
@@ -60,16 +62,15 @@ void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	SetOwner(GEngine->GetFirstLocalPlayerController(GetWorld()));
+
 	if (HasAuthority())
 	{
 		HealthComponent->OnKilledDelegate.AddUniqueDynamic(this, &APlayerCharacter::OnHealthDepleted);
 	}
 }
 
-void APlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-}
+
 
 void APlayerCharacter::OnHealthDepleted(AActor* Actor)
 {
