@@ -22,6 +22,7 @@ public:
 	//====================================================================	
 	AMasterWeapon();
 
+	UFUNCTION()
 	void InitWeaponBaseData();
 	UFUNCTION()
 	void UpdateVisual();
@@ -46,11 +47,11 @@ public:
 	uint16 GetMagazineSize() const {return WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;}
 
 	//Setters
-	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }
+	void SetWeaponBaseRef(UWeaponBase* _WeaponBase);
 	void SetWeaponTableAndName(UDataTable* Table, FName Name);
 
 protected:
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	UPROPERTY(Replicated,ReplicatedUsing = OnRep_WeaponBaseRef, BlueprintReadWrite, VisibleAnywhere)
 	TObjectPtr<UWeaponBase> WeaponBaseRef;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USkeletalMeshComponent* SkeletalMeshWeapon;
@@ -75,7 +76,9 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	
-
+	UFUNCTION()
+	void OnRep_WeaponBaseRef();
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -100,8 +100,8 @@ public:
 	
 
 	// Stat
-	UFUNCTION(BlueprintCallable)
-	virtual bool SwitchState(FGameplayTag _StateTag) override;
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	virtual void SwitchState(FGameplayTag _StateTag) override;
 	UFUNCTION()
 	virtual void OnRep_CurrentStateTag() override;
 	
@@ -133,12 +133,12 @@ protected:
 	TScriptInterface<IProjectileFactory> ProjectileFactory;
 	
 	//
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CurrentWeaponInHands, VisibleAnywhere, BlueprintReadWrite)
 	AMasterWeapon* CurrentWeaponInHands;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName HandWeaponSocketName = "SocketWeapon";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	AMasterWeapon* WeaponPistolHolster;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<AMasterWeapon> WeaponPistolHolster;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	int NumberOfWeaponPrimaryHolsters = 5;
@@ -215,6 +215,11 @@ protected:
 	virtual void TakeupArms(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION(BlueprintCallable)
 	virtual void HideWeapon();
+	UFUNCTION()
+	void AttachWeapon(AActor* ActorToAttach, FName SocketName);
+
+	UFUNCTION()
+	void OnRep_CurrentWeaponInHands();
 	
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsCanStartReload();

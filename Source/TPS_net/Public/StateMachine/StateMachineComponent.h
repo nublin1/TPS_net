@@ -33,7 +33,7 @@ public:
 	UStateMachineComponent();
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool SwitchState(FGameplayTag _StateTag) override;
+	virtual void SwitchState(FGameplayTag _StateTag) override;
 	UFUNCTION()
 	virtual void OnRep_CurrentStateTag() override;
 

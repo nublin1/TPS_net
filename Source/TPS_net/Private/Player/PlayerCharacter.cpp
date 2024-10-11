@@ -52,8 +52,8 @@ void APlayerCharacter::PostInitProperties()
 	{
 		WeaponSystemComponent = NewObject<UWeaponSystemComponent>(this, WeaponSystemComponentClass);
 		
-		//WeaponSystemComponent->OnComponentCreated();
-	//	WeaponSystemComponent->RegisterComponent();
+		WeaponSystemComponent->OnComponentCreated();
+		WeaponSystemComponent->RegisterComponent();
 		WeaponSystemComponent->SetIsReplicated(true);
 	}
 }

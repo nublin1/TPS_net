@@ -90,10 +90,10 @@ protected:
 	FWeaponAssetData WeaponAssetData;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
-	TArray<UAmmoBase*> UsableAmmo;
+	TArray<TObjectPtr<UAmmoBase>> UsableAmmo;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
-	UAmmoBase* SelectedAmmoData;
+	TObjectPtr<UAmmoBase> SelectedAmmoData;
 
 	//====================================================================
 	// FUNCTIONS

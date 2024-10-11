@@ -9,7 +9,10 @@
 
 AMasterWeapon::AMasterWeapon(): WeaponBaseRef(nullptr), SkeletalMeshWeapon(nullptr), TargetPoint(nullptr)
 {
-		
+	bReplicates = true;
+	bReplicateUsingRegisteredSubObjectList = true;
+
+	
 	// Initialize the SkeletalMeshWeapon component
 	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SetRootComponent(SkeletalMeshWeapon);
@@ -64,6 +67,12 @@ void AMasterWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AMasterWeapon::OnRep_WeaponBaseRef()
+{
+	//UE_LOG(LogTemp, Warning, TEXT(" AMasterWeapon WeaponBaseRef is replicate"));
+	UpdateVisual();
+}
+
 void AMasterWeapon::UpdateVisual() 
 {
 	if (!WeaponBaseRef)
@@ -81,17 +90,6 @@ void AMasterWeapon::UpdateVisual()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"),
 		       *WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetBlueprintClass()->GetName());
-	}
-
-	//FString AnimClassName = TEXT("WeaponAnimClass_C");		
-	//UClass* AnimInstanceClass = FindObject<UClass>(ANY_PACKAGE, *AnimClassName);
-	//if (AnimInstanceClass)
-	{
-		//SkeletalMeshWeapon->SetAnimInstanceClass(AnimInstanceClass);
-	}
-	//else
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"), *AnimClassName);
 	}
 }
 
@@ -118,7 +116,21 @@ void AMasterWeapon::SwitchFireMode()
 		SelectedFireMode = WeaponBaseRef->GetCharacteristicsOfTheWeapon().AvailableShootingModes[0];
 	
 	
-	UE_LOG(LogTemp, Log, TEXT("Fire Mode: %d"), static_cast<int>(SelectedFireMode));
+	//UE_LOG(LogTemp, Log, TEXT("Fire Mode: %d"), static_cast<int>(SelectedFireMode));
+}
+
+void AMasterWeapon::SetWeaponBaseRef(UWeaponBase* _WeaponBase)
+{
+	if (!_WeaponBase)
+		return;
+
+	if(IsValid(WeaponBaseRef))
+	{
+		RemoveReplicatedSubObject(WeaponBaseRef);
+	}
+	WeaponBaseRef = _WeaponBase;
+
+	AddReplicatedSubObject(WeaponBaseRef);
 }
 
 void AMasterWeapon::SetWeaponTableAndName(UDataTable* Table, FName Name)
@@ -139,5 +151,6 @@ void AMasterWeapon::Tick(float DeltaTime)
 void AMasterWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
+	DOREPLIFETIME(AMasterWeapon, WeaponBaseRef);
 }

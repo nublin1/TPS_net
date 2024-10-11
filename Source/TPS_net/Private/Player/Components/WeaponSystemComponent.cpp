@@ -17,6 +17,7 @@
 #include "Engine/TimerHandle.h"
 #include "Factories/BulletProjectileFactory.h"
 #include "Player/PlayerCharacter.h"
+
 #include "StateMachine/StateMachineComponent.h"
 
 // Sets default values for this component's properties
@@ -25,6 +26,7 @@ UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr),
                                                   PlayerCamera(nullptr), SkeletalMeshComponent(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 }
 
 bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
@@ -94,9 +96,8 @@ void UWeaponSystemComponent::InitializeFireSequence ()
 {
 	if (!CurrentWeaponInHands)
 		return;
-	
-	EFireMode FireMode =CurrentWeaponInHands->GetSelectedFireMode();
-	switch (FireMode)
+
+	switch (EFireMode FireMode =CurrentWeaponInHands->GetSelectedFireMode())
 	{
 	case EFireMode::Single:
 		AvailableShootsCount = 1;
@@ -114,9 +115,6 @@ void UWeaponSystemComponent::InitializeFireSequence ()
 
 bool UWeaponSystemComponent::CheckIsCanShoot()
 {
-	//if (WeaponInteraction != EWeaponInteraction::None)
-		//return false;
-	
 	if (!CurrentWeaponInHands
 		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 		|| CurrentWeaponInHands->GetRoundsInMagazine()<=0)
@@ -251,7 +249,7 @@ void UWeaponSystemComponent::HandleProjectileSpawn(const FVector& SpawnLocation,
 	}
 }
 
-bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
+void UWeaponSystemComponent::SwitchState_Implementation(FGameplayTag _StateTag)
 {
 	if (!_StateTag.MatchesTagExact(CurrentStateTag))
 	{
@@ -268,7 +266,6 @@ bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
 			
 			StateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
 		}
-		return true;
 	}
 	else
 	{
@@ -277,8 +274,6 @@ bool UWeaponSystemComponent::SwitchState(FGameplayTag _StateTag)
 			
 		}
 	}
-
-	return false;
 }
 
 void UWeaponSystemComponent::OnRep_CurrentStateTag()
@@ -309,19 +304,18 @@ void UWeaponSystemComponent::InitStartingWeapon()
 			continue;
 		}
 
-		if (GetOwner() -> HasAuthority())
+		//if (GetOwner() -> HasAuthority())
 		//if (GetOwnerRole() == ROLE_AutonomousProxy)
 		{
 			//UE_LOG(LogTemp, Error, TEXT("SERVER. WeaponName %s"),* StartingWeapon.ToString());
 			//
-			//ServerAddWEA(StartingWeapon);
+			//ServerAddWEA(StartingWeapon, GetOwner());
 			//MulticastAddWEA(StartingWeapon, nullptr);
 		}
-		else
+		//else
 		{
-			UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* StartingWeapon.ToString());
+			//UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* StartingWeapon.ToString());
 			ServerAddWEA(StartingWeapon, GetOwner());
-			
 		}
 	}
 }
@@ -329,18 +323,12 @@ void UWeaponSystemComponent::InitStartingWeapon()
 void UWeaponSystemComponent::AddWeapon(AMasterWeapon* Weapon, int NumberSlot)
 {
 	AssignWeaponToHolsterSlot(Weapon, NumberSlot);
-	
 }
 
 void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActor* ActorFrom)
 {
-	MulticastAddWEA(WeaponName, ActorFrom);
+	//MulticastAddWEA(WeaponName, ActorFrom);
 
-	//
-}
-
-void UWeaponSystemComponent::MulticastAddWEA_Implementation(FName WeaponName, AActor* ActorFrom )
-{
 	const FWeaponData* WData = WeaponTable->FindRow<FWeaponData>(WeaponName, WeaponName.ToString());
 	
 	if (!WData)
@@ -410,9 +398,9 @@ void UWeaponSystemComponent::MulticastAddWEA_Implementation(FName WeaponName, AA
 	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
 
-	// Spawn the weapon with the new name
+	// Spawn the weapon
 	AMasterWeapon* Weapon = GetWorld()->SpawnActor<AMasterWeapon>(AMasterWeapon::StaticClass(), SpawnTransform, SpawnParameters);
-	
+	Weapon->SetReplicates(true);
 	Weapon->SetWeaponBaseRef(WeaponBase);
 	Weapon->SwitchFireMode();
 	Weapon->Reload();
@@ -424,24 +412,17 @@ void UWeaponSystemComponent::MulticastAddWEA_Implementation(FName WeaponName, AA
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
 							  UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetWeaponType()));
 
-	// Append based on authority (Server or Client)
-	/*if (GetOwner()->HasAuthority()) // Server
-	{
-		UE_LOG(LogTemp, Error, TEXT("SERVER. WeaponName %s"),* WeaponName.ToString());
-	}
-	else // Client
-	{
-		//if (Weapon)
-		//	AddWeapon(Weapon, NumberSlot);
-		UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* WeaponName.ToString());
-	}*/
-	if (ActorFrom == this->GetOwner())
+	
+	//if (ActorFrom == this->GetOwner())
 	{
 		if (Weapon)
 		AddWeapon(Weapon, NumberSlot);
 		
 	}
-	
+}
+
+void UWeaponSystemComponent::MulticastAddWEA_Implementation(FName WeaponName, AActor* ActorFrom )
+{
 	
 }
 
@@ -500,9 +481,6 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 		//HideWeapon();
 	}
 
-	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-	                                           EAttachmentRule::SnapToTarget, true);
-
 	switch (Holster)
 	{
 	case EHolsterWeaponType::None:
@@ -511,7 +489,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 	case EHolsterWeaponType::Pistol:
 		if (!WeaponPistolHolster || WeaponPistolHolster == CurrentWeaponInHands)
 			break;
-		WeaponPistolHolster->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
+		
 		CurrentWeaponInHands = WeaponPistolHolster;
 		LastUsedHolsterType = Holster;
 		break;
@@ -519,7 +497,6 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 	case EHolsterWeaponType::Primary:
 		if (!WeaponPrimaryHolster[NumberOfHolster] || WeaponPrimaryHolster[NumberOfHolster] == CurrentWeaponInHands)
 			break;
-		WeaponPrimaryHolster[NumberOfHolster]->AttachToComponent(SkeletalMeshComponent, AttachRule, HandWeaponSocketName);
 		CurrentWeaponInHands = WeaponPrimaryHolster[NumberOfHolster];
 		LastUsedHolsterType = Holster;
 		break;
@@ -529,9 +506,10 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 	}
 
 	BulletBlueprint = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+
+	OnRep_CurrentWeaponInHands();
 	
-	if (OnTakeupArmsDelegate.IsBound())
-		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);
+	
 }
 
 void UWeaponSystemComponent::HideWeapon()
@@ -549,6 +527,26 @@ void UWeaponSystemComponent::HideWeapon()
 
 	if (OnHideArmsDelegate.IsBound())
 		OnHideArmsDelegate.Broadcast();
+}
+
+void UWeaponSystemComponent::AttachWeapon(AActor* ActorToAttach, FName SocketName)
+{
+	if (!ActorToAttach)
+		return;
+	
+	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+											   EAttachmentRule::SnapToTarget, true);
+
+	ActorToAttach->AttachToComponent(SkeletalMeshComponent, AttachRule, SocketName);
+}
+
+void UWeaponSystemComponent::OnRep_CurrentWeaponInHands()
+{
+	if (CurrentWeaponInHands)
+		AttachWeapon(CurrentWeaponInHands, HandWeaponSocketName);
+
+	if (OnTakeupArmsDelegate.IsBound())
+		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);
 }
 
 bool UWeaponSystemComponent::IsCanStartReload()
@@ -596,6 +594,7 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 		
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentWeaponInHands);
+	DOREPLIFETIME(UWeaponSystemComponent, WeaponPistolHolster);
 	DOREPLIFETIME(UWeaponSystemComponent, WeaponPrimaryHolster);
 	
 }

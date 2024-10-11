@@ -36,7 +36,7 @@ void ADefenceGameMode::HandleStartingNewPlayer_Implementation(APlayerController*
 		return;
 
 	auto PlayerCharacter = Cast<APlayerCharacter>(NewPlayer->GetPawn());
-	//PlayerCharacter->SetOwner(GEngine->GetFirstLocalPlayerController(GetWorld()));
+	PlayerCharacter->SetOwner(GEngine->GetFirstLocalPlayerController(GetWorld()));
 
 	//UE_LOG(LogTemp, Log, TEXT("Owner of %s is %s"), *GetName(), *PlayerCharacter->GetOwner()->GetName());
 
