@@ -357,10 +357,12 @@ void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActo
 
 	TObjectPtr<UWeaponBase> WeaponBase = NewObject<UWeaponBase>(this, UWeaponBase::StaticClass());
 	WeaponBase->SetID(WData->Name);
+	WeaponBase->SetWeaponType(WData->WeaponType);
+	WeaponBase->SetHolsterWeaponType(WData->HolsterWeaponType);
 	WeaponBase->SetBulletMode(WData->BulletMode);
 	WeaponBase->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
 	WeaponBase->SetWeaponAssetData(WData->WeaponAssetData);
-	WeaponBase->SetWeaponType(WData->WeaponType);
+	
 
 	if(!WData->CharacteristicsOfTheWeapon.UsableAmmo.IsEmpty())
 	{
