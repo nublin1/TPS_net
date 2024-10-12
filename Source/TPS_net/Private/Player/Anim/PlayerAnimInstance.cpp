@@ -41,6 +41,16 @@ void UPlayerAnimInstance::UpdateHandPositions()
 		return;
 	}
 
+	
+}
+
+void UPlayerAnimInstance::UpdateWeaponHoldPose()
+{
+	if (!WeaponSysComponent || !WeaponSysComponent->GetCurrentWeaponInHands())
+	{
+		return;
+	}
+
 	// Получение позиции для левой руки и перезарядки
 	LeftHandPosition = WeaponSysComponent->GetLeftHandSocketTransform().GetLocation();
 	ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(
@@ -57,14 +67,6 @@ void UPlayerAnimInstance::UpdateHandPositions()
 	{
 		IsLeftHandNeeded = false;
 	}
-}
-
-void UPlayerAnimInstance::UpdateWeaponHoldPose()
-{
-	if (!WeaponSysComponent || !WeaponSysComponent->GetCurrentWeaponInHands())
-	{
-		return;
-	}
 	
 	if (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 		|| (WeaponSysComponent->GetCurrentStateTag() ==  FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))
@@ -78,10 +80,6 @@ void UPlayerAnimInstance::UpdateWeaponHoldPose()
 	{
 		IsUseHoldWeaponPose = false;
 	}
-
-	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("GetCurrentStateTag %s"), *WeaponSysComponent->GetCurrentStateTag().ToString() ));
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("IsHoldWeapon %s"), IsHoldWeapon ? TEXT("true") : TEXT("false")));
-
 }
 
 void UPlayerAnimInstance::CleanWeaponData()

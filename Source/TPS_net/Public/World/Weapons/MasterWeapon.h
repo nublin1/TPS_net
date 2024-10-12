@@ -27,10 +27,14 @@ public:
 	UFUNCTION()
 	void UpdateVisual();
 
-	UFUNCTION()
-	void DecreaseRoundsInMagazine() {RoundsInMagazine--;}
+	UFUNCTION(BlueprintCallable)
+	void DecreaseRoundsInMagazine();
+	UFUNCTION(Server, Unreliable)
+	void ServerDecreaseRoundsInMagazine();
 	UFUNCTION(BlueprintCallable)
 	void Reload();
+	UFUNCTION(Server, Unreliable)
+	void ServerReload();
 	UFUNCTION(BlueprintCallable)
 	virtual void SwitchFireMode();
 
@@ -59,9 +63,9 @@ protected:
 	UStaticMeshComponent* TargetPoint;
 
 	//
-	UPROPERTY()
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_RoundsInMagazine)
 	uint16 RoundsInMagazine = 10;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	EFireMode SelectedFireMode = EFireMode::None;
 
 	//
@@ -78,6 +82,8 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_WeaponBaseRef();
+	UFUNCTION()
+	void OnRep_RoundsInMagazine();
 	
 public:
 	// Called every frame

@@ -80,7 +80,7 @@ public:
 	bool bIsAnyWeaponInHands() const;
 	
 	UFUNCTION()
-	bool bCheckHolsterAvaibility(EWeaponType BeingCheckedType, int NumberOfHolster = 0) const; // true mean available
+	bool bCheckHolsterAvaibility(EHolsterWeaponType BeingCheckedType, int NumberOfHolster = 0) const; // true mean available
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateSocketsTransform();
@@ -179,7 +179,7 @@ protected:
 	uint8 AvailableShootsCount = 0;
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UBlueprint> BulletBlueprint;
 
 	// State
@@ -205,8 +205,6 @@ protected:
 	virtual void AddWeapon(AMasterWeapon* Weapon, int NumberSlot);
 	UFUNCTION(Server, Unreliable)
 	virtual void ServerAddWEA(FName WeaponName, AActor* ActorFrom);
-	UFUNCTION(NetMulticast, Unreliable)
-	virtual void MulticastAddWEA(FName WeaponName, AActor* ActorFrom );
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot = 0);
 	UFUNCTION(BlueprintCallable)

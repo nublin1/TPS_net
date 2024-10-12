@@ -52,7 +52,7 @@ void AMasterWeapon::InitWeaponBaseData()
 				WeaponBaseRef->SetBulletMode(WData->BulletMode);
 				WeaponBaseRef->SetCharacteristicsOfTheWeapon(WData->CharacteristicsOfTheWeapon);
 				WeaponBaseRef->SetWeaponAssetData(WData->WeaponAssetData);
-				WeaponBaseRef->SetWeaponType(WData->HolsterType);
+				WeaponBaseRef->SetWeaponType(WData->WeaponType);
 
 				SelectedFireMode = WData->CharacteristicsOfTheWeapon.AvailableShootingModes[0];
 				Reload();
@@ -71,6 +71,10 @@ void AMasterWeapon::OnRep_WeaponBaseRef()
 {
 	//UE_LOG(LogTemp, Warning, TEXT(" AMasterWeapon WeaponBaseRef is replicate"));
 	UpdateVisual();
+}
+
+void AMasterWeapon::OnRep_RoundsInMagazine()
+{
 }
 
 void AMasterWeapon::UpdateVisual() 
@@ -93,7 +97,30 @@ void AMasterWeapon::UpdateVisual()
 	}
 }
 
+void AMasterWeapon::DecreaseRoundsInMagazine()
+{
+	if (HasAuthority())
+		RoundsInMagazine--;
+	else
+		ServerDecreaseRoundsInMagazine();
+}
+
+void AMasterWeapon::ServerDecreaseRoundsInMagazine_Implementation()
+{
+	RoundsInMagazine--;
+}
+
 void AMasterWeapon::Reload()
+{
+	if (HasAuthority())
+		RoundsInMagazine = WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;
+	else
+	{
+		ServerReload();
+	}
+}
+
+void AMasterWeapon::ServerReload_Implementation()
 {
 	RoundsInMagazine = WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;
 }
@@ -126,11 +153,13 @@ void AMasterWeapon::SetWeaponBaseRef(UWeaponBase* _WeaponBase)
 
 	if(IsValid(WeaponBaseRef))
 	{
+		RemoveReplicatedSubObject(WeaponBaseRef->GetSelectedAmmoData());
 		RemoveReplicatedSubObject(WeaponBaseRef);
 	}
 	WeaponBaseRef = _WeaponBase;
 
 	AddReplicatedSubObject(WeaponBaseRef);
+	AddReplicatedSubObject(WeaponBaseRef->GetSelectedAmmoData());
 }
 
 void AMasterWeapon::SetWeaponTableAndName(UDataTable* Table, FName Name)
@@ -153,4 +182,6 @@ void AMasterWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMasterWeapon, WeaponBaseRef);
+	DOREPLIFETIME(AMasterWeapon, RoundsInMagazine);
+	DOREPLIFETIME(AMasterWeapon, SelectedFireMode);
 }

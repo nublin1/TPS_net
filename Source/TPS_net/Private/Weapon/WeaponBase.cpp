@@ -5,9 +5,9 @@
 
 #include "Net/UnrealNetwork.h"
 
-UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), WeaponAssetData(), SelectedAmmoData(nullptr)
+UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Primary), HolsterWeaponType(EHolsterWeaponType::Primary), WeaponAssetData(),
+                            SelectedAmmoData(nullptr)
 {
-	
 }
 
 void UWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -16,6 +16,7 @@ void UWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(UWeaponBase, NameID);
 	DOREPLIFETIME(UWeaponBase, WeaponType);
+	DOREPLIFETIME(UWeaponBase, HolsterWeaponType);
 	DOREPLIFETIME(UWeaponBase, BulletMode);
 	DOREPLIFETIME(UWeaponBase, CharacteristicsOfTheWeapon);
 	DOREPLIFETIME(UWeaponBase, WeaponAssetData);

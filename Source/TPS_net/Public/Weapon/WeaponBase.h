@@ -41,6 +41,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
+	UFUNCTION(BlueprintCallable)
+	EHolsterWeaponType GetHolsterWeaponType() const { return HolsterWeaponType; }
 	UFUNCTION()
 	TArray<UAmmoBase*> GetUsableAmmo() {return UsableAmmo;}
 	UFUNCTION()
@@ -49,7 +51,9 @@ public:
 
 	// Setters
 	UFUNCTION()
-	void SetWeaponType(EWeaponType _HolsterType) { this->WeaponType = _HolsterType; }
+	void SetWeaponType(EWeaponType _WeaponType) { this->WeaponType = _WeaponType; }
+	UFUNCTION()
+	void SetHolsterWeaponType(EHolsterWeaponType _HolsterType) { this->HolsterWeaponType = _HolsterType; }
 
 	UFUNCTION()
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
@@ -79,6 +83,9 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	EWeaponType WeaponType;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	EHolsterWeaponType HolsterWeaponType;
+	
 
 	UPROPERTY(Replicated, EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::HitScan;
@@ -86,7 +93,7 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere)
 	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	FWeaponAssetData WeaponAssetData;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)

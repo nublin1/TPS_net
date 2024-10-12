@@ -11,14 +11,14 @@
 
 class ABaseBulletActor;
 
-UENUM(Blueprintable, BlueprintType)
+UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	Primary UMETA(DisplayName = "Primary"),
 	Pistol	UMETA(DisplayName = "Pistol"),
 };
 
-UENUM(meta=(ScriptName="EHolsterWeaponType"))
+UENUM(BlueprintType, meta=(ScriptName="EHolsterWeaponType"))
 enum class EHolsterWeaponType : uint8
 {
 	None				UMETA(DisplayName = "None"),
@@ -43,7 +43,7 @@ enum class EFireMode : uint8
 	Full_Auto   = 3   UMETA(DisplayName = "Full_Auto"),
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FWeaponAssetData
 {
 	GENERATED_USTRUCT_BODY()
@@ -51,12 +51,17 @@ struct FWeaponAssetData
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* SkeletalMesh;
 
-	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
-	UBlueprint* BulletActor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadAnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ShootAnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimSequence> FireAnimSequence;
 
+	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
+	TObjectPtr<UBlueprint> BulletActor;
 	UPROPERTY(EditAnywhere)
 	UAnimBlueprint* AnimationBlueprint;
-
 	UPROPERTY(EditAnywhere)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
 };
@@ -98,7 +103,9 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere)
-	EWeaponType HolsterType = EWeaponType::Primary;
+	EWeaponType WeaponType = EWeaponType::Primary;
+	UPROPERTY(EditAnywhere)
+	EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
 
 	UPROPERTY(EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::Projectile;
@@ -117,8 +124,6 @@ class TPS_NET_API UWeaponHelper : public UObject
 	GENERATED_BODY()
 	
 public:
-	
-	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	static FName ConvertHolsterTypeToText(const EWeaponType HolsterType)
 	{
