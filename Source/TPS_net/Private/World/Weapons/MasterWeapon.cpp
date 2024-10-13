@@ -75,6 +75,8 @@ void AMasterWeapon::OnRep_WeaponBaseRef()
 
 void AMasterWeapon::OnRep_RoundsInMagazine()
 {
+	if (OnCompleteReloadDelegate.IsBound())
+		OnCompleteReloadDelegate.Broadcast(RoundsInMagazine);
 }
 
 void AMasterWeapon::UpdateVisual() 
@@ -113,7 +115,10 @@ void AMasterWeapon::ServerDecreaseRoundsInMagazine_Implementation()
 void AMasterWeapon::Reload()
 {
 	if (HasAuthority())
+	{
 		RoundsInMagazine = WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;
+		OnRep_RoundsInMagazine();
+	}
 	else
 	{
 		ServerReload();

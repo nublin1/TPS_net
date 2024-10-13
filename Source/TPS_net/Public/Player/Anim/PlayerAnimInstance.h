@@ -68,7 +68,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponHoldPose();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void CleanWeaponData();
+	virtual void CleanWeaponData(AMasterWeapon* MasterWeapon);
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponData(AMasterWeapon* newMasterWeapon);
 

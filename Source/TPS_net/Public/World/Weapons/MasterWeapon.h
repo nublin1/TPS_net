@@ -9,7 +9,9 @@
 
 class UWeaponBase;
 
-
+#pragma region Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, int, RoundsInMagazine);
+#pragma endregion
 
 UCLASS()
 class TPS_NET_API AMasterWeapon : public AActor
@@ -17,6 +19,12 @@ class TPS_NET_API AMasterWeapon : public AActor
 	GENERATED_BODY()
 
 public:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	// Delegates
+	FOnCompleteReloadSignature OnCompleteReloadDelegate;
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================	

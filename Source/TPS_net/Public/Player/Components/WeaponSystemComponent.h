@@ -32,8 +32,8 @@ enum EWeaponTransitionType: uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMagazine);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHideArmsSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHideArmsSignature,  AMasterWeapon*, HideWeaponInHands);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchFireMode, EFireMode, FireMode);
 
 #pragma endregion
@@ -55,8 +55,8 @@ public:
 	FOnTakeupArmsSignature OnTakeupArmsDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnHideArmsSignature OnHideArmsDelegate;
-	UPROPERTY(BlueprintAssignable)
-	FOnCompleteReloadSignature OnCompleteReloadDelegate;
+	//UPROPERTY(BlueprintAssignable)
+	//FOnCompleteReloadSignature OnCompleteReloadDelegate;
 	UPROPERTY(BlueprintCallable)
 	FOnSwitchFireMode OnSwitchFireModeDelegate;
 	

@@ -33,7 +33,6 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UHealthComponent::TakeDamage(float DamageAmount)
 {
-	const auto Controller = GetOwner()-> GetInstigatorController();
 	if (!GetOwner()-> GetInstigatorController())
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Controller is Null"));

@@ -519,10 +519,12 @@ void UWeaponSystemComponent::HideWeapon()
 	CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
 	                                        UWeaponHelper::ConvertHolsterTypeToText(
 		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
+	if (OnHideArmsDelegate.IsBound())
+		OnHideArmsDelegate.Broadcast(CurrentWeaponInHands);
+	
 	CurrentWeaponInHands = nullptr;
 
-	if (OnHideArmsDelegate.IsBound())
-		OnHideArmsDelegate.Broadcast();
+	
 }
 
 void UWeaponSystemComponent::AttachWeapon(AActor* ActorToAttach, FName SocketName)
@@ -603,10 +605,7 @@ void UWeaponSystemComponent::InitState()
 
 	if (CurrentStateTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload"))))
 	{
-		CurrentWeaponInHands->Reload();
-		if (OnCompleteReloadDelegate.IsBound())
-			OnCompleteReloadDelegate.Broadcast(CurrentWeaponInHands);
-		
+		CurrentWeaponInHands->Reload();		
 		SwitchState(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")));
 	}
 }

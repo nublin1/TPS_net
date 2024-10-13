@@ -82,7 +82,7 @@ void UPlayerAnimInstance::UpdateWeaponHoldPose()
 	}
 }
 
-void UPlayerAnimInstance::CleanWeaponData()
+void UPlayerAnimInstance::CleanWeaponData(AMasterWeapon* MasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
 	UpdateHandPositions();

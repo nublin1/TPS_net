@@ -50,14 +50,10 @@ struct FWeaponAssetData
 
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* SkeletalMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> ReloadAnimMontage;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ShootAnimMontage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimSequence> FireAnimSequence;
-
+	
 	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
 	TObjectPtr<UBlueprint> BulletActor;
 	UPROPERTY(EditAnywhere)
