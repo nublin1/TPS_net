@@ -2,6 +2,9 @@
 
 
 #include "PlayerControllers/AI/ZombieController.h"
+
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Navigation/CrowdFollowingComponent.h"
 
 AZombieController::AZombieController(const FObjectInitializer& ObjectInitializer)
@@ -37,6 +40,27 @@ void AZombieController::Seek()
 		return;
 	
 	//UE_LOG(LogTemp, Warning, TEXT("TargetActor: %s"), *CurrentTargetActor->GetName());
+
+	bIsTargetIsReachable = false;
+	NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	FVector StartLocation = GetPawn()->GetActorLocation();
+	if (NavSystem)
+		Path = NavSystem->FindPathToLocationSynchronously(GetWorld(), StartLocation, CurrentTargetActor->GetActorLocation());
+	
+	if (Path && Path->PathPoints.Num() > 1)
+	{
+		if (!Path->IsPartial())
+		{
+			bIsTargetIsReachable = true;
+			//UE_LOG(LogTemp, Warning, TEXT("Цель достижима!"));
+		}
+		else
+		{
+			bIsTargetIsReachable = false;
+			//UE_LOG(LogTemp, Warning, TEXT("Путь частичный, цель недоступна!"));
+		}
+	}
+	
 	
 	if(CurrentTargetActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
 	{
@@ -59,6 +83,8 @@ void AZombieController::Seek()
 void AZombieController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	Super::OnMoveCompleted(RequestID, Result);
+	UE_LOG(LogTemp, Warning, TEXT("MoveCompleted. IsTargetIsReachable = %s"), bIsTargetIsReachable ? TEXT("true") : TEXT("false"));
+	
 	
 	if (Result.IsSuccess())
 	{

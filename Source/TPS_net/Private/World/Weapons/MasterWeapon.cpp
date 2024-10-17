@@ -3,6 +3,7 @@
 
 #include "World/Weapons/MasterWeapon.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/WeaponBase.h"
 
@@ -96,6 +97,49 @@ void AMasterWeapon::UpdateVisual()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"),
 		       *WeaponBaseRef->GetWeaponAssetData().AnimationBlueprint->GetBlueprintClass()->GetName());
+	}
+}
+
+void AMasterWeapon::PlayShootEffect(UParticleSystem* ParticleSystem, FName SocketName)
+{
+	if (!ParticleSystem || !SkeletalMeshWeapon) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid ParticleSystem or SkeletalMeshWeapon"));
+		return;
+	}
+
+	if (HasAuthority())
+	{
+		PlayShootEffect_Multicast(ParticleSystem, SocketName);
+	}
+	else
+	{
+		PlayShootEffect_Server(ParticleSystem, SocketName);
+	}
+	
+}
+
+void AMasterWeapon::PlayShootEffect_Server_Implementation(UParticleSystem* ParticleSystem, FName SocketName)
+{
+	PlayShootEffect_Multicast(ParticleSystem, SocketName);
+}
+
+void AMasterWeapon::PlayShootEffect_Multicast_Implementation(UParticleSystem* ParticleSystem, FName SocketName)
+{
+	UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(
+		ParticleSystem,                          // Шаблон эмиттера
+		SkeletalMeshWeapon,                      // К какому компоненту прикрепляем
+		SocketName,                              // Имя сокета, куда прикрепить
+		FVector::ZeroVector,                     // Локальная позиция
+		FRotator::ZeroRotator,                   // Локальная ротация
+		FVector(1.0f, 1.0f, 1.0f),               // Масштаб
+		EAttachLocation::KeepRelativeOffset,     // Тип привязки
+		true                                     // Автоматическое уничтожение
+	);
+
+	if (!ParticleComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn emitter!"));
 	}
 }
 

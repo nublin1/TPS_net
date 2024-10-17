@@ -10,7 +10,6 @@
 #include "Weapon/WeaponBase.h"
 #include "WeaponSystemComponent.generated.h"
 
-
 class UCameraComponent;
 struct FGameplayTag;
 class IProjectileFactory;
@@ -30,7 +29,8 @@ enum EWeaponTransitionType: uint8
 
 #pragma region Delegates
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, int32, RoundsInMagazine);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedProjectileSignature, int32, RoundsInMagazine);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopFireSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHideArmsSignature,  AMasterWeapon*, HideWeaponInHands);
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
@@ -50,7 +50,9 @@ public:
 	//====================================================================
 	// Delegates
 	UPROPERTY(BlueprintAssignable)
-	FOnShootSignature OnShootDelegate;
+	FOnSpawnedProjectileSignature OnSpawnedProjectile;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnStopFireSignature OnStopFireDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnTakeupArmsSignature OnTakeupArmsDelegate;
 	UPROPERTY(BlueprintAssignable)
@@ -123,6 +125,8 @@ public:
 	AMasterWeapon* GetCurrentWeaponInHands() {return CurrentWeaponInHands;}
 	UFUNCTION()
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
+	UFUNCTION()
+	bool GetIsShooting() {return bIsShooting;}
 
 protected:
 	//====================================================================
@@ -171,6 +175,8 @@ protected:
 	FRotator AimOffset;
 
 	//
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	bool bIsShooting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsNeedCalculateShootInfo = false;
 	UPROPERTY()

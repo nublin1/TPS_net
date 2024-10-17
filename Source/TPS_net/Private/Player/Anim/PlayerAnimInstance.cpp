@@ -27,6 +27,7 @@ void UPlayerAnimInstance::SighUp()
 	{
 		WeaponSysComponent->OnHideArmsDelegate.AddDynamic(this, &UPlayerAnimInstance::CleanWeaponData);
 		WeaponSysComponent->OnTakeupArmsDelegate.AddDynamic(this, &UPlayerAnimInstance::UpdateWeaponData);
+		
 	}
 
 	IsInitilize = true;
@@ -40,8 +41,6 @@ void UPlayerAnimInstance::UpdateHandPositions()
 		IsUseHoldWeaponPose = false;
 		return;
 	}
-
-	
 }
 
 void UPlayerAnimInstance::UpdateWeaponHoldPose()

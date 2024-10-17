@@ -194,8 +194,9 @@ void UWeaponSystemComponent::ConfigureSpawnedProjectile ()
 			FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset + RandomSpread;
 			
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
-			if(OnShootDelegate.IsBound())
-				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine()-1);
+			bIsShooting = true;
+			if(OnSpawnedProjectile.IsBound())
+				OnSpawnedProjectile.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine()-1);
 		}
 	}
 }
@@ -235,9 +236,6 @@ void UWeaponSystemComponent::HandleProjectileSpawn(const FVector& SpawnLocation,
 			{
 				UE_LOG(LogTemp, Error, TEXT("Error: Selected ammo data is null in %s"), *GetOwner()->GetName());
 			}
-
-			/*if(OnShootDelegate.IsBound())
-				OnShootDelegate.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());*/
 
 			BulletProjectileComponent->SetAmmoData(NewBulletAmmoData);
 			BulletProjectileComponent->Init();
@@ -335,7 +333,7 @@ void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActo
 
 	bool bIsFreeSlotFound = false;
 	int NumberSlot = 0;
-	if (WData->WeaponType == EWeaponType::Primary)
+	if (WData->HolsterWeaponType == EHolsterWeaponType::Primary)
 	{
 		for(int i = 0; i < NumberOfWeaponPrimaryHolsters; i++)
 		{
@@ -347,7 +345,7 @@ void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActo
 			}
 		}
 	}
-	else if (WData->WeaponType ==EWeaponType::Pistol)
+	else if (WData->HolsterWeaponType ==EHolsterWeaponType::Pistol)
 	{
 		bIsFreeSlotFound = bCheckHolsterAvaibility (WData->HolsterWeaponType);
 	}
@@ -412,7 +410,7 @@ void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActo
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
 											   EAttachmentRule::SnapToTarget, true);
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
-							  UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetWeaponType()));
+							  UWeaponHelper::ConvertHolsterTypeToText(WeaponBase->GetHolsterWeaponType()));
 
 	
 	//if (ActorFrom == this->GetOwner())
@@ -425,12 +423,12 @@ void UWeaponSystemComponent::ServerAddWEA_Implementation(FName WeaponName, AActo
 
 void UWeaponSystemComponent::AssignWeaponToHolsterSlot(AMasterWeapon* WeaponInstance, int NumberSlot)
 {
-	switch (WeaponInstance->GetWeaponBaseRef()->GetWeaponType())
+	switch (WeaponInstance->GetWeaponBaseRef()->GetHolsterWeaponType())
 	{
-	case EWeaponType::Primary:
+	case EHolsterWeaponType::Primary:
 		WeaponPrimaryHolster[NumberSlot] = WeaponInstance;		
 		break;
-	case EWeaponType::Pistol:
+	case EHolsterWeaponType::Pistol:
 		WeaponPistolHolster = WeaponInstance;
 		break;
 	default:
@@ -518,7 +516,7 @@ void UWeaponSystemComponent::HideWeapon()
 
 	CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
 	                                        UWeaponHelper::ConvertHolsterTypeToText(
-		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponType()));
+		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetHolsterWeaponType()));
 	if (OnHideArmsDelegate.IsBound())
 		OnHideArmsDelegate.Broadcast(CurrentWeaponInHands);
 	
@@ -589,7 +587,8 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-		
+
+	DOREPLIFETIME(UWeaponSystemComponent, bIsShooting);
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentWeaponInHands);
 	DOREPLIFETIME(UWeaponSystemComponent, WeaponPistolHolster);

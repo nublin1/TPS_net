@@ -46,7 +46,7 @@ void UAmmoWidget::SighUp()
 	if (!WeaponSystemComponent)
 		return;
 
-	WeaponSystemComponent->OnShootDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	WeaponSystemComponent->OnSpawnedProjectile.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	WeaponSystemComponent->OnTakeupArmsDelegate.AddDynamic(this, &UAmmoWidget::UAmmoWidget::RefreshWeaponDetails);
 	
 	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::ClearWeaponDetails);

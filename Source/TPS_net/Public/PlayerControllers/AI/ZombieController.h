@@ -7,6 +7,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "ZombieController.generated.h"
 
+class UNavigationSystemV1;
 /**
  * 
  */
@@ -43,7 +44,14 @@ protected:
 	FVector TargetLocation;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool bIsTargetIsReachable = false;
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsMoveCompleted = false;
+
+	UPROPERTY()
+	UNavigationSystemV1* NavSystem;
+	UPROPERTY()
+	UNavigationPath* Path = nullptr;
 	
 	//====================================================================
 	// FUNCTIONS

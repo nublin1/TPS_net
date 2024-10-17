@@ -74,6 +74,8 @@ protected:
 	void NPCDead(AActor* KilledActor);
 	UFUNCTION(Server, Unreliable)
 	void Server_NPCDead(AActor* KilledActor);
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticast_NPCDead(AActor* KilledActor);
 	
 
 public:

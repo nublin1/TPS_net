@@ -14,8 +14,10 @@ class ABaseBulletActor;
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	Primary UMETA(DisplayName = "Primary"),
+	Rifle UMETA(DisplayName = "Rifle"),
 	Pistol	UMETA(DisplayName = "Pistol"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	
 };
 
 UENUM(BlueprintType, meta=(ScriptName="EHolsterWeaponType"))
@@ -28,7 +30,7 @@ enum class EHolsterWeaponType : uint8
 };
 
 UENUM(Blueprintable, BlueprintType)
-enum class EBulletMode
+enum class EBulletMode : uint8
 {
 	HitScan		UMETA(DisplayName = "HitScan"),
 	Projectile	UMETA(DisplayName = "Projectile"),
@@ -99,7 +101,7 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere)
-	EWeaponType WeaponType = EWeaponType::Primary;
+	EWeaponType WeaponType = EWeaponType::Rifle;
 	UPROPERTY(EditAnywhere)
 	EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
 
@@ -121,13 +123,13 @@ class TPS_NET_API UWeaponHelper : public UObject
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	static FName ConvertHolsterTypeToText(const EWeaponType HolsterType)
+	static FName ConvertHolsterTypeToText(const EHolsterWeaponType HolsterType)
 	{
 		switch (HolsterType)
 		{
-		case EWeaponType::Primary:
+		case EHolsterWeaponType::Primary:
 			return FName("PrimaryHolster");
-		case EWeaponType::Pistol:
+		case EHolsterWeaponType::Pistol:
 			return FName("R_PistolHolster");
 		default:
 			return FName("");

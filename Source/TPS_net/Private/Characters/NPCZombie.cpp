@@ -113,6 +113,11 @@ void ANPCZombie::NPCDead(AActor* KilledActor)
 
 void ANPCZombie::Server_NPCDead_Implementation(AActor* KilledActor)
 {
+	NetMulticast_NPCDead(KilledActor);
+}
+
+void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
+{
 	if (KilledActor == this)
 	{
 		auto SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
@@ -127,7 +132,7 @@ void ANPCZombie::Server_NPCDead_Implementation(AActor* KilledActor)
 		GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
 		{
 			Destroy();
-		}, 15.0f, false);
+		}, 50.0f, false);
 	}
 }
 

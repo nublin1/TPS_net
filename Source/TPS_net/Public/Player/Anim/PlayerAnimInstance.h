@@ -32,6 +32,8 @@ protected:
 	//====================================================================
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool IsHoldWeapon;
+	UPROPERTY(BlueprintReadWrite)
+	bool IsShootingWeapon;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector LeftHandPosition;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -63,6 +65,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void SighUp();
 
+	
 	UFUNCTION(BlueprintCallable)
 	void UpdateHandPositions();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")

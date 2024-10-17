@@ -36,6 +36,13 @@ public:
 	void UpdateVisual();
 
 	UFUNCTION(BlueprintCallable)
+	void PlayShootEffect(UParticleSystem* ParticleSystem, FName SocketName);
+	UFUNCTION(Server, Unreliable)
+	void PlayShootEffect_Server(UParticleSystem* ParticleSystem, FName SocketName);
+	UFUNCTION(NetMulticast, Unreliable)
+	void PlayShootEffect_Multicast(UParticleSystem* ParticleSystem, FName SocketName);
+
+	UFUNCTION(BlueprintCallable)
 	void DecreaseRoundsInMagazine();
 	UFUNCTION(Server, Unreliable)
 	void ServerDecreaseRoundsInMagazine();
