@@ -5,6 +5,7 @@
 
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Navigation/CrowdFollowingComponent.h"
 
 AZombieController::AZombieController(const FObjectInitializer& ObjectInitializer)
@@ -55,9 +56,11 @@ void AZombieController::Seek()
 			//UE_LOG(LogTemp, Warning, TEXT("Цель достижима!"));
 		}
 		else
-		{
+		{			
 			bIsTargetIsReachable = false;
 			//UE_LOG(LogTemp, Warning, TEXT("Путь частичный, цель недоступна!"));
+
+			CheckObstacles(Path->PathPoints.Last(), Path->PathPoints.Last(), 75.0f);
 		}
 	}
 	
@@ -77,14 +80,69 @@ void AZombieController::Seek()
 	{
 		NewPathFollowingComponent->OnRequestFinished.AddUObject(this, &AZombieController::OnMoveCompleted);
 	}
+}
+
+void AZombieController::CheckObstacles(FVector Start, FVector End, float Radius)
+{
+	TArray<FHitResult> OutHits;
+
+	//UE_LOG(LogTemp, Warning, TEXT("Start = %s"), *Start.ToString());
+
+	// Define the types of objects to trace for
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+	// Trace parameters
+	FCollisionQueryParams QueryParams;
+	QueryParams.bTraceComplex = false;
+	QueryParams.AddIgnoredActor(this->GetOwner()); // Ignore self
+
+	// Multi-Sphere Trace
+	bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+		GetWorld(),         
+		Start,              
+		End,              
+		Radius,             
+		ObjectTypes,        
+		false,             
+		{},                 // Actors to ignore 
+		EDrawDebugTrace::None, 
+		OutHits,           
+		true                // Return only blocking hits
+	);
+
+	if (bHit && OutHits.Num() > 0)
+	{
+		ObstaclesHitResult.Empty();
+		
+		ObstaclesHitResult = OutHits;
+		
+		//if (IsDebug)
+		{
+			const FHitResult& Hit = OutHits[0];
+			if (auto HitActor = Hit.GetActor())
+			{
+				FVector ActorLocation = HitActor->GetActorLocation();
+			
+				DrawDebugPoint(
+					GetWorld(), 
+					ActorLocation,  
+					60.0f,          
+					FColor::Magenta, 
+					false,          
+					1000.0f          
+				);
+			}
+		}
+	}
+	
 	
 }
 
 void AZombieController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	Super::OnMoveCompleted(RequestID, Result);
-	UE_LOG(LogTemp, Warning, TEXT("MoveCompleted. IsTargetIsReachable = %s"), bIsTargetIsReachable ? TEXT("true") : TEXT("false"));
-	
+	//UE_LOG(LogTemp, Warning, TEXT("MoveCompleted. IsTargetIsReachable = %s"), bIsTargetIsReachable ? TEXT("true") : TEXT("false"));
 	
 	if (Result.IsSuccess())
 	{

@@ -33,7 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector PointArrayStruct;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBlackboardKeySelector IsNewTargetKey;
+	FBlackboardKeySelector IsNeedUpdateTargetPoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector KeyTargetLocation;
 

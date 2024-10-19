@@ -28,7 +28,7 @@ public:
 	void Server_HitDetect();
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerClearAlreadyHitTargets();
-	
+
 	//Getters
 	
 

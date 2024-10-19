@@ -31,6 +31,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopFollow();
 
+	//
+	UFUNCTION(BlueprintCallable)
+	void CheckObstacles(FVector Start, FVector End, float Radius = 45.0f);
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -42,6 +46,8 @@ protected:
 	TObjectPtr<AActor> CurrentTargetActor;
 	UPROPERTY(BlueprintReadOnly)
 	FVector TargetLocation;
+	UPROPERTY(blueprintReadOnly)
+	TArray<FHitResult> ObstaclesHitResult;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsTargetIsReachable = false;
@@ -52,6 +58,9 @@ protected:
 	UNavigationSystemV1* NavSystem;
 	UPROPERTY()
 	UNavigationPath* Path = nullptr;
+
+	UPROPERTY()
+	bool IsDebug = false;
 	
 	//====================================================================
 	// FUNCTIONS
