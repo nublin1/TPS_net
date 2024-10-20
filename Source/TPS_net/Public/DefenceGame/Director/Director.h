@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void StopTimer();
 
+	UFUNCTION(BlueprintCallable)
+	bool CheckPathIseRachable(FVector StartLocation, FVector EndLocation);
+
 	// Setters
 	UFUNCTION(BlueprintCallable)
 	void SetTimerDelay(int NewTime) {TimerDelay = NewTime;}
