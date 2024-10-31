@@ -69,4 +69,7 @@ protected:
 	virtual void Seek();
 
 	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
+
+	UFUNCTION(BlueprintCallable)
+	void TargetDestoyed(AActor* DestroyedActor);
 };

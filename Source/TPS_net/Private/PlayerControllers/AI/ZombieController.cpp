@@ -3,15 +3,17 @@
 
 #include "PlayerControllers/AI/ZombieController.h"
 
+#include "EngineUtils.h"
+#include "Landscape.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Navigation/CrowdFollowingComponent.h"
 
 AZombieController::AZombieController(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent"))),
+	  NavSystem(nullptr)
 {
-	
 }
 
 void AZombieController::StartFollow(AActor* NewTargetActor,  FVector NewTargetLocation, float AcceptanceRadius)
@@ -97,6 +99,14 @@ void AZombieController::CheckObstacles(FVector Start, FVector End, float Radius)
 	QueryParams.bTraceComplex = false;
 	QueryParams.AddIgnoredActor(this->GetOwner()); // Ignore self
 
+	// 
+	TArray<AActor*> ActorsToIgnore;
+	for (TActorIterator<ALandscapeProxy> It(GetWorld()); It; ++It)
+	{
+		ActorsToIgnore.Add(*It);
+	}
+
+
 	// Multi-Sphere Trace
 	bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
 		GetWorld(),         
@@ -105,7 +115,7 @@ void AZombieController::CheckObstacles(FVector Start, FVector End, float Radius)
 		Radius,             
 		ObjectTypes,        
 		false,             
-		{},                 // Actors to ignore 
+		ActorsToIgnore,
 		EDrawDebugTrace::None, 
 		OutHits,           
 		true                // Return only blocking hits
@@ -117,26 +127,27 @@ void AZombieController::CheckObstacles(FVector Start, FVector End, float Radius)
 		
 		ObstaclesHitResult = OutHits;
 		
-		//if (IsDebug)
+		for (const FHitResult& Hit : OutHits)
 		{
-			const FHitResult& Hit = OutHits[0];
-			if (auto HitActor = Hit.GetActor())
+			if (!Hit.GetActor()->IsA(ALandscape::StaticClass()))
 			{
-				FVector ActorLocation = HitActor->GetActorLocation();
-			
-				DrawDebugPoint(
-					GetWorld(), 
-					ActorLocation,  
-					60.0f,          
-					FColor::Magenta, 
-					false,          
-					1000.0f          
-				);
+				ObstaclesHitResult.Add(Hit);
+
+				if (IsDebug)
+				{
+					FVector ActorLocation = Hit.GetActor()->GetActorLocation();
+					DrawDebugPoint(
+						GetWorld(), 
+						ActorLocation,  
+						60.0f,          
+						FColor::Magenta, 
+						false,          
+						1000.0f          
+					);
+				}
 			}
 		}
 	}
-	
-	
 }
 
 void AZombieController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
@@ -158,4 +169,10 @@ void AZombieController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollo
 		bIsMoveCompleted = false;
 	}
 }
+
+void AZombieController::TargetDestoyed(AActor* DestroyedActor)
+{
+	ObstaclesHitResult.Empty();
+}
+
 

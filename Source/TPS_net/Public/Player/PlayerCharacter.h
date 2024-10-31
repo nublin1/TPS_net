@@ -95,7 +95,7 @@ protected:
 	
 	// deadth
 	UFUNCTION()
-	void OnHealthDepleted(AActor* Actor);
+	void OnHealthDepleted(AActor* Actor, AController* EventInstigator);
 	UFUNCTION(Server, Unreliable)
 	void ServerOnHealthDepleted();
 	UFUNCTION(NetMulticast, Unreliable)

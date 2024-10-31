@@ -31,13 +31,13 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, MaxHealth);
 }
 
-void UHealthComponent::TakeDamage(float DamageAmount)
+void UHealthComponent::TakeDamage(float DamageAmount, AController* EventInstigator )
 {
-	if (!GetOwner()-> GetInstigatorController())
+	/*if (!GetOwner()-> GetInstigatorController())
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Controller is Null"));
 		return;
-	}
+	}*/
 
 	if (!GetOwner()->HasAuthority())
 	{
@@ -45,16 +45,23 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 		return;
 	}
 
-	ApplyDamage(DamageAmount);
+	ApplyDamage(DamageAmount, EventInstigator);
 }
-
 
 void UHealthComponent::ServerTakeDamage_Implementation(float DamageAmount)
 {
 	NetMulticastTakeDamage(DamageAmount);
 }
 
-void UHealthComponent::ApplyDamage(float DamageAmount)
+void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
+{
+	if (!bIsGodMode)
+	{
+		Health -= DamageAmount;
+	}
+}
+
+void UHealthComponent::ApplyDamage(float DamageAmount, AController* EventInstigator)
 {
 	if (bIsGodMode)
 	{
@@ -73,16 +80,8 @@ void UHealthComponent::ApplyDamage(float DamageAmount)
 	{
 		if (OnKilledDelegate.IsBound())
 		{
-			OnKilledDelegate.Broadcast(GetOwner());
+			OnKilledDelegate.Broadcast(GetOwner(), EventInstigator? EventInstigator: nullptr);
 		}
-	}
-}
-
-void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
-{
-	if (!bIsGodMode)
-	{
-		Health -= DamageAmount;
 	}
 }
 

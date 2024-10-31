@@ -129,10 +129,15 @@ void UZombieCombatComponent::Server_HitDetect_Implementation()
 
 void UZombieCombatComponent::ServerApplyDamage_Implementation(AActor* HitActor)
 {
+	if (!HitActor) return;
 	//UE_LOG(LogTemp, Warning, TEXT("ApplyDamage on Server"));
-	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(), nullptr, nullptr);
+	
+	//FVector ShotDirection = (HitActor->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();    
+	//AController* InstigatorController = HitActor->GetInstigatorController();    
+	//UGameplayStatics::ApplyPointDamage(HitActor, 10.0f, ShotDirection, nullptr, InstigatorController, GetOwner(), nullptr);
+	
+	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(),  GetOwner(), UDamageType::StaticClass());
 }
-
 
 void UZombieCombatComponent::ClearAlreadyHitTargets()
 {

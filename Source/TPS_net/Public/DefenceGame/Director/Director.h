@@ -6,10 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "Director.generated.h"
 
-class UHealthComponent;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimerExpired);
+#pragma region Delegates
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimerBeetweenWavesStarted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimerBeetweenWavesExpired);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeUpdated, int, RemainingTime);
 
+#pragma endregion
+
+class UHealthComponent;
 class ANPCZombie;
 
 USTRUCT(Blueprintable)
@@ -34,7 +39,9 @@ public:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(BlueprintAssignable)
-	FOnTimerExpired OnTimerExpired;
+	FOnTimerBeetweenWavesStarted OnTimerBeetweenWavesStarted;
+	UPROPERTY(BlueprintAssignable)
+	FOnTimerBeetweenWavesExpired OnTimerBeetweenWavesExpired;
 	UPROPERTY(BlueprintAssignable)
 	FOnTimeUpdated OnTimeUpdated; 
 	
@@ -88,7 +95,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void HandleZombieDeath(UHealthComponent* HealthComponent);
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnZombieKilledEvent(AActor* KilledActor);
+	void OnZombieKilledEvent(AActor* KilledActor, AController* EventInstigator);
 	UFUNCTION(BlueprintCallable)
 	void HandleZombieKilled(AActor* KilledActor);
 

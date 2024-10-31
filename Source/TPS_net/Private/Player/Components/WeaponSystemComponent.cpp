@@ -196,7 +196,7 @@ void UWeaponSystemComponent::ConfigureSpawnedProjectile ()
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
 			bIsShooting = true;
 			if(OnSpawnedProjectile.IsBound())
-				OnSpawnedProjectile.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine()-1);
+				OnSpawnedProjectile.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
 		}
 	}
 }

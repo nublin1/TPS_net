@@ -53,6 +53,8 @@ void ADirector::StartTimer_Implementation()
 {
 	RemainingTimeInSeconds = TimerDelay;
 
+	OnTimerBeetweenWavesStarted.Broadcast();
+
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleWaves, [this]()
 	{
 		int32 NewTime = RemainingTimeInSeconds - 1;
@@ -61,7 +63,7 @@ void ADirector::StartTimer_Implementation()
 		{
 			GetWorld()->GetTimerManager().ClearTimer(TimerHandleWaves);
 			NewTime = 0;
-			OnTimerExpired.Broadcast();  
+			OnTimerBeetweenWavesExpired.Broadcast();  
 		}
 
 		//UE_LOG(LogTemp, Warning, TEXT("Updating RemainingTimeInSeconds: %d"), NewTime);
@@ -114,7 +116,6 @@ void ADirector::HandleZombieKilled(AActor* KilledActor)
 		CurrentNumberOfWave++;
 	}
 }
-
 
 // Called every frame
 void ADirector::Tick(float DeltaTime)

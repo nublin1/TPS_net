@@ -71,7 +71,7 @@ protected:
 
 	//
 	UFUNCTION()
-	void NPCDead(AActor* KilledActor);
+	void NPCDead(AActor* KilledActor, AController* EventInstigator);
 	UFUNCTION(Server, Unreliable)
 	void Server_NPCDead(AActor* KilledActor);
 	UFUNCTION(NetMulticast, Unreliable)

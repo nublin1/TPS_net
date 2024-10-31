@@ -70,9 +70,7 @@ void APlayerCharacter::PostInitializeComponents()
 	}
 }
 
-
-
-void APlayerCharacter::OnHealthDepleted(AActor* Actor)
+void APlayerCharacter::OnHealthDepleted(AActor* Actor, AController* EventInstigator)
 {
 	if (!ActiveStateCharacter)
 		return;

@@ -106,7 +106,7 @@ void ANPCZombie::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
 	ChangeMaxMoveSpeed(SprintSpeed);
 }
 
-void ANPCZombie::NPCDead(AActor* KilledActor)
+void ANPCZombie::NPCDead(AActor* KilledActor, AController* EventInstigator)
 {
 	Server_NPCDead(KilledActor);
 }
