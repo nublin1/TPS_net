@@ -30,8 +30,10 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(Replicated, BlueprintReadWrite, EditAnywhere)
 	bool IsHoldWeapon;
+	UPROPERTY(BlueprintReadWrite)
+	bool IsShootingWeapon;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector LeftHandPosition;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -44,7 +46,7 @@ protected:
 	//
 	UPROPERTY(BlueprintReadWrite, Category="References")
 	TObjectPtr<UWeaponSystemComponent> WeaponSysComponent;
-	UPROPERTY(Replicated, BlueprintReadWrite, Category="References")
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Character,  BlueprintReadWrite, Category="References")
 	TObjectPtr<APlayerCharacter> Character;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -63,13 +65,18 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void SighUp();
 
+	
+	UFUNCTION(BlueprintCallable)
+	void UpdateHandPositions();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void HoldWeapon();
+	virtual void UpdateWeaponHoldPose();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void CleanWeaponData();
+	virtual void CleanWeaponData(AMasterWeapon* MasterWeapon);
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponData(AMasterWeapon* newMasterWeapon);
 
-	
+	UFUNCTION()
+	void OnRep_Character();
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 };

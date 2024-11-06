@@ -21,7 +21,9 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	UAmmoBase();
-	virtual ~UAmmoBase() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	virtual bool IsSupportedForNetworking() const override { return true; }
 
 	// getters
 	UFUNCTION(BlueprintCallable)
@@ -37,10 +39,10 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
 	FAmmoCharacteristics AmmoCharacteristics;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
 	FBulletBehaviour AmmoBehaviour;
 	
 	//====================================================================

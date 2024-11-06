@@ -50,7 +50,7 @@ protected:
 	//====================================================================
 	virtual void RerunConstructionScripts() override;
 	virtual void PreInitializeComponents() override;
-	virtual void PostInitProperties() override;
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 
 	// MovemantSpeed
@@ -71,7 +71,11 @@ protected:
 
 	//
 	UFUNCTION()
-	void NPCDead(AActor* KilledActor);
+	void NPCDead(AActor* KilledActor, AController* EventInstigator);
+	UFUNCTION(Server, Unreliable)
+	void Server_NPCDead(AActor* KilledActor);
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticast_NPCDead(AActor* KilledActor);
 	
 
 public:

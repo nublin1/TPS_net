@@ -23,12 +23,12 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 		return EBTNodeResult::Failed;
 	}
 
-	UObject* TargetObject = BlackboardComp->GetValueAsObject(AITarget.SelectedKeyName);
-	AActor* Target = Cast<AActor>(TargetObject);
-	bool isNewTarget = BlackboardComp->GetValueAsBool(IsNewTargetKey.SelectedKeyName);
+	bool isNewTarget = BlackboardComp->GetValueAsBool(IsNeedUpdateTargetPoints.SelectedKeyName);
 	if (!isNewTarget)
 		return EBTNodeResult::Succeeded;
 
+	UObject* TargetObject = BlackboardComp->GetValueAsObject(AITarget.SelectedKeyName);
+	AActor* Target = Cast<AActor>(TargetObject);
 	if (!Target)
 		return EBTNodeResult::Failed;
 
@@ -61,6 +61,8 @@ EBTNodeResult::Type UBTTask_SetTargetPoint::ExecuteTask(UBehaviorTreeComponent& 
 	BlackboardComp->SetValueAsInt(TEXT("CurrentPointIndex"), RandomIndex);
 	// 
 	//UE_LOG(LogTemp, Log, TEXT("Selected random point at index %d: %s"), RandomIndex, *TargetLocation.ToString());
+
+	BlackboardComp->SetValueAsBool(IsNeedUpdateTargetPoints.SelectedKeyName, false);
 
 	return EBTNodeResult::Succeeded;
 }

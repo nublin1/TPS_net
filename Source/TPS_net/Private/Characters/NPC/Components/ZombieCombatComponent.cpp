@@ -40,8 +40,7 @@ bool UZombieCombatComponent::RequestHitDetect()
 	{
 		return HitDetect();
 	}
-
-
+	
 	auto PC = Cast<APlayerController_TPS>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 	if (PC)
 	{
@@ -130,10 +129,15 @@ void UZombieCombatComponent::Server_HitDetect_Implementation()
 
 void UZombieCombatComponent::ServerApplyDamage_Implementation(AActor* HitActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyDamage on Server"));
-	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(), nullptr, nullptr);
+	if (!HitActor) return;
+	//UE_LOG(LogTemp, Warning, TEXT("ApplyDamage on Server"));
+	
+	//FVector ShotDirection = (HitActor->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();    
+	//AController* InstigatorController = HitActor->GetInstigatorController();    
+	//UGameplayStatics::ApplyPointDamage(HitActor, 10.0f, ShotDirection, nullptr, InstigatorController, GetOwner(), nullptr);
+	
+	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(),  GetOwner(), UDamageType::StaticClass());
 }
-
 
 void UZombieCombatComponent::ClearAlreadyHitTargets()
 {
@@ -143,10 +147,15 @@ void UZombieCombatComponent::ClearAlreadyHitTargets()
 		return;
 	}
 
-	SetverClearAlreadyHitTargets();
+	auto PC = Cast<APlayerController_TPS>(GEngine->GetFirstLocalPlayerController(GetWorld()));
+	if (PC)
+	{
+		// Клиент посылает запрос на сервер через свой PlayerController
+		PC->RequestClearAlreadyHitTargetsOnServer(GetOwner());
+	}
 }
 
-void UZombieCombatComponent::SetverClearAlreadyHitTargets_Implementation()
+void UZombieCombatComponent::ServerClearAlreadyHitTargets_Implementation()
 {
 	AlreadyHitTargets.Empty();
 }

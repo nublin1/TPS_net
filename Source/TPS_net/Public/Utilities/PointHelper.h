@@ -28,12 +28,12 @@ public:
 	{
 		for (const FVector& t_Point : Points)
 		{
-			DrawDebugPoint(WorldContextObject->GetWorld(), t_Point, PointSize, PointColor, false, 5, 0);
+			DrawDebugPoint(WorldContextObject->GetWorld(), t_Point, PointSize, PointColor, false, 50, 0);
 		}
 	}
 
 	UFUNCTION()
-	static void GeneratePointsAlongLine(TArray<FVector>& Points, const FVector& Start, const FVector& End,
+	static void GeneratePointsAlongLine_FixedCount(TArray<FVector>& Points, const FVector& Start, const FVector& End,
 	                                    const int32 PointsPerSide = 5)
 	{
 		if (PointsPerSide <= 0)
@@ -45,6 +45,24 @@ public:
 			FVector Point = FMath::Lerp(Start, End, Alpha);
 			Points.Add(Point);
 		}
+	}
+
+	UFUNCTION()
+	static void GeneratePointsAlongLine_FixedStep(TArray<FVector>& Points, const FVector& Start, const FVector& End, 
+												  float StepSize = 50.0f)
+	{
+		if (StepSize <= 0)
+			return;
+
+		FVector Direction = (End - Start).GetSafeNormal();
+		float Distance = FVector::Dist(Start, End); 
+
+		for (float CurrentDistance = 0.0f; CurrentDistance <= Distance; CurrentDistance += StepSize)
+		{
+			FVector Point = Start + Direction * CurrentDistance;
+			Points.Add(Point);
+		}
+		
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "PointHelper")
@@ -88,34 +106,47 @@ public:
 		auto TargetLocation = TargetObject->GetActorLocation();
 
 		FVector BoxExtent; // Prioritize the StaticMeshComponent if it exists, otherwise use SkeletalMeshComponent		
+		FVector ComponentScale;
+
 		if (StaticMeshComponent && StaticMeshComponent->GetStaticMesh())
 		{
 			BoxExtent = StaticMeshComponent->GetStaticMesh()->GetBounds().BoxExtent;
+			ComponentScale = StaticMeshComponent->GetComponentScale();
 		}
 		else if (SkeletalMeshComponent && SkeletalMeshComponent->GetSkinnedAsset())
 		{
 			BoxExtent = SkeletalMeshComponent->GetSkinnedAsset()->GetBounds().BoxExtent;
+			ComponentScale = SkeletalMeshComponent->GetComponentScale();
 		}
+
+		// Умножаем размеры на скейл компонента
+		FVector ScaledBoxExtent = BoxExtent * ComponentScale;
+
+		// Выводим ScaledBoxExtent в консоль
+		UE_LOG(LogTemp, Warning, TEXT("Scaled BoxExtent: X = %f, Y = %f, Z = %f"), 
+			   ScaledBoxExtent.X, ScaledBoxExtent.Y, ScaledBoxExtent.Z);
 
 		switch (PointGenerationPattern)
 		{
 		case PointGenerationPattern_Box:
 			{
 				// Получение размеров коллайдера
-				float Width = BoxExtent.X * 2.0f; // Ширина прямоугольника
-				float Height = BoxExtent.Y * 2.0f; // Высота прямоугольника
-				float HalfWidth = Width / 2.0f + PointOffset;
-				float HalfHeight = Height / 2.0f + PointOffset;
+				float Width = ScaledBoxExtent.X * 2.0f; // Ширина прямоугольника
+				float Height = ScaledBoxExtent.Y * 2.0f; // Высота прямоугольника
+				float HalfWidth = ScaledBoxExtent.X + PointOffset;
+				float HalfHeight = ScaledBoxExtent.Y + PointOffset; 
 
 				FVector TopLeft = TargetLocation + FVector(-HalfWidth, -HalfHeight, 0.0f);
-				FVector TopRight = TargetLocation + FVector(HalfWidth, -HalfHeight, 0.0f);
+				FVector TopRight = TargetLocation + FVector(Width, -HalfHeight, 0.0f);
 				FVector BottomLeft = TargetLocation + FVector(-HalfWidth, HalfHeight, 0.0f);
-				FVector BottomRight = TargetLocation + FVector(HalfWidth, HalfHeight, 0.0f);
+				FVector BottomRight = TargetLocation + FVector(Width, HalfHeight, 0.0f);
 
 				//GeneratePointsAlongLine(Points_temp, TopLeft, TopRight, PointsPerSide);   // Верхняя сторона
-				GeneratePointsAlongLine(Points_temp, TopRight, BottomRight, PointsPerSide); // Правая сторона
+				GeneratePointsAlongLine_FixedStep(Points_temp, TopRight, BottomRight, 50); // Правая сторона
 				//GeneratePointsAlongLine(Points_temp, BottomRight, BottomLeft, PointsPerSide);// Нижняя сторона
 				//GeneratePointsAlongLine(Points_temp, BottomLeft, TopLeft, PointsPerSide); // Левая сторона
+				
+				
 
 				return Points_temp;
 			}

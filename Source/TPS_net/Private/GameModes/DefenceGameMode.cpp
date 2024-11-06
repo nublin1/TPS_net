@@ -4,9 +4,14 @@
 #include "GameModes/DefenceGameMode.h"
 
 #include "GS_TPS.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "DefenceGame/Director/Director.h"
 #include "GameFramework/GameStateBase.h"
 #include "Player/PlayerCharacter.h"
 #include "StateMachine/StateMachineComponent.h"
+
+class ADirector;
 
 ADefenceGameMode::ADefenceGameMode()
 {
@@ -21,29 +26,57 @@ void ADefenceGameMode::PostInitializeComponents()
 void ADefenceGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GameStated = EUGameStates::GameState_Gameplay;
+
+	auto DirectorActor = Cast<ADirector>(UGameplayStatics::GetActorOfClass(GetWorld(), ADirector::StaticClass()));
+	if (DirectorActor)
+	{
+		DirectorActor->OnTimerBeetweenWavesStarted.AddDynamic(this, &ADefenceGameMode::ADefenceGameMode::ShopStateEnter);
+		DirectorActor->OnTimerBeetweenWavesExpired.AddDynamic(this, &ADefenceGameMode::ADefenceGameMode::ShopStateExit);
+	}
 }
 
 void ADefenceGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	
+
+	if (GlobalUpgrades.Num()> 0)
+	{
+		FUpgrades newList;
+		newList.ListOfUpgrades = GlobalUpgrades;
+		IndividualPlayerUpgrades.Add(NewPlayer, newList);
+	}
 }
 
 void ADefenceGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+	if (!NewPlayer)
+		return;
 
-	const auto StateMachine = Cast<APlayerCharacter>(NewPlayer->GetPawn())->GetActiveStateCharacter();
+	auto PlayerCharacter = Cast<APlayerCharacter>(NewPlayer->GetPawn());
+	PlayerCharacter->SetOwner(GEngine->GetFirstLocalPlayerController(GetWorld()));
+
+	//UE_LOG(LogTemp, Log, TEXT("Owner of %s is %s"), *GetName(), *PlayerCharacter->GetOwner()->GetName());
+
+	const auto StateMachine = PlayerCharacter->GetActiveStateCharacter();
 	if (!StateMachine->StateChangedDelegate.IsAlreadyBound(this, &ADefenceGameMode::OnPlayerStateChanged))
 	{
 		StateMachine->StateChangedDelegate.AddDynamic(this, &ADefenceGameMode::OnPlayerStateChanged);
 		GameStateRef->AlivePlayers.Add(NewPlayer);
 	}
+
+	PlayersMoney.Add(NewPlayer, 0);
 }
 
 void ADefenceGameMode::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
+
+	APlayerController* PC = Cast<APlayerController>(Exiting);
+	PlayersMoney.Remove(PC);
+	IndividualPlayerUpgrades.Remove(PC);
 }
 
 void ADefenceGameMode::OnPlayerStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
@@ -74,7 +107,7 @@ void ADefenceGameMode::CheckLooseCondition()
 {
 	if (GameStateRef->AlivePlayers.Num() == 0)
 	{
-		GameStated = UGameStates::GameState_GameOver;
+		GameStated = EUGameStates::GameState_GameOver;
 		UE_LOG(LogTemp, Warning, TEXT("lose "));
 		GameOver();
 	}
@@ -89,4 +122,14 @@ void ADefenceGameMode::GameOver() const
 			PC->GameHasEnded(nullptr, false);
 		}
 	}
+}
+
+void ADefenceGameMode::ShopStateEnter()
+{
+	GameStated = EUGameStates::GameState_Shop;
+}
+
+void ADefenceGameMode::ShopStateExit()
+{
+	GameStated = EUGameStates::GameState_Gameplay;
 }

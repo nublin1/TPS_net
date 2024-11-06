@@ -24,9 +24,11 @@ public:
 	//====================================================================
 	UZombieCombatComponent();
 
-	UFUNCTION()
-	bool HitDetect();
-	
+	UFUNCTION(Server, Reliable)
+	void Server_HitDetect();
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerClearAlreadyHitTargets();
+
 	//Getters
 	
 
@@ -56,16 +58,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	bool RequestHitDetect();
-	
-	UFUNCTION(Server, Reliable)
-	void Server_HitDetect();
+	UFUNCTION()
+	bool HitDetect();	
 	UFUNCTION(Server, Reliable)
 	void ServerApplyDamage(AActor* HitActor);
 	UFUNCTION(BlueprintCallable)
 	void ClearAlreadyHitTargets();
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void SetverClearAlreadyHitTargets();
-
 	
 
 public:	

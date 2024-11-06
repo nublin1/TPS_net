@@ -31,14 +31,13 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, MaxHealth);
 }
 
-void UHealthComponent::TakeDamage(float DamageAmount)
+void UHealthComponent::TakeDamage(float DamageAmount, AController* EventInstigator )
 {
-	const auto Controller = GetOwner()-> GetInstigatorController();
-	if (!GetOwner()-> GetInstigatorController())
+	/*if (!GetOwner()-> GetInstigatorController())
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Controller is Null"));
 		return;
-	}
+	}*/
 
 	if (!GetOwner()->HasAuthority())
 	{
@@ -46,37 +45,12 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 		return;
 	}
 
-	ApplyDamage(DamageAmount);
+	ApplyDamage(DamageAmount, EventInstigator);
 }
-
 
 void UHealthComponent::ServerTakeDamage_Implementation(float DamageAmount)
 {
 	NetMulticastTakeDamage(DamageAmount);
-}
-
-void UHealthComponent::ApplyDamage(float DamageAmount)
-{
-	if (bIsGodMode)
-	{
-		return;
-	}
-	
-	float OldHealth = Health;
-	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-	if (OnHealthChangedDelegate.IsBound())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на сервере: %f"), Health);
-		OnHealthChangedDelegate.Broadcast(Health);
-	}
-	
-	if (Health <= 0.0f && OldHealth > 0.0f)
-	{
-		if (OnKilledDelegate.IsBound())
-		{
-			OnKilledDelegate.Broadcast(GetOwner());
-		}
-	}
 }
 
 void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
@@ -87,9 +61,33 @@ void UHealthComponent::NetMulticastTakeDamage_Implementation(float DamageAmount)
 	}
 }
 
+void UHealthComponent::ApplyDamage(float DamageAmount, AController* EventInstigator)
+{
+	if (bIsGodMode)
+	{
+		return;
+	}
+	
+	float OldHealth = Health;
+	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
+	if (OnHealthChangedDelegate.IsBound())
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на сервере: %f"), Health);
+		OnHealthChangedDelegate.Broadcast(Health);
+	}
+	
+	if (Health <= 0.0f && OldHealth > 0.0f)
+	{
+		if (OnKilledDelegate.IsBound())
+		{
+			OnKilledDelegate.Broadcast(GetOwner(), EventInstigator? EventInstigator: nullptr);
+		}
+	}
+}
+
 void UHealthComponent::OnRep_Health() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
+	//UE_LOG(LogTemp, Warning, TEXT("Здоровье изменилось на клиенте: %f"), Health);
 	if (OnHealthChangedDelegate.IsBound())
 	{
 		OnHealthChangedDelegate.Broadcast(Health);

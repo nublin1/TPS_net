@@ -41,6 +41,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetWeaponType() const { return WeaponType; }
+	UFUNCTION(BlueprintCallable)
+	EHolsterWeaponType GetHolsterWeaponType() const { return HolsterWeaponType; }
 	UFUNCTION()
 	TArray<UAmmoBase*> GetUsableAmmo() {return UsableAmmo;}
 	UFUNCTION()
@@ -49,7 +51,9 @@ public:
 
 	// Setters
 	UFUNCTION()
-	void SetWeaponType(EWeaponType _HolsterType) { this->WeaponType = _HolsterType; }
+	void SetWeaponType(EWeaponType _WeaponType) { this->WeaponType = _WeaponType; }
+	UFUNCTION()
+	void SetHolsterWeaponType(EHolsterWeaponType _HolsterType) { this->HolsterWeaponType = _HolsterType; }
 
 	UFUNCTION()
 	void SetID(const FName& _NameID) { this->NameID = _NameID; }
@@ -74,28 +78,35 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Data")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Weapon Data")
 	FName NameID;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	EWeaponType WeaponType;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	EHolsterWeaponType HolsterWeaponType;
+	
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::HitScan;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly)
 	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	FWeaponAssetData WeaponAssetData;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<UAmmoBase*> UsableAmmo;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	TArray<TObjectPtr<UAmmoBase>> UsableAmmo;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UAmmoBase* SelectedAmmoData;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAmmoBase> SelectedAmmoData;
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	virtual bool IsSupportedForNetworking() const override { return true; }
 };

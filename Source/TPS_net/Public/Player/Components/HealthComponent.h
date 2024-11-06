@@ -8,7 +8,7 @@
 
 #pragma region Delegates
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledSignature, AActor*, KilledActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnKilledSignature, AActor*, KilledActor, AController*, KilledByInstigator);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, CurrentHealth);
 
 #pragma endregion
@@ -34,11 +34,11 @@ public:
 	UHealthComponent();
 
 	UFUNCTION(BlueprintCallable )
-	virtual void TakeDamage(float DamageAmount);
+	virtual void TakeDamage(float DamageAmount, AController* EventInstigator = nullptr);
 	UFUNCTION(Server, Unreliable)
 	virtual void ServerTakeDamage(float DamageAmount);
 	UFUNCTION()
-	void ApplyDamage(float DamageAmount);
+	void ApplyDamage(float DamageAmount, AController* EventInstigator = nullptr);
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticastTakeDamage(float DamageAmount);
 
@@ -56,6 +56,8 @@ protected:
 	float Health = 100.0f;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.0f;
+
+	
 	
 	//====================================================================
 	// FUNCTIONS

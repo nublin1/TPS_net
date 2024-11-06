@@ -41,9 +41,9 @@ void ANPCZombie::PreInitializeComponents()
 	Super::PreInitializeComponents();
 }
 
-void ANPCZombie::PostInitProperties()
+void ANPCZombie::PostInitializeComponents()
 {
-	Super::PostInitProperties();
+	Super::PostInitializeComponents();
 }
 
 void ANPCZombie::BeginPlay()
@@ -106,15 +106,25 @@ void ANPCZombie::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
 	ChangeMaxMoveSpeed(SprintSpeed);
 }
 
-void ANPCZombie::NPCDead(AActor* KilledActor)
+void ANPCZombie::NPCDead(AActor* KilledActor, AController* EventInstigator)
+{
+	Server_NPCDead(KilledActor);
+}
+
+void ANPCZombie::Server_NPCDead_Implementation(AActor* KilledActor)
+{
+	NetMulticast_NPCDead(KilledActor);
+}
+
+void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 {
 	if (KilledActor == this)
 	{
-		auto result = FindComponentByClass<USkeletalMeshComponent>();
-		if (result)
+		auto SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
+		if (SkeletalMeshComponent)
 		{
-			result->SetSimulatePhysics(true);
-			result->SetCollisionProfileName(TEXT("Ragdoll"), true);
+			SkeletalMeshComponent->SetSimulatePhysics(true);
+			SkeletalMeshComponent->SetCollisionProfileName(TEXT("Ragdoll"), true);
 			FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 
@@ -122,7 +132,7 @@ void ANPCZombie::NPCDead(AActor* KilledActor)
 		GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
 		{
 			Destroy();
-		}, 5.0f, false);
+		}, 50.0f, false);
 	}
 }
 
@@ -130,7 +140,6 @@ void ANPCZombie::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-
 
 void ANPCZombie::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

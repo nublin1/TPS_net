@@ -17,7 +17,7 @@ UStateMachineComponent::UStateMachineComponent()
 	SetIsReplicated(true);
 }
 
-bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
+void UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 {
 	if (!_StateTag.MatchesTagExact(CurrentStateTag))
 	{
@@ -34,7 +34,6 @@ bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 			
 			StateChangedDelegate.Broadcast(GetOwner(),CurrentStateTag);
 		}
-		return true;
 	}
 	else
 	{
@@ -43,9 +42,6 @@ bool UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 			
 		}
 	}
-
-	return false;
-	
 }
 
 void UStateMachineComponent::InitState()

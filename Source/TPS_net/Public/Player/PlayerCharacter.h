@@ -70,7 +70,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UWeaponSystemComponent> WeaponSystemComponentClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UWeaponSystemComponent> WeaponSystemComponent;
 	
 	//Ladder
@@ -91,11 +91,11 @@ protected:
 	//====================================================================
 	virtual void PostInitProperties() override;
 	virtual void PostInitializeComponents() override;
-	virtual void BeginPlay() override;
+
 	
 	// deadth
 	UFUNCTION()
-	void OnHealthDepleted(AActor* Actor);
+	void OnHealthDepleted(AActor* Actor, AController* EventInstigator);
 	UFUNCTION(Server, Unreliable)
 	void ServerOnHealthDepleted();
 	UFUNCTION(NetMulticast, Unreliable)

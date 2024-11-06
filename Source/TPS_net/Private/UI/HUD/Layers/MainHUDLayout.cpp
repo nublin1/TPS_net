@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/Layers/MainHUDLayout.h"
+#include "UI/HUD/Layers/MainHUDLayout.h"
 
 #include "Components/PanelWidget.h"
 

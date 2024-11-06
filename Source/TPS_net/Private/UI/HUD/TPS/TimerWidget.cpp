@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/TPS/TimerWidget.h"
+#include "UI/HUD/TPS/TimerWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 #include "DefenceGame/Director/Director.h"

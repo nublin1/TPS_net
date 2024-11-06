@@ -39,7 +39,7 @@ public:
 	virtual FStateChangedSignature& OnStateChanged() = 0;
 
 	// Functions that need to be implemented
-	virtual bool SwitchState(FGameplayTag _StateTag) = 0;
+	virtual void SwitchState(FGameplayTag _StateTag) = 0;
 	virtual void OnRep_CurrentStateTag() = 0;
 	virtual FGameplayTag GetCurrentStateTag() const = 0;
 	virtual FString GetCurrentStateTagName() const = 0;

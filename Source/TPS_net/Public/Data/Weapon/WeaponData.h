@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RecoilAnimationComponent.h"
 #include "Engine/DataTable.h"
 
 #include "WeaponData.generated.h"
@@ -11,14 +12,16 @@
 
 class ABaseBulletActor;
 
-UENUM(Blueprintable, BlueprintType)
+UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	Primary UMETA(DisplayName = "Primary"),
+	Rifle UMETA(DisplayName = "Rifle"),
 	Pistol	UMETA(DisplayName = "Pistol"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	
 };
 
-UENUM(meta=(ScriptName="EHolsterWeaponType"))
+UENUM(BlueprintType, meta=(ScriptName="EHolsterWeaponType"))
 enum class EHolsterWeaponType : uint8
 {
 	None				UMETA(DisplayName = "None"),
@@ -28,7 +31,7 @@ enum class EHolsterWeaponType : uint8
 };
 
 UENUM(Blueprintable, BlueprintType)
-enum class EBulletMode
+enum class EBulletMode : uint8
 {
 	HitScan		UMETA(DisplayName = "HitScan"),
 	Projectile	UMETA(DisplayName = "Projectile"),
@@ -43,44 +46,48 @@ enum class EFireMode : uint8
 	Full_Auto   = 3   UMETA(DisplayName = "Full_Auto"),
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FWeaponAssetData
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* SkeletalMesh;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ShootAnimMontage;
+	
 	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
-	UBlueprint* BulletActor;
-
+	TObjectPtr<UBlueprint> BulletActor;
 	UPROPERTY(EditAnywhere)
 	UAnimBlueprint* AnimationBlueprint;
-
 	UPROPERTY(EditAnywhere)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRecoilAnimData RecoilAnimData;
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FCharacteristicsOfTheWeapon
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
 	TArray<EFireMode> AvailableShootingModes;
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
 	TArray<FDataTableRowHandle> UsableAmmo;
 	
-	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Weapon Characteristics")
 	float WeaponMass = 1.0f; // kilograms
-	UPROPERTY(EditAnywhere,Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = "Weapon Characteristics")
 	float SpreadAngle = 1.0f;
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
 	float RPM = 600; //Rounds per minute	
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
 	uint16 MagazineSize = 30; // Rounds
 	
-	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Weapon Characteristics")
 	float MuzzleVelocity = 55000; // cm/sec
 
 	FCharacteristicsOfTheWeapon()
@@ -98,7 +105,9 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere)
-	EWeaponType HolsterType = EWeaponType::Primary;
+	EWeaponType WeaponType = EWeaponType::Rifle;
+	UPROPERTY(EditAnywhere)
+	EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
 
 	UPROPERTY(EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::Projectile;
@@ -117,16 +126,14 @@ class TPS_NET_API UWeaponHelper : public UObject
 	GENERATED_BODY()
 	
 public:
-	
-	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	static FName ConvertHolsterTypeToText(const EWeaponType HolsterType)
+	static FName ConvertHolsterTypeToText(const EHolsterWeaponType HolsterType)
 	{
 		switch (HolsterType)
 		{
-		case EWeaponType::Primary:
+		case EHolsterWeaponType::Primary:
 			return FName("PrimaryHolster");
-		case EWeaponType::Pistol:
+		case EHolsterWeaponType::Pistol:
 			return FName("R_PistolHolster");
 		default:
 			return FName("");

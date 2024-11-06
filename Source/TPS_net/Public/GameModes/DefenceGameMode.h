@@ -10,14 +10,25 @@ class AGS_TPS;
 struct FGameplayTag;
 
 UENUM(BlueprintType)
-enum class UGameStates : uint8
+enum class EUGameStates : uint8
 {
 	GameState_None,
 	GameState_Gameplay,
+	GameState_Shop,
 	GameState_GameOver,
 	GameState_Pause,
 	GameState_Victory,
 };
+
+USTRUCT(BlueprintType)
+struct FUpgrades
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	TArray<FDataTableRowHandle> ListOfUpgrades;
+};
+
 
 UCLASS()
 class TPS_NET_API ADefenceGameMode : public AGameModeBase
@@ -50,7 +61,14 @@ protected:
 	TObjectPtr<AGS_TPS> GameStateRef;
 
 	UPROPERTY()
-	UGameStates GameStated = UGameStates::GameState_Gameplay;
+	TMap<TObjectPtr<APlayerController>, int> PlayersMoney;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FDataTableRowHandle> GlobalUpgrades;
+	UPROPERTY(VisibleAnywhere)
+	TMap<TObjectPtr<APlayerController>, FUpgrades> IndividualPlayerUpgrades ;
+
+	UPROPERTY()
+	EUGameStates GameStated = EUGameStates::GameState_Gameplay;
 
 	//====================================================================
 	// FUNCTIONS
@@ -64,11 +82,12 @@ protected:
 	void OnPlayerStateChanged(AActor* Actor, const FGameplayTag& NewStateTag);
 	UFUNCTION()
 	void CheckLooseCondition();
-	
-
 	UFUNCTION()
 	void GameOver() const;
 	
-	
+	UFUNCTION()
+	void ShopStateEnter();
+	UFUNCTION()
+	void ShopStateExit();
 	
 };

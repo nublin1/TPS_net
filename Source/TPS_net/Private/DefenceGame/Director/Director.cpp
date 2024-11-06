@@ -3,6 +3,8 @@
 
 #include "DefenceGame/Director/Director.h"
 
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Characters/NPCZombie.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
@@ -19,7 +21,29 @@ ADirector::ADirector(): RemainingTimeInSeconds(0)
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
+bool ADirector::CheckPathIseRachable(FVector StartLocation, FVector EndLocation)
+{
+	auto NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	TObjectPtr<UNavigationPath> Path = nullptr;
+	
+	if (NavSystem)
+		Path = NavSystem->FindPathToLocationSynchronously(GetWorld(), StartLocation, EndLocation);
+	
+	if (Path && Path->PathPoints.Num() > 1)
+	{
+		if (!Path->IsPartial())
+		{
+			return true;
+		}
+		else
+		{			
+			return false;
+		}
+	}
+
+	return false;
+}
+
 void ADirector::BeginPlay()
 {
 	Super::BeginPlay();
@@ -29,6 +53,8 @@ void ADirector::StartTimer_Implementation()
 {
 	RemainingTimeInSeconds = TimerDelay;
 
+	OnTimerBeetweenWavesStarted.Broadcast();
+
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleWaves, [this]()
 	{
 		int32 NewTime = RemainingTimeInSeconds - 1;
@@ -37,7 +63,7 @@ void ADirector::StartTimer_Implementation()
 		{
 			GetWorld()->GetTimerManager().ClearTimer(TimerHandleWaves);
 			NewTime = 0;
-			OnTimerExpired.Broadcast();  
+			OnTimerBeetweenWavesExpired.Broadcast();  
 		}
 
 		//UE_LOG(LogTemp, Warning, TEXT("Updating RemainingTimeInSeconds: %d"), NewTime);
@@ -90,7 +116,6 @@ void ADirector::HandleZombieKilled(AActor* KilledActor)
 		CurrentNumberOfWave++;
 	}
 }
-
 
 // Called every frame
 void ADirector::Tick(float DeltaTime)

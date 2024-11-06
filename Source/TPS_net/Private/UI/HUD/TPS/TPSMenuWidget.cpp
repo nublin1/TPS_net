@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/TPS/TPSMenuWidget.h"
+#include "UI/HUD/TPS/TPSMenuWidget.h"
 
 #include "GameInstance/MultiplayerGameInstance.h"
 #include "Kismet/GameplayStatics.h"

@@ -9,7 +9,9 @@
 
 class UWeaponBase;
 
-
+#pragma region Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, int, RoundsInMagazine);
+#pragma endregion
 
 UCLASS()
 class TPS_NET_API AMasterWeapon : public AActor
@@ -18,23 +20,48 @@ class TPS_NET_API AMasterWeapon : public AActor
 
 public:
 	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	// Delegates
+	FOnCompleteReloadSignature OnCompleteReloadDelegate;
+	
+	//====================================================================
 	// FUNCTIONS
 	//====================================================================	
 	AMasterWeapon();
 
-	void UpdateVisual() const;
-
 	UFUNCTION()
-	void DecreaseRoundsInMagazine() {RoundsInMagazine--;}
+	void InitWeaponBaseData();
+	UFUNCTION()
+	void UpdateVisual();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnFire();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStopFire();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayShootEffect(UParticleSystem* ParticleSystem, FName SocketName);
+	UFUNCTION(Server, Unreliable)
+	void PlayShootEffect_Server(UParticleSystem* ParticleSystem, FName SocketName);
+	UFUNCTION(NetMulticast, Unreliable)
+	void PlayShootEffect_Multicast(UParticleSystem* ParticleSystem, FName SocketName);
+
+	UFUNCTION(BlueprintCallable)
+	void DecreaseRoundsInMagazine();
+	UFUNCTION(Server, Unreliable)
+	void ServerDecreaseRoundsInMagazine();
 	UFUNCTION(BlueprintCallable)
 	void Reload();
+	UFUNCTION(Server, Unreliable)
+	void ServerReload();
 	UFUNCTION(BlueprintCallable)
 	virtual void SwitchFireMode();
 
 	//Getters
 	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
-	UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
+	//UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
 
 	UFUNCTION(BlueprintCallable)
 	EFireMode GetSelectedFireMode() {return SelectedFireMode;}
@@ -44,20 +71,21 @@ public:
 	uint16 GetMagazineSize() const {return WeaponBaseRef->GetCharacteristicsOfTheWeapon().MagazineSize;}
 
 	//Setters
-	void SetWeaponBaseRef(UWeaponBase* _WeaponBase) { WeaponBaseRef = _WeaponBase; }
+	void SetWeaponBaseRef(UWeaponBase* _WeaponBase);
+	void SetWeaponTableAndName(UDataTable* Table, FName Name);
 
 protected:
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	UWeaponBase* WeaponBaseRef;
+	UPROPERTY(Replicated,ReplicatedUsing = OnRep_WeaponBaseRef, BlueprintReadWrite, VisibleAnywhere)
+	TObjectPtr<UWeaponBase> WeaponBaseRef;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	USkeletalMeshComponent* SkeletalMeshWeapon;
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshWeapon;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	UStaticMeshComponent* TargetPoint;
+	TObjectPtr<UStaticMeshComponent> TargetPointPtr;
 
 	//
-	UPROPERTY()
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_RoundsInMagazine)
 	uint16 RoundsInMagazine = 10;
-	UPROPERTY()
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	EFireMode SelectedFireMode = EFireMode::None;
 
 	//
@@ -66,13 +94,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName StartingWeapon;
 	
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-
+	
+	UFUNCTION()
+	void OnRep_WeaponBaseRef();
+	UFUNCTION()
+	void OnRep_RoundsInMagazine() const;
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	
 };

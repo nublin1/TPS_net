@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "AmmoWidget.generated.h"
 
+class UWeaponSystemComponent;
 enum class EFireMode : uint8;
 class AMasterWeapon;
 class UWeaponBase;
@@ -36,6 +37,9 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY()
+	TObjectPtr<UWeaponSystemComponent> WeaponSystemComponent;
+	
+	UPROPERTY()
 	TObjectPtr<UTextBlock> CurrentAmmo;
 	UPROPERTY()
 	TObjectPtr<UTextBlock> MaxMagazineAmmo;
@@ -55,6 +59,8 @@ protected:
 	void SetCurrentAmmo(int32 RoundsInMagazine);
 	UFUNCTION()
 	void RefreshWeaponDetails(AMasterWeapon* WeaponInfo);
+	UFUNCTION()
+	void ClearWeaponDetails(AMasterWeapon* WeaponInfo);
 	UFUNCTION()
 	void CollapseWidget();
 };

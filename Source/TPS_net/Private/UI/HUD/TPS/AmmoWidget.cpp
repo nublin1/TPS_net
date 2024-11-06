@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/TPS/AmmoWidget.h"
+#include "UI/HUD/TPS/AmmoWidget.h"
 
 #include "Components/TextBlock.h"
 #include "Player/Components/WeaponSystemComponent.h"
@@ -42,14 +42,14 @@ void UAmmoWidget::SighUp()
 		return;
 	}
 
-	UWeaponSystemComponent* WeaponSystemComponent = WeaponSystemInterface->GetWeaponSystemComponent();
+	WeaponSystemComponent = WeaponSystemInterface->GetWeaponSystemComponent();
 	if (!WeaponSystemComponent)
 		return;
 
-	WeaponSystemComponent->OnShootDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	WeaponSystemComponent->OnSpawnedProjectile.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	WeaponSystemComponent->OnTakeupArmsDelegate.AddDynamic(this, &UAmmoWidget::UAmmoWidget::RefreshWeaponDetails);
-	WeaponSystemComponent->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
-	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::CollapseWidget);
+	
+	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::ClearWeaponDetails);
 	WeaponSystemComponent->OnSwitchFireModeDelegate.AddDynamic(this, &UAmmoWidget::SetFireMode);
 }
 
@@ -67,6 +67,8 @@ void UAmmoWidget::SetCurrentAmmo(int32 RoundsInMagazine)
 
 void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
 {
+	WeaponInfo->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	
 	SetCurrentAmmo(WeaponInfo->GetRoundsInMagazine());
 	
 	if(MaxMagazineAmmo)
@@ -76,6 +78,13 @@ void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
 		SetFireMode(WeaponInfo->GetSelectedFireMode());
 
 	this->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UAmmoWidget::ClearWeaponDetails(AMasterWeapon* WeaponInfo)
+{
+	//WeaponInfo->OnCompleteReloadDelegate.RemoveDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
+	
+	CollapseWidget();
 }
 
 void UAmmoWidget::CollapseWidget()
