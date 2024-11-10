@@ -20,7 +20,7 @@ enum class EUpgradeType : uint8
 USTRUCT(Blueprintable)
 struct FBaseUpgrade 
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EUpgradeType UpgradeType;
@@ -47,10 +47,10 @@ struct FBaseUpgrade
 USTRUCT(BlueprintType)
 struct FWeaponUpgradeRow : public FTableRowBase
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FBaseUpgrade> Upgrades;

@@ -7,6 +7,7 @@
 #include "Components/StackBox.h"
 #include "StoreCard.generated.h"
 
+class UUpgradeBase;
 class UStoreCardRowWidget;
 /**
  * 
@@ -25,6 +26,9 @@ public:
 	//====================================================================
 	UStoreCard();
 
+	UFUNCTION()
+	void InitStoreCard(UUpgradeBase* UpgradeBase);
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -39,6 +43,8 @@ protected:
 	
 	UPROPERTY()
 	TArray<TObjectPtr<UStoreCardRowWidget>> CardRows;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UStoreCardRowWidget> CardRowsClass;
 
 	//====================================================================
 	// FUNCTIONS

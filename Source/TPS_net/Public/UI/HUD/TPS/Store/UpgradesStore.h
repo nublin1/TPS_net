@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "UpgradesStore.generated.h"
 
+struct FUpgrades;
 class UStoreCard;
 class UUniformGridPanel;
 /**
@@ -26,16 +27,25 @@ public:
 	//====================================================================
 	UUpgradesStore();
 
+	UFUNCTION(BlueprintCallable)
+	void InitUpgradesStore(FUpgrades UpgradesList);
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UUniformGridPanel> StoreCardsHolder;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int StoreCardsHolderRowsNumber;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int StoreCardsHolderCollumsNumber;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<TObjectPtr<UStoreCard>> StoreCardArray;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UStoreCard> StoreCardClass;
 
 	//====================================================================
 	// FUNCTIONS

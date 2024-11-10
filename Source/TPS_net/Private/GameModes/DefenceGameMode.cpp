@@ -4,12 +4,14 @@
 #include "GameModes/DefenceGameMode.h"
 
 #include "GS_TPS.h"
+#include "Data/Upgrades/UpgradeData.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "DefenceGame/Director/Director.h"
 #include "GameFramework/GameStateBase.h"
 #include "Player/PlayerCharacter.h"
 #include "StateMachine/StateMachineComponent.h"
+#include "UI/HUD/TPS/Upgrade/UpgradeBase.h"
 
 class ADirector;
 
@@ -37,16 +39,43 @@ void ADefenceGameMode::BeginPlay()
 	}
 }
 
+void ADefenceGameMode::InitUpgrades(APlayerController* NewPlayer)
+{
+	if (AvaiablePlayersUpgrades.Num()== 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AvaiablePlayersUpgrades is Empty"));
+		return;
+	}
+
+	FUpgrades ListOfPlayerUps;
+
+	for (int i = 0; i < AvaiablePlayersUpgrades.Num(); i++)
+	{
+		if (AvaiablePlayersUpgrades[i].DataTable && !AvaiablePlayersUpgrades[i].RowName.IsNone())
+		{
+			FWeaponUpgradeRow* WData = AvaiablePlayersUpgrades[i].DataTable->FindRow<FWeaponUpgradeRow>(AvaiablePlayersUpgrades[i].RowName, AvaiablePlayersUpgrades[i].RowName.ToString());
+			if (!WData)
+				continue;
+
+			auto UpgradeBaseRef = NewObject<UUpgradeBase>(this, UUpgradeBase::StaticClass());
+			UpgradeBaseRef->Name = WData->Name;
+			UpgradeBaseRef->SetUpgrades(WData->Upgrades);
+
+			ListOfPlayerUps.ListOfUpgrades.Add(UpgradeBaseRef);
+		}
+	}
+
+	if (ListOfPlayerUps.ListOfUpgrades.Num() > 0)
+	{
+		IndividualPlayerUpgrades.Add(NewPlayer, ListOfPlayerUps);
+	}
+}
+
 void ADefenceGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (GlobalUpgrades.Num()> 0)
-	{
-		FUpgrades newList;
-		newList.ListOfUpgrades = GlobalUpgrades;
-		IndividualPlayerUpgrades.Add(NewPlayer, newList);
-	}
+	InitUpgrades(NewPlayer);
 }
 
 void ADefenceGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
@@ -77,6 +106,16 @@ void ADefenceGameMode::Logout(AController* Exiting)
 	APlayerController* PC = Cast<APlayerController>(Exiting);
 	PlayersMoney.Remove(PC);
 	IndividualPlayerUpgrades.Remove(PC);
+}
+
+FUpgrades ADefenceGameMode::GetPlayerUpgrades(APlayerController* PlayerController)
+{
+	if (auto FoundUpgrades = IndividualPlayerUpgrades.Find(PlayerController))
+	{
+		return *FoundUpgrades;
+	}
+	
+	return FUpgrades();
 }
 
 void ADefenceGameMode::OnPlayerStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)

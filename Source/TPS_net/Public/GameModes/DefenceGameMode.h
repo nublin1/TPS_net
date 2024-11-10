@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "DefenceGameMode.generated.h"
 
+class UUpgradeBase;
 class AGS_TPS;
 struct FGameplayTag;
 
@@ -26,7 +27,7 @@ struct FUpgrades
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	TArray<FDataTableRowHandle> ListOfUpgrades;
+	TArray<TObjectPtr<UUpgradeBase>> ListOfUpgrades;
 };
 
 
@@ -53,6 +54,9 @@ public:
 	UFUNCTION()
 	virtual void Logout(AController* Exiting) override;
 
+	UFUNCTION(BlueprintCallable)
+	FUpgrades GetPlayerUpgrades(APlayerController* PlayerController);
+
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -63,7 +67,7 @@ protected:
 	UPROPERTY()
 	TMap<TObjectPtr<APlayerController>, int> PlayersMoney;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FDataTableRowHandle> GlobalUpgrades;
+	TArray<FDataTableRowHandle> AvaiablePlayersUpgrades;
 	UPROPERTY(VisibleAnywhere)
 	TMap<TObjectPtr<APlayerController>, FUpgrades> IndividualPlayerUpgrades ;
 
@@ -76,8 +80,12 @@ protected:
 	virtual void PostInitializeComponents() override;
 	UFUNCTION()
 	virtual void BeginPlay() override;
+	
+	
 
 	//
+	UFUNCTION()
+	void InitUpgrades(APlayerController* NewPlayer);
 	UFUNCTION()
 	void OnPlayerStateChanged(AActor* Actor, const FGameplayTag& NewStateTag);
 	UFUNCTION()

@@ -6,6 +6,7 @@
 #include "UI/BUIUserWidget.h"
 #include "StoreCardRowWidget.generated.h"
 
+struct FBaseUpgrade;
 class UTextBlock;
 /**
  * 
@@ -24,6 +25,9 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	UStoreCardRowWidget();
+
+	UFUNCTION()
+	void InitStoreCardRow(FBaseUpgrade BaseUpgrade);
 
 protected:
 	//====================================================================
