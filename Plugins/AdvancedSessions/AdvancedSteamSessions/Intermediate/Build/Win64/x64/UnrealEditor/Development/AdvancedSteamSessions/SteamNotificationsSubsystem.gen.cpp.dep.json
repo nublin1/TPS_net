@@ -1,12 +1,12 @@
 {
     "Version": "1.2",
     "Data": {
-        "Source": "f:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\unrealeditor\\inc\\advancedsteamsessions\\uht\\steamnotificationssubsystem.gen.cpp",
+        "Source": "g:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\unrealeditor\\inc\\advancedsteamsessions\\uht\\steamnotificationssubsystem.gen.cpp",
         "ProvidedModule": "",
-        "PCH": "f:\\ueprojects\\tps_net 5.4\\intermediate\\build\\win64\\x64\\tps_neteditor\\development\\unrealed\\sharedpch.unrealed.project.novalfmtstr.valapi.cpp20.inclorderoldest.h.pch",
+        "PCH": "g:\\ueprojects\\tps_net 5.4\\intermediate\\build\\win64\\x64\\tps_neteditor\\development\\unrealed\\sharedpch.unrealed.project.novalfmtstr.valapi.cpp20.inclorderoldest.h.pch",
         "Includes": [
-            "f:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\advancedsteamsessions\\definitions.advancedsteamsessions.h",
-            "f:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\source\\advancedsteamsessions\\classes\\steamnotificationssubsystem.h",
+            "g:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\advancedsteamsessions\\definitions.advancedsteamsessions.h",
+            "g:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\source\\advancedsteamsessions\\classes\\steamnotificationssubsystem.h",
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\steam_api.h",
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\steam_api_common.h",
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\steamtypes.h",
@@ -41,7 +41,7 @@
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\steamnetworkingtypes.h",
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\isteamnetworkingsockets.h",
             "f:\\ue_5.4\\engine\\source\\thirdparty\\steamworks\\steamv157\\sdk\\public\\steam\\isteamnetworkingutils.h",
-            "f:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\unrealeditor\\inc\\advancedsteamsessions\\uht\\steamnotificationssubsystem.generated.h"
+            "g:\\ueprojects\\tps_net 5.4\\plugins\\advancedsessions\\advancedsteamsessions\\intermediate\\build\\win64\\unrealeditor\\inc\\advancedsteamsessions\\uht\\steamnotificationssubsystem.generated.h"
         ],
         "ImportedModules": [],
         "ImportedHeaderUnits": []

@@ -10,10 +10,10 @@ public class TPS_net : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI" ,"GameplayTags",
 			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule", "GameplayTasks", 
-			 "RecoilAnimation", "NavigationSystem", "Landscape"
+			 "RecoilAnimation", "NavigationSystem", "Landscape", "PhysicsCore"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG" });
 		
 		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
         //DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");

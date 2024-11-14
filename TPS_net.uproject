@@ -7,22 +7,13 @@
 		{
 			"Name": "TPS_net",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"CoreUObject",
-				"UMG",
-				"AIModule"
-			]
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
+			"Enabled": true
 		},
 		{
 			"Name": "MotionWarping",
@@ -30,18 +21,11 @@
 		},
 		{
 			"Name": "OnlineSubsystemGooglePlay",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Android"
-			]
+			"Enabled": false
 		},
 		{
 			"Name": "OnlineSubsystemIOS",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"IOS",
-				"TVOS"
-			]
+			"Enabled": false
 		},
 		{
 			"Name": "OnlineSubsystemSteam",
@@ -49,18 +33,23 @@
 		},
 		{
 			"Name": "AsyncLoadingScreen",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/01f39767dc6b4290877f38365787cbf8"
+			"Enabled": true
 		},
 		{
 			"Name": "RecoilAnimation",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/76194998d28247018bee7be203f6c948"
+			"Enabled": true
+		},
+		{
+			"Name": "VisualStudioTools",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
 		"Linux",
 		"LinuxArm64",
 		"Windows"
-	]
+	],
+	"AdditionalRootDirectories": [],
+	"AdditionalPluginDirectories": [],
+	"EpicSampleNameHash": ""
 }
