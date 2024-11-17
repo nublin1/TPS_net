@@ -40,8 +40,6 @@ protected:
 	//====================================================================
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	FVector2D MovementVector;
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite )
-	bool IsAiming;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsMoving;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -82,8 +80,13 @@ protected:
 	bool LadderIsNextLeftArm;
 
 	//Timers
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FTimerHandle CollisionOffTimerHandle;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FTimerHandle HipFireCooldownTimeHandle;
+	UPROPERTY(BlueprintReadWrite)
+	float HipFireToIdleTransitionTime;
 	
 	
 	//====================================================================
@@ -91,9 +94,8 @@ protected:
 	//====================================================================
 	virtual void PostInitProperties() override;
 	virtual void PostInitializeComponents() override;
-
 	
-	// deadth
+	// Deadth
 	UFUNCTION()
 	void OnHealthDepleted(AActor* Actor, AController* EventInstigator);
 	UFUNCTION(Server, Unreliable)
@@ -117,6 +119,7 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStartClimbing(USceneComponent* TargetMoveToComponent);
 
+	
 	//
 	UFUNCTION(BlueprintCallable)
 	void ShortCollisionOff(UBoxComponent* TargetCollision);

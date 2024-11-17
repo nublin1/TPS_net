@@ -15,7 +15,7 @@
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 
 // Sets default values
-APlayerCharacter::APlayerCharacter(): IsAiming(false), CameraInterpolationSpeed(5)
+APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -197,6 +197,8 @@ void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* Ta
 	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
 
+
+
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
 {
 	if (!TargetCollision)
@@ -230,7 +232,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(APlayerCharacter, MovementVector);
 	
-	DOREPLIFETIME(APlayerCharacter, IsAiming);
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 
