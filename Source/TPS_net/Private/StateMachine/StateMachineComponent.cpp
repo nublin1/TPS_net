@@ -31,7 +31,6 @@ void UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 		OnRep_CurrentStateTag();
 		if(StateChangedDelegate.IsBound())
 		{
-			
 			StateChangedDelegate.Broadcast(GetOwner(),CurrentStateTag);
 		}
 	}

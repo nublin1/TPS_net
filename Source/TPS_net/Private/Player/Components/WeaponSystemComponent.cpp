@@ -42,10 +42,12 @@ void UWeaponSystemComponent::PostInitProperties()
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)
 	{
-		auto FindStateMachine_Aiming =  Cast<UStateMachineComponent>(Owner->GetDefaultSubobjectByName(TEXT("StateMachine_Aiming")));
-		if (FindStateMachine_Aiming)
+		auto ResultStateMachine_Aiming =  Cast<UStateMachineComponent>(Owner->GetDefaultSubobjectByName(TEXT("StateMachine_Aiming")));
+		if (ResultStateMachine_Aiming)
 		{
-			FindStateMachine_Aiming->StateChangedDelegate.AddDynamic(this, &UWeaponSystemComponent::SwitchStateMachine_Aiming);
+			OwnerStateMachineComponent_Aiming = ResultStateMachine_Aiming;
+			OwnerStateMachineComponent_Aiming->StateChangedDelegate.AddDynamic(this, &UWeaponSystemComponent::SwitchStateMachine_Aiming);
+			OwnerStateMachineComponent_Aiming->InitStateDelegate.AddDynamic(this, &UWeaponSystemComponent::InitState_Aiming);
 		}		
 	}
 }
@@ -101,7 +103,7 @@ void UWeaponSystemComponent::InitializeFireSequence ()
 	if (!CurrentWeaponInHands)
 		return;
 
-	switch (EFireMode FireMode =CurrentWeaponInHands->GetSelectedFireMode())
+	switch (EFireMode FireMode = CurrentWeaponInHands->GetSelectedFireMode())
 	{
 	case EFireMode::Single:
 		AvailableShootsCount = 1;
@@ -121,7 +123,8 @@ bool UWeaponSystemComponent::CheckIsCanShoot()
 {
 	if (!CurrentWeaponInHands
 		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
-		|| CurrentWeaponInHands->GetRoundsInMagazine()<=0)
+		|| CurrentWeaponInHands->GetRoundsInMagazine()<=0
+		|| OwnerStateMachineComponent_Aiming->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.NoAiming")))
 		return false;
 	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
@@ -573,8 +576,9 @@ bool UWeaponSystemComponent::IsCanStartReload()
 
 void UWeaponSystemComponent::SwitchStateMachine_Aiming(AActor* Actor, const FGameplayTag& NewStateTag)
 {
-	static const FGameplayTag AimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.Aiming"));	
-	if (NewStateTag == AimingTag)
+	static const FGameplayTag AimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.Aiming"));
+	static const FGameplayTag HipAimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.HipAiming"));
+	if (NewStateTag == AimingTag || NewStateTag == HipAimingTag)
 	{
 		bIsNeedCalculateShootInfo = true;
 	}
@@ -584,6 +588,14 @@ void UWeaponSystemComponent::SwitchStateMachine_Aiming(AActor* Actor, const FGam
 	}
 }
 
+void UWeaponSystemComponent::InitState_Aiming(const FGameplayTag& NewStateTag)
+{
+	static const FGameplayTag AimingTag = FGameplayTag::RequestGameplayTag(TEXT("PlayerAimingStates.HipAiming"));
+	if (NewStateTag == AimingTag)
+	{
+		
+	}
+}
 
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                            FActorComponentTickFunction* ThisTickFunction)

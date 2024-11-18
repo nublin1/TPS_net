@@ -10,6 +10,7 @@
 #include "Weapon/WeaponBase.h"
 #include "WeaponSystemComponent.generated.h"
 
+class UStateMachineComponent;
 class UCameraComponent;
 struct FGameplayTag;
 class IProjectileFactory;
@@ -235,6 +236,8 @@ protected:
 	//
 	UFUNCTION()
 	void SwitchStateMachine_Aiming(AActor* Actor, const FGameplayTag& NewStateTag);
+	UFUNCTION()
+	void InitState_Aiming(const FGameplayTag& NewStateTag);
 
 public:		
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -242,6 +245,11 @@ public:
 
 
 private:
+	//====================================================================
+	// PROPERTIES AND VARIABLES
+	//====================================================================
+	TObjectPtr<UStateMachineComponent> OwnerStateMachineComponent_Aiming;
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================

@@ -9,6 +9,7 @@
 #include "Interfaces/WeaponSystemInterface.h"
 #include "PlayerCharacter.generated.h"
 
+struct FGameplayTag;
 class UBoxComponent;
 class UStateMachineComponent;
 

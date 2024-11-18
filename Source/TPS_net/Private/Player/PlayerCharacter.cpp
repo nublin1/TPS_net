@@ -197,8 +197,6 @@ void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* Ta
 	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
 
-
-
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
 {
 	if (!TargetCollision)
