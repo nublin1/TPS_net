@@ -129,10 +129,15 @@ void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 		}
 
 		FTimerHandle UnusedHandle;
-		GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
+		GetWorldTimerManager().SetTimer(UnusedHandle, [this, SkeletalMeshComponent]()
 		{
-			Destroy();
-		}, 50.0f, false);
+			//SkeletalMeshComponent->SetSimulatePhysics(false);
+			SkeletalMeshComponent->Stop();
+			SkeletalMeshComponent->bPauseAnims = true;
+			SkeletalMeshComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+			SkeletalMeshComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+			//Destroy();
+		}, 3.0f, false);
 	}
 }
 

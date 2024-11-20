@@ -197,6 +197,19 @@ void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* Ta
 	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
 }
 
+bool APlayerCharacter::IsStateTransitionAllowed(FGameplayTag NewState)
+{
+	if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
+	{
+		if (!IsGrounded
+			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
+			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder"))))
+			return false;
+	}
+	
+	return true;
+}
+
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
 {
 	if (!TargetCollision)

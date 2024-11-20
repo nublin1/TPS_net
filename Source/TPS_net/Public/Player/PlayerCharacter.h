@@ -120,6 +120,10 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStartClimbing(USceneComponent* TargetMoveToComponent);
 
+	//
+	UFUNCTION(BlueprintCallable)
+	bool IsStateTransitionAllowed(FGameplayTag NewState);
+
 	
 	//
 	UFUNCTION(BlueprintCallable)
