@@ -50,10 +50,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsInitialized = false;
+	UPROPERTY(BlueprintReadWrite)
+	bool IsNeedToDestroy = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Velocity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector StartPosition;
+	UPROPERTY(BlueprintReadWrite)
+	TArray<TObjectPtr<AActor>> ActorsToIgnore;
+	
 
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -69,7 +74,7 @@ protected:
 	virtual void HitDetected();
 
 	UFUNCTION(BlueprintCallable)
-	virtual void Destroy();
+	virtual void DestroyReq();
 
 public:
 	// Called every frame

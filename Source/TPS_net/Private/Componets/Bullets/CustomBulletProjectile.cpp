@@ -23,7 +23,7 @@ void UCustomBulletProjectile::Init()
 	IsInitialized = true;
 	
 	if(GetOwner()){
-		GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, this, &UCustomBulletProjectile::Destroy, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
+		GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, this, &UCustomBulletProjectile::DestroyReq, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
 	    
 	}
 }
@@ -41,13 +41,12 @@ void UCustomBulletProjectile::HitDetected()
 	}
 }
 
-void UCustomBulletProjectile::Destroy()
+void UCustomBulletProjectile::DestroyReq()
 {
 	if (GetOwner()->GetWorldTimerManager().IsTimerActive(DestroyHandle))
 		GetOwner()->GetWorldTimerManager().ClearTimer(DestroyHandle);
 
-	if(GetOwner())
-		GetOwner()->K2_DestroyActor();
+	IsNeedToDestroy = true;
 }
 
 

@@ -7,6 +7,7 @@
 #include "Characters/NPC/Components/ZombieCombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
 
@@ -18,11 +19,12 @@ ANPCZombie::ANPCZombie()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
-	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
 	
 	ZombieCombatComponent = CreateDefaultSubobject<UZombieCombatComponent>(TEXT("ZombieCombatComponent"));
 	ZombieCombatComponent->OnComponentCreated();
 	ZombieCombatComponent->SetIsReplicated(true);
+
+	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
 	
 }
 
@@ -49,6 +51,8 @@ void ANPCZombie::PostInitializeComponents()
 void ANPCZombie::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 void ANPCZombie::ChangeMaxMoveSpeed(float NewMaxSpeed)
@@ -138,6 +142,9 @@ void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 			SkeletalMeshComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 			//Destroy();
 		}, 3.0f, false);
+
+		if (DyingSound)
+			UGameplayStatics::PlaySoundAtLocation(this, DyingSound, GetActorLocation());
 	}
 }
 

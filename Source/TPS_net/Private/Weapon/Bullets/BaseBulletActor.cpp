@@ -13,19 +13,19 @@ ABaseBulletActor::ABaseBulletActor()
 
 }
 
-
-
-// Called when the game starts or when spawned
 void ABaseBulletActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
+void ABaseBulletActor::Destroy()
+{
+	K2_DestroyActor();
+}
+
 void ABaseBulletActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
-

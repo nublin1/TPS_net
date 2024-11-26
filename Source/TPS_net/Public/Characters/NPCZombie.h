@@ -44,6 +44,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ReadyToAttack = true;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TObjectPtr<USoundBase> DyingSound;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -72,7 +75,7 @@ protected:
 	//
 	UFUNCTION()
 	void NPCDead(AActor* KilledActor, AController* EventInstigator);
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
 	void Server_NPCDead(AActor* KilledActor);
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticast_NPCDead(AActor* KilledActor);

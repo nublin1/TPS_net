@@ -50,7 +50,7 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	UPROPERTY(Replicated, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bIsGodMode = false;
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Health, EditAnywhere, BlueprintReadWrite)
 	float Health = 100.0f;

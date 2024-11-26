@@ -4,6 +4,7 @@
 #include "Player/Components/WeaponSystemComponent.h"
 
 #include "NativeGameplayTags.h"
+#include "Camera/CameraComponent.h"
 #include "Data/Weapon/WeaponData.h"
 #include "Weapon/WeaponBase.h"
 #include "Engine/EngineTypes.h"
@@ -201,8 +202,12 @@ void UWeaponSystemComponent::ConfigureSpawnedProjectile ()
 				0.0f                                        // Roll (не нужно для разброса)
 			);
 
-			FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
-			FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset + RandomSpread;
+			FVector SpawnLocation = PlayerCamera->K2_GetComponentLocation();
+			FRotator SpawnRotation = PlayerCamera->GetComponentRotation() + RandomSpread;
+
+			//FVector SpawnLocation = BulletSpawnPointTransform.GetLocation();
+			//FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + AimOffset + RandomSpread;
+			//FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
 			
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics, CurrentWeaponInHands);
 			bIsShooting = true;
