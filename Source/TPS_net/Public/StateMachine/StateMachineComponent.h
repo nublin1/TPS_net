@@ -54,6 +54,8 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	FGameplayTag PrevStateTag;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FGameplayTag CurrentStateTag;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

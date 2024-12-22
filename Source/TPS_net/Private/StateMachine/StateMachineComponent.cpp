@@ -24,6 +24,7 @@ void UStateMachineComponent::SwitchState(FGameplayTag _StateTag)
 		bCanTickState = false;
 		
 		ExitState();
+		PrevStateTag = CurrentStateTag;
 		CurrentStateTag = _StateTag;
 		InitState();
 

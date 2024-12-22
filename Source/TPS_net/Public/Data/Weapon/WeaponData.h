@@ -12,7 +12,7 @@
 
 class ABaseBulletActor;
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta=(ScriptName="EWeaponType"))
 enum class EWeaponType : uint8
 {
 	Rifle UMETA(DisplayName = "Rifle"),
@@ -66,6 +66,8 @@ struct FWeaponAssetData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FRecoilAnimData RecoilAnimData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UCurveVector> CrosshairMotionCurves;
 };
 
 USTRUCT(BlueprintType)

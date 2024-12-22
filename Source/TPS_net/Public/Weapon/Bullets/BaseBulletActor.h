@@ -14,10 +14,10 @@ class TPS_NET_API ABaseBulletActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	
-	ABaseBulletActor();	
+	ABaseBulletActor();
 
-protected:
+
+protected:	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

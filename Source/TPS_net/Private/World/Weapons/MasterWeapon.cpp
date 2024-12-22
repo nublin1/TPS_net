@@ -102,6 +102,23 @@ void AMasterWeapon::UpdateVisual()
 	}
 }
 
+void AMasterWeapon::ToggleBoneVisibility(FName BoneName)
+{
+	if (!SkeletalMeshWeapon) return;
+	
+	bool bIsHidden = SkeletalMeshWeapon->IsBoneHiddenByName(BoneName);
+	if (bIsHidden)
+	{
+		SkeletalMeshWeapon->UnHideBoneByName(BoneName);
+	}
+	else
+	{
+		SkeletalMeshWeapon->HideBoneByName(BoneName, PBO_None);
+	}
+}
+
+
+
 void AMasterWeapon::PlayShootEffect(UParticleSystem* ParticleSystem, FName SocketName)
 {
 	if (!ParticleSystem || !SkeletalMeshWeapon) 

@@ -1,12 +1,59 @@
 [
 	{
 		"Name": "5.45x39mm",
-		"Damage": 40,
-		"BulletMass": 0.1
+		"AmmoCharacteristics":
+		{
+			"Name": "5.45x39mm",
+			"Damage": 35,
+			"BulletMass": 0.1,
+			"NumberOfShotsPerRound": 1,
+			"StartBulletSpeed": 75000,
+			"BulletLifeTime": 8,
+			"CrossSection": 0.49
+		},
+		"AmmoBehaviour":
+		{
+			"IsCanRicochet": false,
+			"IsEffectOfGravity": true,
+			"IsEffectOfDragForce": true
+		}
 	},
 	{
 		"Name": "9x18mm",
-		"Damage": 14,
-		"BulletMass": 0.1
+		"AmmoCharacteristics":
+		{
+			"Name": "9x18mm",
+			"Damage": 10,
+			"BulletMass": 0.1,
+			"NumberOfShotsPerRound": 1,
+			"StartBulletSpeed": 55000,
+			"BulletLifeTime": 8,
+			"CrossSection": 0.49
+		},
+		"AmmoBehaviour":
+		{
+			"IsCanRicochet": false,
+			"IsEffectOfGravity": true,
+			"IsEffectOfDragForce": true
+		}
+	},
+	{
+		"Name": "12-70_5.25mm_buckshot",
+		"AmmoCharacteristics":
+		{
+			"Name": "12-70_5.25mm_buckshot",
+			"Damage": 10,
+			"BulletMass": 0.044,
+			"NumberOfShotsPerRound": 5,
+			"StartBulletSpeed": 75000,
+			"BulletLifeTime": 8,
+			"CrossSection": 0.49
+		},
+		"AmmoBehaviour":
+		{
+			"IsCanRicochet": false,
+			"IsEffectOfGravity": true,
+			"IsEffectOfDragForce": true
+		}
 	}
 ]

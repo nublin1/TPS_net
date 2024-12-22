@@ -34,7 +34,12 @@ public:
 	void InitWeaponBaseData();
 	UFUNCTION()
 	void UpdateVisual();
+	UFUNCTION(BlueprintCallable)
+	void ToggleBoneVisibility(FName BoneName);
+	
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartFire();
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnFire();
 	UFUNCTION(BlueprintImplementableEvent)
@@ -81,6 +86,8 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshWeapon;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> TargetPointPtr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ClipBoneName;
 
 	//
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_RoundsInMagazine)
@@ -93,6 +100,12 @@ protected:
 	UDataTable* WeaponTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName StartingWeapon;
+
+	// Recoil
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsRecoiling = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurrentRecoilTime;
 	
 	
 	//====================================================================

@@ -20,6 +20,17 @@ enum class EWeaponType : uint8;
 class AMasterWeapon;
 
 
+#pragma region Enums
+UENUM(BlueprintType)
+enum class EShootReadyStatus : uint8
+{
+	Ready                UMETA(DisplayName = "Ready to Shoot"),            
+	NoAmmo               UMETA(DisplayName = "Not Enough Ammo"),           
+	ShootDelayActive     UMETA(DisplayName = "Shoot Delay Active"),       
+	WeaponNotEquipped    UMETA(DisplayName = "Weapon Not Equipped"),     
+	Unknown              UMETA(DisplayName = "Unknown Reason")        
+};
+
 UENUM(Blueprintable, BlueprintType)
 enum EWeaponTransitionType: uint8
 {
@@ -27,7 +38,7 @@ enum EWeaponTransitionType: uint8
 	SwitchToPrimary UMETA(DisplayName = "Switch to Primary"),
 	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
 };
-
+#pragma endregion Enums
 #pragma region Delegates
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedProjectileSignature, int32, RoundsInMagazine);
@@ -39,6 +50,26 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHideArmsSignature,  AMasterWeapon
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchFireMode, EFireMode, FireMode);
 
 #pragma endregion
+
+USTRUCT(BlueprintType)
+struct FShootReadyResult
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite)
+	EShootReadyStatus Status;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FString Message;
+	
+	FShootReadyResult()
+		: Status(EShootReadyStatus::Unknown), Message(TEXT(""))
+	{}
+
+	FShootReadyResult(EShootReadyStatus InStatus, const FString& InMessage = TEXT(""))
+		: Status(InStatus), Message(InMessage)
+	{}
+};
 
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
@@ -96,7 +127,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitializeFireSequence ();
 	UFUNCTION(BlueprintCallable)
-	bool CheckIsCanShoot();
+	FShootReadyResult CheckIsCanShoot();
 	UFUNCTION(BlueprintCallable)
 	void TriggerFireWeapon();
 	UFUNCTION()
@@ -132,7 +163,7 @@ public:
 	UFUNCTION()
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
 	UFUNCTION()
-	bool GetIsShooting() {return bIsShooting;}
+	bool GetIsStartShooting() {return bIsStartShooting;}
 
 protected:
 	//====================================================================
@@ -184,13 +215,13 @@ protected:
 
 	//
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
-	bool bIsShooting = false;
+	bool bIsStartShooting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsNeedCalculateShootInfo = false;
 	UPROPERTY()
 	bool bIsReadyToNextShoot = true;
 	UPROPERTY()
-	uint8 AvailableShootsCount = 0;
+	uint16 AvailableShootsCount = 0;
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
 	UPROPERTY(Transient)

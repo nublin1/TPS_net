@@ -14,6 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Factories/BulletProjectileFactory.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Player/PlayerCharacter.h"
 
 #include "StateMachine/StateMachineComponent.h"
@@ -94,6 +95,7 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 
 void UWeaponSystemComponent::StopFireSequence()
 {
+	bIsStartShooting = false;
 	OnStopFireDelegate.Broadcast();
 	if (CurrentWeaponInHands)
 		CurrentWeaponInHands->OnStopFire();
@@ -120,24 +122,38 @@ void UWeaponSystemComponent::InitializeFireSequence ()
 	}
 }
 
-bool UWeaponSystemComponent::CheckIsCanShoot()
+FShootReadyResult UWeaponSystemComponent::CheckIsCanShoot()
 {
+	if (!CurrentWeaponInHands)
+		return FShootReadyResult(EShootReadyStatus::WeaponNotEquipped, TEXT("Weapon is not equipped."));
+
+	if (CurrentWeaponInHands->GetRoundsInMagazine()<=0)
+		return FShootReadyResult(EShootReadyStatus::NoAmmo, TEXT("No ammo left."));
+	
 	if (!CurrentWeaponInHands
 		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
-		|| CurrentWeaponInHands->GetRoundsInMagazine()<=0
 		|| OwnerStateMachineComponent_Aiming->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.NoAiming")))
-		return false;
+		return FShootReadyResult(EShootReadyStatus::Unknown);
 	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
-		return false;		
+		return FShootReadyResult(EShootReadyStatus::ShootDelayActive);	
 	
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
-	{			
-		//UE_LOG(LogTemp, Warning, TEXT("Available Shoots Count: %d"), AvailableShootsCount);
-		return true;
+	{
+		//FString Message = FString::Printf(TEXT("Available Shoots Count: %d"), AvailableShootsCount);
+		//UKismetSystemLibrary::PrintString(this, Message, true, false, FLinearColor::Yellow, 5.0f);
+		
+		OnStartFireSignatureDelegate.Broadcast();
+		if (!bIsStartShooting)
+		{
+			bIsStartShooting = true;
+			CurrentWeaponInHands->OnStartFire();
+		}
+		
+		return FShootReadyResult(EShootReadyStatus::Ready);
 	}
 	
-	return false;
+	return FShootReadyResult(EShootReadyStatus::Unknown);
 }
 
 void UWeaponSystemComponent::TriggerFireWeapon() 
@@ -145,10 +161,8 @@ void UWeaponSystemComponent::TriggerFireWeapon()
 	if (!CurrentWeaponInHands)
 		return;
 
-	OnStartFireSignatureDelegate.Broadcast();
-	CurrentWeaponInHands->OnFire();
 	
-
+	CurrentWeaponInHands->OnFire();
 	CurrentWeaponInHands->DecreaseRoundsInMagazine(); 
 
 	switch (CurrentWeaponInHands->GetWeaponBaseRef()->GetEBulletMode())
@@ -210,7 +224,6 @@ void UWeaponSystemComponent::ConfigureSpawnedProjectile ()
 			//FRotator SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
 			
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics, CurrentWeaponInHands);
-			bIsShooting = true;
 			if(OnSpawnedProjectile.IsBound())
 				OnSpawnedProjectile.Broadcast(CurrentWeaponInHands->GetRoundsInMagazine());
 		}
@@ -484,7 +497,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 
 	if (!SkeletalMeshComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Skeleal MeshComponent is null. Cannot attach weapon to the skeletal mesh."));
+		UE_LOG(LogTemp, Error, TEXT("Skeletal MeshComponent is null. Cannot attach weapon to the skeletal mesh."));
 		return;
 	}
 
@@ -614,7 +627,7 @@ void UWeaponSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UWeaponSystemComponent, bIsShooting);
+	DOREPLIFETIME(UWeaponSystemComponent, bIsStartShooting);	
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentStateTag);
 	DOREPLIFETIME(UWeaponSystemComponent, CurrentWeaponInHands);
 	DOREPLIFETIME(UWeaponSystemComponent, WeaponPistolHolster);

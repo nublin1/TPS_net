@@ -1,22 +1,135 @@
 [
 	{
 		"Name": "Pistol",
-		"HolsterType": "Pistol",
-		"BulletMode": "HitScan",
+		"WeaponType": "Pistol",
+		"HolsterWeaponType": "Pistol",
+		"BulletMode": "Projectile",
+		"CharacteristicsOfTheWeapon":
+		{
+			"AvailableShootingModes": [
+				"Single"
+			],
+			"UsableAmmo": [
+				{
+					"DataTable": "/Script/Engine.DataTable'/Game/ThirdPerson/Data/AmmoDataTable.AmmoDataTable'",
+					"RowName": "9x18mm"
+				}
+			],
+			"WeaponMass": 1,
+			"SpreadAngle": 1,
+			"RPM": 600,
+			"MagazineSize": 12,
+			"MuzzleVelocity": 55000
+		},
 		"WeaponAssetData":
 		{
 			"SkeletalMesh": "/Script/Engine.SkeletalMesh'/Game/MilitaryWeapDark/Weapons/Pistols_B.Pistols_B'",
-			"BulletActor": "None"
+			"ShootAnimMontage": "/Script/Engine.AnimMontage'/Game/Weapon/MilitaryWeapDark/Weapons/Anims/Fire_Pistol_W_Montage.Fire_Pistol_W_Montage'",
+			"BulletActor": "/Script/Engine.Blueprint'/Game/ThirdPerson/Blueprints/Weapons/Bullet/BP_Bullet.BP_Bullet'",
+			"AnimationBlueprint": "/Script/Engine.AnimBlueprint'/Game/Weapon/AnimBluprints/ABP_Pistol.ABP_Pistol'",
+			"BulletSpawnSocketTransformName": "MuzzleFlash",
+			"RecoilAnimData":
+			{
+				"SingleRot": "/Script/Engine.CurveVector'/Game/PRAS/Pistol_Curves/Pistol_Rot.Pistol_Rot'",
+				"SingleLoc": "/Script/Engine.CurveVector'/Game/PRAS/Pistol_Curves/Pistol_Loc.Pistol_Loc'",
+				"AutoRot": "None",
+				"AutoLoc": "None",
+				"RestRot": "None",
+				"RestLoc": "None",
+				"SlotName": "Pistol",
+				"SolverType": "Advanced",
+				"StoredData": "/Script/RecoilAnimation.StoredData'/Game/PRAS/Pistol.Pistol'"
+			},
+			"CrosshairMotionCurves": "None"
 		}
 	},
 	{
-		"Name": "Assault_Rifle",
-		"HolsterType": "Primary",
+		"Name": "Assault",
+		"WeaponType": "Rifle",
+		"HolsterWeaponType": "Primary",
 		"BulletMode": "Projectile",
+		"CharacteristicsOfTheWeapon":
+		{
+			"AvailableShootingModes": [
+				"Full_Auto",
+				"Single"
+			],
+			"UsableAmmo": [
+				{
+					"DataTable": "/Script/Engine.DataTable'/Game/ThirdPerson/Data/AmmoDataTable.AmmoDataTable'",
+					"RowName": "5.45x39mm"
+				}
+			],
+			"WeaponMass": 2,
+			"SpreadAngle": 1,
+			"RPM": 800,
+			"MagazineSize": 900,
+			"MuzzleVelocity": 75000
+		},
 		"WeaponAssetData":
 		{
 			"SkeletalMesh": "/Script/Engine.SkeletalMesh'/Game/MilitaryWeapDark/Weapons/Assault_Rifle_B.Assault_Rifle_B'",
-			"BulletActor": "None"
+			"ShootAnimMontage": "/Script/Engine.AnimMontage'/Game/Weapon/MilitaryWeapDark/Weapons/Anims/Fire_Rifle_W_Montage.Fire_Rifle_W_Montage'",
+			"BulletActor": "/Script/Engine.Blueprint'/Game/ThirdPerson/Blueprints/Weapons/Bullet/BP_Bullet.BP_Bullet'",
+			"AnimationBlueprint": "/Script/Engine.AnimBlueprint'/Game/Weapon/AnimBluprints/ABP_AssaultRifle.ABP_AssaultRifle'",
+			"BulletSpawnSocketTransformName": "MuzzleFlash",
+			"RecoilAnimData":
+			{
+				"SingleRot": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assault_Rot_Single.Assault_Rot_Single'",
+				"SingleLoc": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assaultl_Loc_Single.Assaultl_Loc_Single'",
+				"AutoRot": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assault_Rot_Auto.Assault_Rot_Auto'",
+				"AutoLoc": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assaultl_Loc_Auto.Assaultl_Loc_Auto'",
+				"RestRot": "None",
+				"RestLoc": "None",
+				"SlotName": "Assault",
+				"SolverType": "Advanced",
+				"StoredData": "/Script/RecoilAnimation.StoredData'/Game/PRAS/Assault.Assault'"
+			},
+			"CrosshairMotionCurves": "/Script/Engine.CurveVector'/Game/ThirdPerson/Blueprints/Weapons/Recoil/Curve_Assault_Auto.Curve_Assault_Auto'"
+		}
+	},
+	{
+		"Name": "Shotgun",
+		"WeaponType": "Shotgun",
+		"HolsterWeaponType": "Primary",
+		"BulletMode": "Projectile",
+		"CharacteristicsOfTheWeapon":
+		{
+			"AvailableShootingModes": [
+				"Single"
+			],
+			"UsableAmmo": [
+				{
+					"DataTable": "/Script/Engine.DataTable'/Game/ThirdPerson/Data/AmmoDataTable.AmmoDataTable'",
+					"RowName": "12-70_5.25mm_buckshot"
+				}
+			],
+			"WeaponMass": 2,
+			"SpreadAngle": 1,
+			"RPM": 400,
+			"MagazineSize": 7,
+			"MuzzleVelocity": 55000
+		},
+		"WeaponAssetData":
+		{
+			"SkeletalMesh": "/Script/Engine.SkeletalMesh'/Game/Weapon/MilitaryWeapDark/Weapons/Shotgun_B.Shotgun_B'",
+			"ShootAnimMontage": "/Script/Engine.AnimMontage'/Game/Weapon/MilitaryWeapDark/Weapons/Anims/Fire_Shotgun_W_Montage.Fire_Shotgun_W_Montage'",
+			"BulletActor": "/Script/Engine.Blueprint'/Game/ThirdPerson/Blueprints/Weapons/Bullet/BP_Bullet.BP_Bullet'",
+			"AnimationBlueprint": "/Script/Engine.AnimBlueprint'/Game/Weapon/AnimBluprints/ABP_Shotgun.ABP_Shotgun'",
+			"BulletSpawnSocketTransformName": "MuzzleFlash",
+			"RecoilAnimData":
+			{
+				"SingleRot": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assault_Rot_Single.Assault_Rot_Single'",
+				"SingleLoc": "/Script/Engine.CurveVector'/Game/PRAS/Assault_Curves/Assaultl_Loc_Single.Assaultl_Loc_Single'",
+				"AutoRot": "None",
+				"AutoLoc": "None",
+				"RestRot": "None",
+				"RestLoc": "None",
+				"SlotName": "Assault",
+				"SolverType": "Advanced",
+				"StoredData": "/Script/RecoilAnimation.StoredData'/Game/PRAS/Assault.Assault'"
+			},
+			"CrosshairMotionCurves": "None"
 		}
 	}
 ]
