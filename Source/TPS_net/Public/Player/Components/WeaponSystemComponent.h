@@ -97,7 +97,7 @@ public:
 	UPROPERTY(BlueprintCallable)
 	FOnSwitchFireMode OnSwitchFireModeDelegate;
 	
-	
+	//
 	UPROPERTY(BlueprintAssignable)
 	FInitStateSignature InitStateDelegate;
 	UPROPERTY(BlueprintAssignable)
@@ -105,7 +105,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FTickStateSinganture TickStateDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FStateChangedSignature StateChangedDelegate;
+	FStateChangedSignature OnStateChangedDelegate;
 
 	
 	//====================================================================
@@ -136,11 +136,13 @@ public:
 	void ServerProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics, AActor* Owner = nullptr);
 	UFUNCTION()
 	void HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics, AActor* Owner = nullptr) ;
-	
+
+	UFUNCTION(BlueprintCallable)
+	bool IsCanHideWeapon();
 
 	// Stat
 	UFUNCTION(Server, Unreliable, BlueprintCallable)
-	virtual void SwitchState(FGameplayTag _StateTag) override;
+	virtual void SwitchState(FGameplayTag _NewStateTag) override;
 	UFUNCTION()
 	virtual void OnRep_CurrentStateTag() override;
 	
@@ -151,7 +153,7 @@ public:
 	virtual FInitStateSignature& OnInitState() override { return InitStateDelegate; }
 	virtual FExitStateSignature& OnExitState() override { return ExitStateDelegate; }
 	virtual FTickStateSinganture& OnTickState() override { return TickStateDelegate; }
-	virtual FStateChangedSignature& OnStateChanged() override { return StateChangedDelegate; }
+	virtual FStateChangedSignature& OnStateChanged() override { return OnStateChangedDelegate; }
 
 	UFUNCTION()
 	virtual FGameplayTag GetCurrentStateTag() const override { return CurrentStateTag; }

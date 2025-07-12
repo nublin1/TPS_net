@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "5.6",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -20,37 +20,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "OnlineSubsystemGooglePlay",
-			"Enabled": false
-		},
-		{
-			"Name": "OnlineSubsystemIOS",
-			"Enabled": false
-		},
-		{
 			"Name": "OnlineSubsystemSteam",
-			"Enabled": true
-		},
-		{
-			"Name": "AsyncLoadingScreen",
-			"Enabled": false,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/01f39767dc6b4290877f38365787cbf8"
-		},
-		{
-			"Name": "RecoilAnimation",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/76194998d28247018bee7be203f6c948"
-		},
-		{
-			"Name": "VisualStudioTools",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/362651520df94e4fa65492dbcba44ae2",
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
-		},
-		{
-			"Name": "SkeletalMeshModelingTools",
 			"Enabled": true
 		}
 	],

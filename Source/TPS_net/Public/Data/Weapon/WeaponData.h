@@ -3,12 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RecoilAnimationComponent.h"
 #include "Engine/DataTable.h"
 
 #include "WeaponData.generated.h"
-
-
 
 class ABaseBulletActor;
 
@@ -63,11 +60,6 @@ struct FWeaponAssetData
 	UAnimBlueprint* AnimationBlueprint;
 	UPROPERTY(EditAnywhere)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FRecoilAnimData RecoilAnimData;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UCurveVector> CrosshairMotionCurves;
 };
 
 USTRUCT(BlueprintType)

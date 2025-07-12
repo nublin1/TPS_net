@@ -48,14 +48,7 @@ UHealthComponent* APlayerCharacter::GetHealthComponent() const
 void APlayerCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
-	if (WeaponSystemComponentClass)
-	{
-		WeaponSystemComponent = NewObject<UWeaponSystemComponent>(this, WeaponSystemComponentClass);
-		
-		WeaponSystemComponent->OnComponentCreated();
-		WeaponSystemComponent->RegisterComponent();
-		WeaponSystemComponent->SetIsReplicated(true);
-	}
+	
 }
 
 void APlayerCharacter::PostInitializeComponents()
@@ -67,6 +60,57 @@ void APlayerCharacter::PostInitializeComponents()
 	if (HasAuthority())
 	{
 		HealthComponent->OnKilledDelegate.AddUniqueDynamic(this, &APlayerCharacter::OnHealthDepleted);
+	}
+}
+
+void APlayerCharacter::SetEssentialValues(float DeltaTime)
+{
+	if (GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		ReplicatedControlRotation = GetControlRotation();
+	}
+	else
+	{
+		
+	}
+
+	if (GetCharacterMovement()->MaxWalkSpeed != TargetMaxWalkSpeed)
+	{
+		float CurrentMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+		float InterpSpeed = FMath::FInterpTo(CurrentMaxWalkSpeed, TargetMaxWalkSpeed, DeltaTime, 0.3f);
+		GetCharacterMovement()->MaxWalkSpeed = InterpSpeed;
+	}
+
+	AimingRotation = FMath::RInterpTo(AimingRotation, ReplicatedControlRotation, DeltaTime, 30);
+
+	const FVector CurrentVel = GetVelocity();
+	Speed = CurrentVel.Size2D();
+	IsMoving = Speed > 1.0f; 
+}
+
+void APlayerCharacter::EventOnJumped()
+{
+	OnJumpedDelegate.Broadcast();
+}
+
+void APlayerCharacter::Multicast_OnJumped_Implementation()
+{
+	if (!IsLocallyControlled())
+	{
+		EventOnJumped();
+	}
+}
+
+void APlayerCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+	if (IsLocallyControlled())
+	{
+		EventOnJumped();
+	}
+	if (HasAuthority())
+	{
+		Multicast_OnJumped();
 	}
 }
 
@@ -126,7 +170,8 @@ void APlayerCharacter::ServerSetSpeed_Implementation(float NewMaxSpeed)
 
 void APlayerCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
 {
-	GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
+	TargetMaxWalkSpeed = NewMaxSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
 }
 
 void APlayerCharacter::StartClimbing()
@@ -228,6 +273,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Set required values
+	SetEssentialValues(DeltaTime);
+
 }
 
 // Called to bind functionality to input
@@ -242,12 +290,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APlayerCharacter, MovementVector);
+	DOREPLIFETIME(APlayerCharacter, TargetMaxWalkSpeed);
 	
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 
 	DOREPLIFETIME(APlayerCharacter, StateMachine_Movement);
 	DOREPLIFETIME(APlayerCharacter, StateMachine_Aiming);
+	DOREPLIFETIME(APlayerCharacter, ReplicatedControlRotation);
 	DOREPLIFETIME(APlayerCharacter, WeaponSystemComponent);
 	DOREPLIFETIME(APlayerCharacter, ActiveStateCharacter);
 }

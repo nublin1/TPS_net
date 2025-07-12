@@ -6,19 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "GeneralUtils.generated.h"
 
-UENUM(BlueprintType)
-enum class EDirection : uint8
-{
-	Right      UMETA(DisplayName = "Right"),
-	UpRight    UMETA(DisplayName = "Up-Right"),
-	Up         UMETA(DisplayName = "Up"),
-	UpLeft     UMETA(DisplayName = "Up-Left"),
-	Left       UMETA(DisplayName = "Left"),
-	DownLeft   UMETA(DisplayName = "Down-Left"),
-	Down       UMETA(DisplayName = "Down"),
-	DownRight  UMETA(DisplayName = "Down-Right")
-};
 
+struct FScreenResolutionRHI;
 /**
  * 
  */
@@ -57,9 +46,6 @@ public:
 		}
 		return enumNames;
 	}
-
-	UFUNCTION(BlueprintCallable)
-	static EDirection GetDirection(FVector2D Vector);
 	
 	static FString ExpandEnumString(const FString& name, const FString& enumName);
 

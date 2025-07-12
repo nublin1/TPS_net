@@ -278,22 +278,33 @@ void UWeaponSystemComponent::HandleProjectileSpawn(const FVector& SpawnLocation,
 	}
 }
 
-void UWeaponSystemComponent::SwitchState_Implementation(FGameplayTag _StateTag)
+bool UWeaponSystemComponent::IsCanHideWeapon()
 {
-	if (!_StateTag.MatchesTagExact(CurrentStateTag))
+	if (CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Hide"))
+		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Takeup")))
+		return false;
+	
+	if (!CurrentWeaponInHands)
+		return false;
+
+	return true;
+}
+
+void UWeaponSystemComponent::SwitchState_Implementation(FGameplayTag _NewStateTag)
+{
+	if (!_NewStateTag.MatchesTagExact(CurrentStateTag))
 	{
 		bCanTickState = false;
 		
 		ExitState();
-		CurrentStateTag = _StateTag;
+		CurrentStateTag = _NewStateTag;
 		InitState();
 
 		bCanTickState= true;
 		OnRep_CurrentStateTag();
-		if(StateChangedDelegate.IsBound())
+		if(OnStateChangedDelegate.IsBound())
 		{
-			
-			StateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
+			OnStateChangedDelegate.Broadcast(GetOwner(), _NewStateTag);
 		}
 	}
 	else
@@ -308,9 +319,9 @@ void UWeaponSystemComponent::SwitchState_Implementation(FGameplayTag _StateTag)
 void UWeaponSystemComponent::OnRep_CurrentStateTag()
 {
 	InitState();
-	if (StateChangedDelegate.IsBound())
+	if (OnStateChangedDelegate.IsBound())
 	{
-		StateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
+		OnStateChangedDelegate.Broadcast(GetOwner(), CurrentStateTag);
 	}
 }
 

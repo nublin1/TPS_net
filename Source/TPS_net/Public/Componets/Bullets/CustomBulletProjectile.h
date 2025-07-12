@@ -31,7 +31,7 @@ public:
 	void Init();
 
 	//Getters
-	UAmmoBase* GetAmmoData() {return a;}
+	UAmmoBase* GetAmmoData() {return BulletAmmoData;}
 	
 	float GetStartBulletSpeed() const { return BulletAmmoData->GetAmmoCharacteristics().StartBulletSpeed; }	
 	float GetBulletLifeTime() const { return BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime; }	

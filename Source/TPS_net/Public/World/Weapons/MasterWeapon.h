@@ -23,6 +23,7 @@ public:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	// Delegates
+	UPROPERTY(BlueprintAssignable)
 	FOnCompleteReloadSignature OnCompleteReloadDelegate;
 	
 	//====================================================================
