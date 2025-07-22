@@ -77,8 +77,15 @@ void APlayerCharacter::SetEssentialValues(float DeltaTime)
 	if (GetCharacterMovement()->MaxWalkSpeed != TargetMaxWalkSpeed)
 	{
 		float CurrentMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
-		float InterpSpeed = FMath::FInterpTo(CurrentMaxWalkSpeed, TargetMaxWalkSpeed, DeltaTime, 0.3f);
+		float InterpSpeed = FMath::FInterpTo(CurrentMaxWalkSpeed, TargetMaxWalkSpeed, DeltaTime, 3.5f);
 		GetCharacterMovement()->MaxWalkSpeed = InterpSpeed;
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue,
+				FString::Printf(TEXT("Current: %.2f, Target: %.2f, Interp: %.2f"),
+								CurrentMaxWalkSpeed, TargetMaxWalkSpeed, InterpSpeed));
+		}
 	}
 
 	AimingRotation = FMath::RInterpTo(AimingRotation, ReplicatedControlRotation, DeltaTime, 30);

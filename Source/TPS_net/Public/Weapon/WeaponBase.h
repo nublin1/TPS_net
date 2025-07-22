@@ -44,12 +44,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EHolsterWeaponType GetHolsterWeaponType() const { return HolsterWeaponType; }
 	UFUNCTION()
+	EWeaponGripType GetWeaponGripType () const {return WeaponGripType;}
+	UFUNCTION()
 	TArray<UAmmoBase*> GetUsableAmmo() {return UsableAmmo;}
 	UFUNCTION()
 	UAmmoBase* GetSelectedAmmoData() const { return SelectedAmmoData; }
 
 
 	// Setters
+	UFUNCTION()
+	void SetWeaponGripType (EWeaponGripType _WeaponGripType) {this->WeaponGripType = _WeaponGripType;}
 	UFUNCTION()
 	void SetWeaponType(EWeaponType _WeaponType) { this->WeaponType = _WeaponType; }
 	UFUNCTION()
@@ -85,8 +89,9 @@ protected:
 	EWeaponType WeaponType;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	EHolsterWeaponType HolsterWeaponType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EWeaponGripType WeaponGripType;
 	
-
 	UPROPERTY(Replicated, EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::HitScan;
 

@@ -15,7 +15,13 @@ enum class EWeaponType : uint8
 	Rifle UMETA(DisplayName = "Rifle"),
 	Pistol	UMETA(DisplayName = "Pistol"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
-	
+};
+
+UENUM(BlueprintType)
+enum class EWeaponGripType : uint8
+{
+	OneHanded     UMETA(DisplayName = "One-Handed"),
+	TwoHanded     UMETA(DisplayName = "Two-Handed")
 };
 
 UENUM(BlueprintType, meta=(ScriptName="EHolsterWeaponType"))
@@ -102,6 +108,8 @@ struct TPS_NET_API FWeaponData : public FTableRowBase
 	EWeaponType WeaponType = EWeaponType::Rifle;
 	UPROPERTY(EditAnywhere)
 	EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EWeaponGripType WeaponGripType = EWeaponGripType::TwoHanded;
 
 	UPROPERTY(EditAnywhere)
 	EBulletMode BulletMode = EBulletMode::Projectile;

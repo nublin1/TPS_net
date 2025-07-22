@@ -5,7 +5,8 @@
 
 #include "Net/UnrealNetwork.h"
 
-UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Rifle), HolsterWeaponType(EHolsterWeaponType::Primary), WeaponAssetData(),
+UWeaponBase::UWeaponBase(): WeaponType(EWeaponType::Rifle), HolsterWeaponType(EHolsterWeaponType::Primary),
+                            WeaponGripType(), WeaponAssetData(),
                             SelectedAmmoData(nullptr)
 {
 }

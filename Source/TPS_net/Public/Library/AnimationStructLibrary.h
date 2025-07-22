@@ -87,7 +87,7 @@ struct FAnimGraphLayerBlending
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Layer Blending")
 	float Arm_R_Add = 0.0f;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
-	bool EnableHandIK_L = 1.0f;
+	bool EnableHandIK_L = 0.0f;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
 	bool EnableHandIK_R = 1.0f;
 };

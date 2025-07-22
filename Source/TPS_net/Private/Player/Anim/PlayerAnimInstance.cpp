@@ -152,6 +152,15 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 		LayerBlendingValues.Head = IsHoldWeapon ? 1.0f : 0.0f;
 		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
 		LayerBlendingValues.Arm_R = IsHoldWeapon ? 1.0f : 0.0f;
+
+		if (WeaponSysComponent->GetCurrentWeaponInHands())
+		{
+			LayerBlendingValues.EnableHandIK_L =
+			WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+			LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		}
 	}
 	
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Takeup"))
@@ -160,6 +169,7 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 		LayerBlendingValues.Spine = 0.0f;
 		LayerBlendingValues.Head = 1.0f;
 		LayerBlendingValues.Arm_L = 0.0f;
+		LayerBlendingValues.EnableHandIK_L = 0.0f;
 		LayerBlendingValues.Arm_R = 1.0f;
 	}
 }
