@@ -65,7 +65,9 @@ public:
 	virtual void SwitchFireMode();
 
 	//Getters
+	UFUNCTION()
 	UWeaponBase* GetWeaponBaseRef() const { return WeaponBaseRef; }
+	UFUNCTION()
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
 	//UStaticMeshComponent* GetTargetPoint() { return TargetPoint; }
 

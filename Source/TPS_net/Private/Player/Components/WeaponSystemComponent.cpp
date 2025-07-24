@@ -557,14 +557,11 @@ void UWeaponSystemComponent::HideWeapon()
 	                                           EAttachmentRule::SnapToTarget, true);
 
 	CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
-	                                        UWeaponHelper::ConvertHolsterTypeToText(
-		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetHolsterWeaponType()));
+		                                        CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().HolsterName);
 	if (OnHideArmsDelegate.IsBound())
 		OnHideArmsDelegate.Broadcast(CurrentWeaponInHands);
 	
 	CurrentWeaponInHands = nullptr;
-
-	
 }
 
 void UWeaponSystemComponent::AttachWeapon(AActor* ActorToAttach, FName SocketName)

@@ -106,6 +106,8 @@ protected:
 
 	UFUNCTION()
 	virtual void WeaponStateChanged(AActor* Actor, const FGameplayTag& NewStateTag);
+	UFUNCTION()
+	virtual void AimingStateChanged(AActor* Actor, const FGameplayTag& NewStateTag);
 	
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponHoldPose();

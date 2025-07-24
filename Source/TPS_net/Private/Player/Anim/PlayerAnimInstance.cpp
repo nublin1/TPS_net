@@ -77,13 +77,16 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UPlayerAnimInstance::SighUp()
 {
 	WeaponSysComponent = Character->GetWeaponSystemComponent();
-
 	if (WeaponSysComponent)
 	{
 		WeaponSysComponent->OnStateChangedDelegate.AddDynamic(this, &UPlayerAnimInstance::WeaponStateChanged);
 		WeaponSysComponent->OnHideArmsDelegate.AddDynamic(this, &UPlayerAnimInstance::CleanWeaponData);
 		WeaponSysComponent->OnTakeupArmsDelegate.AddDynamic(this, &UPlayerAnimInstance::UpdateWeaponData);
-		
+	}
+
+	if (StateMachine_Aiming)
+	{
+		StateMachine_Aiming->StateChangedDelegate.AddDynamic(this, &UPlayerAnimInstance::UPlayerAnimInstance::AimingStateChanged);
 	}
 	
 	IsInitilize = true;
@@ -158,8 +161,7 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 			LayerBlendingValues.EnableHandIK_L =
 			WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-			LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+			
 		}
 	}
 	
@@ -171,6 +173,23 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 		LayerBlendingValues.Arm_L = 0.0f;
 		LayerBlendingValues.EnableHandIK_L = 0.0f;
 		LayerBlendingValues.Arm_R = 1.0f;
+	}
+}
+
+void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
+{
+	if (NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.Aiming"))
+		|| NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.HipAiming")))
+	{
+		if (!IsHoldWeapon)
+			return;
+		
+		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+	}
+	else
+	{
+		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
 	}
 }
 

@@ -60,12 +60,14 @@ struct FWeaponAssetData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ShootAnimMontage;
 	
-	UPROPERTY(EditAnywhere, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
 	TObjectPtr<UBlueprint> BulletActor;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UAnimBlueprint* AnimationBlueprint;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName HolsterName = "HolsterName";
 };
 
 USTRUCT(BlueprintType)
