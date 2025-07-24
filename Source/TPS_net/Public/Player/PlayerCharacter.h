@@ -63,9 +63,14 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	FVector2D MovementVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsMoving;
+	bool IsMoving = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsGrounded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsSprintingButtonHeld = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsAimingButtonHeld = false;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Essential Information")
 	float Speed = 0.0f;
@@ -112,7 +117,7 @@ protected:
 	bool LadderIsNextLeftArm;
 
 	//Timers
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	FTimerHandle CollisionOffTimerHandle;
 	
 	UPROPERTY(BlueprintReadWrite)

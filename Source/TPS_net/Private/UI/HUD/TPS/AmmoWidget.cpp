@@ -59,7 +59,7 @@ void UAmmoWidget::SetFireMode(EFireMode newFireMode)
 	FireMode->SetText(FText::FromString(StringValue));
 }
 
-void UAmmoWidget::SetCurrentAmmo(int32 RoundsInMagazine)
+void UAmmoWidget::SetCurrentAmmo(const int32 RoundsInMagazine)
 {
 	if (CurrentAmmo)
 		CurrentAmmo->SetText(FText::AsNumber(RoundsInMagazine));
@@ -82,7 +82,7 @@ void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
 
 void UAmmoWidget::ClearWeaponDetails(AMasterWeapon* WeaponInfo)
 {
-	//WeaponInfo->OnCompleteReloadDelegate.RemoveDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
+	WeaponInfo->OnCompleteReloadDelegate.RemoveDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	
 	CollapseWidget();
 }

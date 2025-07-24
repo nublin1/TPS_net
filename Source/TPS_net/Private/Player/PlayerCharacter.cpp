@@ -8,7 +8,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
-#include "Player/Components/WeaponSystemComponent.h"
 #include "StateMachine/StateMachineComponent.h"
 #include "World/Ladders/ProceduralLadder.h"
 
@@ -85,6 +84,10 @@ void APlayerCharacter::SetEssentialValues(float DeltaTime)
 			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue,
 				FString::Printf(TEXT("Current: %.2f, Target: %.2f, Interp: %.2f"),
 								CurrentMaxWalkSpeed, TargetMaxWalkSpeed, InterpSpeed));
+
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue,
+				FString::Printf(TEXT("Current: %s"),
+								*StateMachine_Movement->GetCurrentStateTagName()));
 		}
 	}
 
@@ -178,7 +181,7 @@ void APlayerCharacter::ServerSetSpeed_Implementation(float NewMaxSpeed)
 void APlayerCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
 {
 	TargetMaxWalkSpeed = NewMaxSpeed;
-	//GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
+	
 }
 
 void APlayerCharacter::StartClimbing()

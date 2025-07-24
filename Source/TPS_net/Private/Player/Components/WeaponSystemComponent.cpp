@@ -542,8 +542,8 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 		break;
 	}
 
-	auto result = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
-	BulletBlueprint = result;
+	auto BulletAsset = CurrentWeaponInHands->GetWeaponBaseRef()->GetWeaponAssetData().BulletActor;
+	BulletBlueprint = BulletAsset;
 	
 	OnRep_CurrentWeaponInHands();
 }
