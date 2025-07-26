@@ -174,6 +174,11 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 		LayerBlendingValues.EnableHandIK_L = 0.0f;
 		LayerBlendingValues.Arm_R = 1.0f;
 	}
+
+	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
+	{
+		LayerBlendingValues.EnableHandIK_L = 0.0f;
+	}
 }
 
 void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
