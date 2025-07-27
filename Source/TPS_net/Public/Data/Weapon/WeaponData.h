@@ -59,6 +59,8 @@ struct FWeaponAssetData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ShootAnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadAnimMontage;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
 	TObjectPtr<UBlueprint> BulletActor;

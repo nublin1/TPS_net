@@ -281,6 +281,7 @@ private:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	UPROPERTY()
 	TObjectPtr<UStateMachineComponent> OwnerStateMachineComponent_Aiming;
 	
 	//====================================================================

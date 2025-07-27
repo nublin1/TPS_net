@@ -158,6 +158,8 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 
 		if (WeaponSysComponent->GetCurrentWeaponInHands())
 		{
+			LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 			LayerBlendingValues.EnableHandIK_L =
 			WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
@@ -177,6 +179,13 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
 	{
+		LayerBlendingValues.Arm_L = 1.0f;
+		LayerBlendingValues.EnableHandIK_L = 0.0f;
+	}
+	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
+	{
+		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 		LayerBlendingValues.EnableHandIK_L = 0.0f;
 	}
 }
