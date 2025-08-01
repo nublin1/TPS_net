@@ -99,3 +99,38 @@ FVector2D UGeneralUtils::GetViewportScaledSize()
 	//UE_LOG(LogTemp, Log, TEXT("ViewportSize: %s"), *ViewportSize.ToString());
 	return ViewportSize;	
 }
+
+EDirection8 UGeneralUtils::GetDirectionFromVector(const FVector2D& MovementVector)
+{
+	if (MovementVector.IsNearlyZero())
+	{
+		return EDirection8::None;
+	}
+
+	float AngleRad = FMath::Atan2(MovementVector.Y, MovementVector.X);
+	float AngleDeg = FMath::RadiansToDegrees(AngleRad);
+
+	//[0, 360]
+	if (AngleDeg < 0)
+	{
+		AngleDeg += 360.0f;
+	}
+
+	// Каждый сектор по 45°
+	if (AngleDeg >= 337.5f || AngleDeg < 22.5f)
+		return EDirection8::Right;
+	else if (AngleDeg < 67.5f)
+		return EDirection8::UpRight;
+	else if (AngleDeg < 112.5f)
+		return EDirection8::Up;
+	else if (AngleDeg < 157.5f)
+		return EDirection8::UpLeft;
+	else if (AngleDeg < 202.5f)
+		return EDirection8::Left;
+	else if (AngleDeg < 247.5f)
+		return EDirection8::DownLeft;
+	else if (AngleDeg < 292.5f)
+		return EDirection8::Down;
+	else // < 337.5f
+		return EDirection8::DownRight;
+}

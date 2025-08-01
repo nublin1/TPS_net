@@ -31,9 +31,9 @@ struct FAnimCharacterInformation
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Character Information")
-	FVector2D MovementVector;
+	FVector2D MovementVector = FVector2D::ZeroVector;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Character Information")
-	bool bShouldMove;
+	bool bShouldMove = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Character Information")
 	float Speed = 0.0f;
 
@@ -50,11 +50,11 @@ struct FAnimGraphAimingValues
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")
-	FRotator SmoothedAimingRotation;
+	FRotator SmoothedAimingRotation = FRotator();
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")
-	FVector2D AimingAngle;
+	FVector2D AimingAngle = FVector2D::ZeroVector;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")
-	FVector2D SmoothedAimingAngle;
+	FVector2D SmoothedAimingAngle = FVector2D::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

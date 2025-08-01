@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Player/PlayerStructsLibrary.h"
 #include "GeneralUtils.generated.h"
 
 
@@ -56,5 +57,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FVector2D GetViewportScaledSize();
+
+	UFUNCTION(BlueprintCallable)
+	static EDirection8 GetDirectionFromVector(const FVector2D& MovementVector);
+	
 	
 };

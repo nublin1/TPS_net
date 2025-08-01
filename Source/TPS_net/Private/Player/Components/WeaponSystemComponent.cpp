@@ -130,13 +130,17 @@ FShootReadyResult UWeaponSystemComponent::CheckIsCanShoot()
 	if (CurrentWeaponInHands->GetRoundsInMagazine()<=0)
 		return FShootReadyResult(EShootReadyStatus::NoAmmo, TEXT("No ammo left."));
 	
-	if (!CurrentWeaponInHands
-		|| CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
+	if (CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 		|| OwnerStateMachineComponent_Aiming->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.NoAiming")))
-		return FShootReadyResult(EShootReadyStatus::Unknown);
+	{
+		FString StateMessage = FString::Printf(TEXT("Weapon reload in progress or player not aiming. Current state: %s, Aiming state: %s"),
+		*CurrentStateTag.ToString(),
+		*OwnerStateMachineComponent_Aiming->GetCurrentStateTag().ToString());
+		return FShootReadyResult(EShootReadyStatus::Unknown, StateMessage);
+	}
 	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
-		return FShootReadyResult(EShootReadyStatus::ShootDelayActive);	
+		return FShootReadyResult(EShootReadyStatus::ShootDelayActive, TEXT("Shoot delay timer is active."));	
 	
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
 	{
@@ -150,17 +154,17 @@ FShootReadyResult UWeaponSystemComponent::CheckIsCanShoot()
 			CurrentWeaponInHands->OnStartFire();
 		}
 		
-		return FShootReadyResult(EShootReadyStatus::Ready);
+		FString ReadyMessage = FString::Printf(TEXT("Weapon is ready. Available shoots: %d"), AvailableShootsCount);
+		return FShootReadyResult(EShootReadyStatus::Ready, ReadyMessage);
 	}
 	
-	return FShootReadyResult(EShootReadyStatus::Unknown);
+	return FShootReadyResult(EShootReadyStatus::Unknown, TEXT("Unknown shoot readiness state."));
 }
 
 void UWeaponSystemComponent::TriggerFireWeapon() 
 {
 	if (!CurrentWeaponInHands)
 		return;
-
 	
 	CurrentWeaponInHands->OnFire();
 	CurrentWeaponInHands->DecreaseRoundsInMagazine(); 

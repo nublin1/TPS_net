@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-
+#include "Engine/DataAsset.h"
+#include "RecoilAnimation.h"
+#include "RecoilAnimationComponent.h"
 #include "WeaponData.generated.h"
 
+
+class UCurveVector;
 class ABaseBulletActor;
 
 UENUM(BlueprintType, meta=(ScriptName="EWeaponType"))
@@ -58,7 +62,10 @@ struct FWeaponAssetData
 	USkeletalMesh* SkeletalMesh;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> ShootAnimMontage;
+	TObjectPtr<UAnimMontage> WeaponShootAnimMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> CharShootAnimMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ReloadAnimMontage;
 	
@@ -70,6 +77,9 @@ struct FWeaponAssetData
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName HolsterName = "HolsterName";
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<URecoilData> RecoilAnimData;
 };
 
 USTRUCT(BlueprintType)

@@ -66,7 +66,7 @@ struct FShootReadyResult
 		: Status(EShootReadyStatus::Unknown), Message(TEXT(""))
 	{}
 
-	FShootReadyResult(EShootReadyStatus InStatus, const FString& InMessage = TEXT(""))
+	explicit FShootReadyResult(EShootReadyStatus InStatus, const FString& InMessage = TEXT(""))
 		: Status(InStatus), Message(InMessage)
 	{}
 };
@@ -94,7 +94,7 @@ public:
 	FOnHideArmsSignature OnHideArmsDelegate;
 	//UPROPERTY(BlueprintAssignable)
 	//FOnCompleteReloadSignature OnCompleteReloadDelegate;
-	UPROPERTY(BlueprintCallable)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnSwitchFireMode OnSwitchFireModeDelegate;
 	
 	//

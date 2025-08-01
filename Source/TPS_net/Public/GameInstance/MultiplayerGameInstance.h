@@ -58,9 +58,9 @@ public:
 	UMultiplayerGameInstance(const FObjectInitializer& ObjectInitializer);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void CreateServer(FName ServerName, int32 MaxPlayers, bool bIsLAN);
+	void CreateServer(FName ServerName = "ServerName", int32 MaxPlayer = 1, bool bIsLAN = true);
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void FindSessions(bool bIsLAN, bool bIsPresence);
+	void FindSessions(bool bIsLAN = true, bool bIsPresence = true);
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void DestroyCurrentSession();
 	

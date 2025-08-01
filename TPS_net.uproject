@@ -25,6 +25,11 @@
 		{
 			"Name": "OnlineSubsystemSteam",
 			"Enabled": true
+		},
+		{
+			"Name": "RecoilAnimation",
+			"Enabled": true,
+			"MarketplaceURL": "https://www.fab.com/listings/c664053f-900b-4f33-aa26-4bdb46959e4c"
 		}
 	],
 	"TargetPlatforms": [
