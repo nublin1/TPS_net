@@ -57,6 +57,8 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bones")
+	TArray<FName> ArmBoneNames;
 	
 	
 	//====================================================================

@@ -15,6 +15,8 @@ UHealthComponent::UHealthComponent(): MaxHealth(100)
 	PrimaryComponentTick.bCanEverTick = true;
 
 	Health = MaxHealth;
+
+	ArmBoneNames = { "upperarm_l", "lowerarm_l", "hand_l", "upperarm_r", "lowerarm_r", "hand_r" };
 }
 
 void UHealthComponent::BeginPlay()

@@ -47,7 +47,6 @@ UHealthComponent* APlayerCharacter::GetHealthComponent() const
 void APlayerCharacter::PostInitProperties()
 {
 	Super::PostInitProperties();
-	
 }
 
 void APlayerCharacter::PostInitializeComponents()

@@ -117,6 +117,7 @@ void ANPCZombie::NPCDead(AActor* KilledActor, AController* EventInstigator)
 
 void ANPCZombie::Server_NPCDead_Implementation(AActor* KilledActor)
 {
+	ensure(HasAuthority());
 	NetMulticast_NPCDead(KilledActor);
 }
 

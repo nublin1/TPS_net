@@ -73,7 +73,7 @@ protected:
 	void SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted);
 
 	//
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void NPCDead(AActor* KilledActor, AController* EventInstigator);
 	UFUNCTION(Server, Unreliable, BlueprintCallable)
 	void Server_NPCDead(AActor* KilledActor);
