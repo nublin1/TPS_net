@@ -14,6 +14,8 @@ UHealthComponent::UHealthComponent(): MaxHealth(100)
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	ComponentTags.Add("HealthComponent");
+
 	Health = MaxHealth;
 
 	ArmBoneNames = { "upperarm_l", "lowerarm_l", "hand_l", "upperarm_r", "lowerarm_r", "hand_r" };

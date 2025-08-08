@@ -6,6 +6,29 @@
 #include "Components/ActorComponent.h"
 #include "LimbSeveringComponent.generated.h"
 
+#pragma region Structs
+
+USTRUCT()
+struct FSeveredLimbFrame
+{
+	GENERATED_BODY()
+
+	FSeveredLimbFrame(){};
+	FSeveredLimbFrame(const FName InName, USkeletalMeshComponent* InMesh)
+	: BoneName(InName), SkeletalMeshComponent(InMesh){}
+	
+	UPROPERTY()
+	FName BoneName = NAME_None;
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+	UPROPERTY()
+	FVector Impulse = FVector(0);
+	UPROPERTY()
+	FTransform Transform;
+};
+
+#pragma endregion
+
 /*
  *	LimbSeveringComponent is used for cutting off the
  *	limbs of a Skeletal Mesh. This component uses a control
@@ -50,14 +73,37 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Limb Severing")
 	TObjectPtr<USkeletalMeshComponent> SeveringMesh;
 
+	//
+	UPROPERTY()
+	TArray<FSeveredLimbFrame> DelayedSeveredLimbs;
+
+	// Config
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Limb Severing")
+	bool bSupportAttachedChildMeshes = false;
+	UPROPERTY(EditDefaultsOnly, Category = "Severing|Tags")
+	FName Tag_NoSevering = "No Severing";
+	UPROPERTY(EditDefaultsOnly, Category = "Severing|Tags")
+	FName Tag_TransferSevering = "Transfer Severing";
+	UPROPERTY(EditDefaultsOnly, Category = "Severing|Tags")
+	FName Tag_SeveredLimb = "Severed Limb";
+
 	// Defaults
 	UPROPERTY(EditAnywhere, Category="Limb Severing", meta = (ToolTip="IMPORTANT: The name of the pelvis bone of the skeleton. This cannot be 'None'."))
 	FName PelvisBoneName = FName("Pelvis");
+	UPROPERTY(EditAnywhere, Category="Limb Severing")
+	TArray<FName> BlacklistBones;
+	UPROPERTY(EditAnywhere, Category="Limb Severing")
+	TArray<FName> WhitelistBones;
+	
 	/** Class of the severed limb actor that will be spawned after dismemberment */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Limb Severing", meta = (ToolTip = "Actor class to spawn when a limb is severed."))
 	TSubclassOf<AActor> SeveredLimbClass;
 	UPROPERTY(EditAnywhere, Category = "Limb Severing", meta = (ToolTip = "Animation Blueprint to use for severed limbs. If null, a default mannequin-based instance will be used."))
 	TSubclassOf<USeveredLimbAnimInstance> SeveredLimbAnimClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Limb Severing")
+	bool bUseSpecificCollisionObjectType = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Limb Severing", meta = (EditCondition = "bUseSpecificCollisionObjectType", GetOptions = "GetCollisionProfiles"))
+	FName CollisionProfileName = TEXT("CharacterMesh");
 
 	//====================================================================
 	// FUNCTIONS
@@ -80,14 +126,26 @@ private:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION()
+	bool CheckBoneFilter(const FName BoneName);
 	UFUNCTION(Category="Limb Severing")
 	static bool IsVirtualBone(FName BoneName);
 	UFUNCTION(Category="Limb Severing")
 	void FindSkeletalMeshComponent();
 
 	UFUNCTION()
+	AActor* CreateSeveredLimb(const FName BoneName, const FTransform& Transform, TSet<FName> Sockets);
+	UFUNCTION()
+	void FrameDelayedSevering(USkeletalMeshComponent* Component, const FName BoneName, const FVector& Impulse, const FTransform& Transform);
+	UFUNCTION()
+	void SeveringLimbFrameDelayed();
+	UFUNCTION()
 	void CopyLimbProperties(USkeletalMeshComponent* Mesh, USkeletalMeshComponent* Limb);
-	
+
+	UFUNCTION()
+	void GetSocketsOnBoneAndChildren(USkeletalMeshComponent* MeshComp,	FName RootBone,	TArray<USkeletalMeshSocket*>& OutSockets);
+	UFUNCTION()
+	TArray<USkeletalMeshComponent*> GetAllAttachedMeshes(USkeletalMeshComponent* SkeletalMeshComponent, TSet<FName> UsedSockets);
 	UFUNCTION(Category = "Limb Severing")
 	void GenerateSeveredLimbPhysicsAsset(FName InLimb);
 	UFUNCTION(Category = "Limb Severing", meta = (ToolTip = "Applies a custom AnimInstance to the specified severed limb bone's skeletal mesh component."))
