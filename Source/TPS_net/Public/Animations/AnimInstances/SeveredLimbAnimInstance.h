@@ -17,7 +17,11 @@ class TPS_NET_API USeveredLimbAnimInstance : public UAnimInstance
 public:	
 	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "SeveredLimbAnimInstance")
 	FName PelvisBoneName = "Pelvis";
-
 	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "SeveredLimbAnimInstance")
 	FName LimbBoneName = "upperarm_l";
+
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "SeveredLimbAnimInstance")
+	bool bIsSynced = false;
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "SeveredLimbAnimInstance")
+	TObjectPtr<USkeletalMeshComponent> SourceMeshForPose = nullptr;
 };

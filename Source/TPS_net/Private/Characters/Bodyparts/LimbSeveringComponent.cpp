@@ -78,6 +78,7 @@ void ULimbSeveringComponent::LimbSevering_Multi_Implementation(FName BoneName, c
 
 void ULimbSeveringComponent::LimbSevering_Internal(FName BoneName, const FVector& Impulse)
 {
+	if (bDisableSevering) return;
 	if (!SeveredLimbClass) return;
 	if (!CheckBoneFilter(BoneName)) return;
 	if(SeveredLimbs.Contains(BoneName)) return;
@@ -88,20 +89,11 @@ void ULimbSeveringComponent::LimbSevering_Internal(FName BoneName, const FVector
 
 	SeveringMesh->HideBoneByName(BoneName, EPhysBodyOp::PBO_Term);
 	SeveringMesh->BreakConstraint(FVector(0), FVector(0), BoneName);
-
-	TArray<USkeletalMeshSocket*> UsedSockets;
-	GetSocketsOnBoneAndChildren(SeveringMesh, BoneName, UsedSockets);
-	TSet<FName> SocketNames;
-	for (USkeletalMeshSocket* Socket : UsedSockets)
-	{
-		SocketNames.Add(Socket->SocketName);
-	}
 	
-	auto LimbSpawnedActor = CreateSeveredLimb(BoneName, CachedBoneTransform, SocketNames);
-	USkeletalMeshComponent* TargetMeshComp = LimbSpawnedActor->FindComponentByClass<USkeletalMeshComponent>();
+	auto LimbSpawnedActor = CreateSeveredLimb(BoneName, CachedBoneTransform);
 	
-	SeveredLimbs.Add(BoneName);
-	FrameDelayedSevering(TargetMeshComp, BoneName, Impulse, CachedBoneTransform);
+	SeveredLimbs.Add(BoneName, LimbSpawnedActor);
+	FrameDelayedSevering(LimbSpawnedActor, BoneName, Impulse, CachedBoneTransform);
 }
 
 void ULimbSeveringComponent::PreSevering(const FName BoneName, FVector Impulse)
@@ -146,49 +138,105 @@ void ULimbSeveringComponent::FindSkeletalMeshComponent()
 	SeveringMesh = OwnersMeshComponents[0];
 }
 
-AActor* ULimbSeveringComponent::CreateSeveredLimb(const FName BoneName, const FTransform& Transform, TSet<FName> Sockets)
+AActor* ULimbSeveringComponent::CreateSeveredLimb(const FName BoneName, const FTransform& Transform)
 {
 	FVector SpawnLocation = Transform.GetLocation();
 	FRotator SpawnRotation = Transform.Rotator();
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = GetOwner();
 	
-	auto LimbSpawnedActor = GetWorld()->SpawnActor<AActor>(SeveredLimbClass, SpawnLocation, SpawnRotation, SpawnParams);
-	if (!LimbSpawnedActor)
+	auto SpawnedSeveredLimbActor = GetWorld()->SpawnActor<AActor>(SeveredLimbClass, SpawnLocation, SpawnRotation, SpawnParams);
+	if (!SpawnedSeveredLimbActor)
 	{
 		return nullptr;
 	}
 
-	USkeletalMeshComponent* TargetMeshComp = LimbSpawnedActor->FindComponentByClass<USkeletalMeshComponent>();
-	if (!TargetMeshComp)
+	if (bBlockFurtherSevering)
 	{
-		TargetMeshComp =  NewObject<USkeletalMeshComponent>(LimbSpawnedActor->GetRootComponent());
-		TargetMeshComp->RegisterComponent();
+		ULimbSeveringComponent* SpawnedLimbSeveringComponent = SpawnedSeveredLimbActor->FindComponentByClass<ULimbSeveringComponent>();
+		if (SpawnedLimbSeveringComponent)
+		{
+			SpawnedLimbSeveringComponent->bDisableSevering = true;
+			SpawnedLimbSeveringComponent->bBlockFurtherSevering = true;
+		}
+	}
+	else
+	{
+		ULimbSeveringComponent* TargetLimbSeveringComp = SpawnedSeveredLimbActor->FindComponentByClass<ULimbSeveringComponent>();
+		if (!TargetLimbSeveringComp)
+		{
+			TargetLimbSeveringComp = NewObject<ULimbSeveringComponent>(SpawnedSeveredLimbActor->GetRootComponent());
+		}
+
+		TargetLimbSeveringComp->bDisableSevering = false;
+		TargetLimbSeveringComp->bBlockFurtherSevering = false;
+		TargetLimbSeveringComp->AddBoneToBlackList(BoneName);
 	}
 	
-	ApplyAnimInstanceToSeveredLimb(TargetMeshComp, BoneName);
-	CopyLimbProperties(SeveringMesh, TargetMeshComp);
+	USkeletalMeshComponent* SpawnedLimbMeshComponent = SpawnedSeveredLimbActor->FindComponentByClass<USkeletalMeshComponent>();
+	if (!SpawnedLimbMeshComponent)
+	{
+		SpawnedLimbMeshComponent = NewObject<USkeletalMeshComponent>(SpawnedSeveredLimbActor->GetRootComponent());
+		SpawnedLimbMeshComponent->RegisterComponent();
+	}
+	
+	ApplyAnimInstanceToSeveredLimb(SpawnedLimbMeshComponent, BoneName);
+	CopyLimbProperties(SeveringMesh, SpawnedLimbMeshComponent);
 
-	LimbSpawnedActor->Tags.Add("Severed Limb");
+	SpawnedSeveredLimbActor->Tags.Add("Severed Limb");
 	if(bSupportAttachedChildMeshes)
 	{
-		for (auto Mesh : GetAllAttachedMeshes(SeveringMesh, Sockets))
+		TArray<USkeletalMeshSocket*> UsedSockets;
+		GetSocketsOnBoneAndChildren(SeveringMesh, BoneName, UsedSockets);
+		TSet<FName> SocketNames;
+		for (USkeletalMeshSocket* Socket : UsedSockets)
 		{
-			if(Mesh->ComponentTags.Contains(Tag_NoSevering)) continue;
-			//if(Mesh->GetAttachSocketName() != NAME_None && !LimbMap->GetLimb(BoneName).Get().Contains(Mesh->GetAttachSocketName())) continue;
-
-			if(Mesh->ComponentTags.Contains(Tag_TransferSevering))
-			{				
-				Mesh->AttachToComponent(TargetMeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale, Mesh->GetAttachSocketName());
+			SocketNames.Add(Socket->SocketName);
+		}
+		
+		for (auto Comp : GetAllAttachedMeshes(SeveringMesh, SocketNames))
+		{
+			//UE_LOG(LogTemp, Display, TEXT(" Owner %s has ."), *Comp->GetName());
+			
+			if(Comp->ComponentTags.Contains(Tag_KeepAttached))
+			{
+				Comp->SetHiddenInGame(true);
 				continue;
 			}
+
+			if(Comp->ComponentTags.Contains(Tag_MoveToSeveredLimb))
+			{				
+				Comp->AttachToComponent(SpawnedLimbMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, Comp->GetAttachSocketName());
+				continue;
+			}
+			
+			if(Comp->ComponentTags.Contains(Tag_DetachOnSever))
+			{
+				auto& AttachedComps = BoneAttachedComponents.FindOrAdd(BoneName);
+				if (!AttachedComps.Contains(Comp))
+				{
+					AttachedComps.Add(Comp );
+				}
+				
+				Comp->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+			}
+			
+			/*if(Comp->ComponentTags.Contains(Tag_SeveredLimb))
+			{
+				// Copy the Mesh
+				USkeletalMeshComponent* Child = NewObject<USkeletalMeshComponent>(GetOwner());
+				Child->AttachToComponent(SpawnedLimbMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, Comp->GetAttachSocketName());
+				Child->RegisterComponent();
+				CopyLimbProperties(Mesh, Child);
+				Child->SetLeaderPoseComponent(SpawnedLimbMeshComponent);
+			}*/
 		}
 	}
 	
-	return LimbSpawnedActor;
+	return SpawnedSeveredLimbActor;
 }
 
-void ULimbSeveringComponent::FrameDelayedSevering(USkeletalMeshComponent* Component, const FName BoneName,
+void ULimbSeveringComponent::FrameDelayedSevering(AActor* Component, const FName BoneName,
                                                   const FVector& Impulse, const FTransform& Transform)
 {
 	FSeveredLimbFrame SeveredLimbFrame (BoneName, Component);
@@ -203,31 +251,59 @@ void ULimbSeveringComponent::SeveringLimbFrameDelayed()
 {
 	for (auto SeveredLimbData : DelayedSeveredLimbs)
 	{
-		USkeletalMeshComponent* CachedSeveredLimb = SeveredLimbData.SkeletalMeshComponent;
-
+		USkeletalMeshComponent* SpawnedLimbMeshComponent = SeveredLimbData.TargetActor->FindComponentByClass<USkeletalMeshComponent>();
+		USeveredLimbAnimInstance* AnimInstance = Cast<USeveredLimbAnimInstance>(SpawnedLimbMeshComponent->GetAnimInstance());
+		AnimInstance->bIsSynced = true;
+		
 		if (bUseSpecificCollisionObjectType && !CollisionProfileName.IsNone())
 		{
-			CachedSeveredLimb->SetCollisionProfileName(CollisionProfileName);
+			SpawnedLimbMeshComponent->SetCollisionProfileName(CollisionProfileName);
 		}
 		else
 		{
-			CachedSeveredLimb->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			CachedSeveredLimb->SetCollisionObjectType(ECC_PhysicsBody);
-			CachedSeveredLimb->SetCollisionResponseToAllChannels(ECR_Ignore);
-			CachedSeveredLimb->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
-			CachedSeveredLimb->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+			SpawnedLimbMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			SpawnedLimbMeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
+			SpawnedLimbMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+			SpawnedLimbMeshComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+			SpawnedLimbMeshComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 		}
 		
-
 		//CreateDismemberLimbPhysicsAsset(CachedDismemberedLimb, Data.BoneName);
 		
-		CachedSeveredLimb->SetSimulatePhysics(true);
+		SpawnedLimbMeshComponent->SetSimulatePhysics(true);
 		
-		CachedSeveredLimb->AddImpulse(SeveredLimbData.Impulse, SeveredLimbData.BoneName, true);
+		SpawnedLimbMeshComponent->AddImpulse(SeveredLimbData.Impulse, SeveredLimbData.BoneName, true);
 		
 		//UpdateMissingLimbs(CachedDismemberedLimb, Data.BoneName);
+
+		if (!BoneAttachedComponents.IsEmpty())
+		{
+			for (auto& Pair : BoneAttachedComponents)
+			{
+				FName Key = Pair.Key;
+				auto& AttachedComp = Pair.Value;
+
+				for (int32 i = AttachedComp.Num() - 1; i >= 0; --i)
+				{
+					if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(AttachedComp[i]))
+					{
+						PrimComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+						PrimComp->SetCollisionObjectType(ECC_PhysicsBody);
+						PrimComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+						PrimComp->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+						PrimComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+						PrimComp->SetSimulatePhysics(true);
+						PrimComp->AddImpulse(SeveredLimbData.Impulse);
+					}
+
+					AttachedComp.RemoveAt(i);
+				}
+
+				BoneAttachedComponents.Remove(Key);
+			}
+		}
 		
-		PostSevering(SeveredLimbData.BoneName, CachedSeveredLimb);
+		PostSevering(SeveredLimbData.BoneName, SpawnedLimbMeshComponent);
 	}
 
 	DelayedSeveredLimbs.Reset();
@@ -273,29 +349,28 @@ void ULimbSeveringComponent::GetSocketsOnBoneAndChildren(USkeletalMeshComponent*
 	}
 }
 
-TArray<USkeletalMeshComponent*> ULimbSeveringComponent::GetAllAttachedMeshes(
+TArray<USceneComponent*> ULimbSeveringComponent::GetAllAttachedMeshes(
 	USkeletalMeshComponent* SkeletalMeshComponent, TSet<FName> UsedSockets)
 {
 	TArray<USceneComponent*> Children;
-	TArray<USkeletalMeshComponent*> ChildMeshes;
+	TArray<USceneComponent*> Result;
 
 	SkeletalMeshComponent->GetChildrenComponents(true, Children);
 	for (USceneComponent* Child : Children)
 	{
-		if(!Child->IsA(USkeletalMeshComponent::StaticClass())) continue;
+		if (!Child) continue;
 	
-		USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(Child);
-		if(Mesh)
+		if (Child->GetAttachParent() == SkeletalMeshComponent)
 		{
 			FName SocketName = Child->GetAttachSocketName();
 			if (UsedSockets.Contains(SocketName))
 			{
-				ChildMeshes.Add(Mesh);
+				Result.Add(Child);
 			}
 		}
 	}
 
-	return ChildMeshes;
+	return Result;
 }
 
 void ULimbSeveringComponent::GenerateSeveredLimbPhysicsAsset(FName InLimb)
@@ -326,5 +401,7 @@ void ULimbSeveringComponent::ApplyAnimInstanceToSeveredLimb(USkeletalMeshCompone
 
 	AnimInstance->PelvisBoneName = PelvisBoneName;
 	AnimInstance->LimbBoneName = BoneName;
+
+	AnimInstance->SourceMeshForPose = Component;
 }
 
