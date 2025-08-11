@@ -5,15 +5,16 @@
 
 #include "Animations/AnimInstances/SeveredLimbAnimInstance.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "FX/EffectFXManager.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "Rendering/SkeletalMeshRenderData.h"
 
 ULimbSeveringComponent::ULimbSeveringComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 void ULimbSeveringComponent::BeginPlay()
@@ -33,7 +34,20 @@ void ULimbSeveringComponent::BeginPlay()
 
 	if (!SeveredLimbAnimClass)
 		UE_LOG(LogTemp, Display, TEXT("Component has an invalid SeveredLimbAnimClass"));
-	
+
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ULimbSeveringComponent::InitializeVertexColors);
+}
+
+void ULimbSeveringComponent::InitializeVertexColors()
+{
+	if(IsRunningDedicatedServer()) return;
+		
+	for (int32 i = 0; i < SeveringMesh->GetNumLODs(); i++)
+	{
+		TArray<FLinearColor> Colors = UVertexColorUtility::GetCurrentVertexColors(SeveringMesh, i);
+		UVertexColorUtility::SetLinearColorChannel(Colors, 0.f, BloodVertexChannel);
+		SeveringMesh->SetVertexColorOverride_LinearColor(i, Colors);
+	}
 }
 
 void ULimbSeveringComponent::SeverLimbByBone(FName BoneName, FVector Impulse)
@@ -100,6 +114,15 @@ void ULimbSeveringComponent::PreSevering(const FName BoneName, FVector Impulse)
 {
 	if (OnPreSevering.IsBound())
 		OnPreSevering.Broadcast(BoneName, Impulse);
+
+	if (!FX_BloodBurst) return;
+	
+	FVector HitLocation = SeveringMesh->GetSocketLocation(BoneName);	
+	UEffectFXManager::SpawnFXEffect(FX_BloodBurst, nullptr, NAME_None, HitLocation, Impulse.Rotation(), FVector(BloodParticleScale));
+
+	LineTraceForBloodPool(HitLocation, Impulse.GetSafeNormal());
+
+	if(BoneName != NAME_None) ApplyBlood(BoneName);
 }
 
 void ULimbSeveringComponent::PostSevering(const FName BoneName, USkeletalMeshComponent* DismemberMesh)
@@ -122,6 +145,25 @@ bool ULimbSeveringComponent::IsVirtualBone(FName BoneName)
 	if(BoneString.Len() < 2) return false;
 	
 	return BoneString[0] == *"V" && BoneString[1] == *"B";
+}
+
+void ULimbSeveringComponent::LineTraceForBloodPool(FVector HitLocation, FVector Direction)
+{
+	FVector End = Direction;
+	End.Z = -0.7;
+	End *= FVector(2000.f);
+	End += HitLocation;
+	
+	FHitResult HitResult;
+	
+	UKismetSystemLibrary::LineTraceSingleForObjects(GetOwner(),
+		HitLocation, End,
+		{EObjectTypeQuery::ObjectTypeQuery1}, true, {},
+		EDrawDebugTrace::None, HitResult, true);
+	
+	if(!HitResult.bBlockingHit) return;
+	
+	SpawnBloodPool(HitResult.ImpactPoint, HitResult.ImpactNormal, Direction, HitResult.GetComponent());
 }
 
 void ULimbSeveringComponent::FindSkeletalMeshComponent()
@@ -390,6 +432,15 @@ void ULimbSeveringComponent::GenerateSeveredLimbPhysicsAsset(FName InLimb)
 			//TerminatePhysicsBodies(NewPhysicsAsset, Index); // <--- From: FPhysicsAssetUtils::DestroyBody(NewPhysicsAsset, Index);
 		}
 	}
+}
+
+void ULimbSeveringComponent::ApplyBlood(FName BoneName, float Radius, float Hardness)
+{
+	if(IsRunningDedicatedServer()) return;
+
+	if(SeveringMesh->ComponentTags.Contains("Ignore Blood")) return;
+
+	ApplyBloodToMesh(Mesh, BoneName, Radius, Hardness);
 }
 
 void ULimbSeveringComponent::ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName)

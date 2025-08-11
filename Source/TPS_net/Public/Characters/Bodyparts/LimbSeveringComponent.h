@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Utilities/VertexColorUtility.h"
 #include "LimbSeveringComponent.generated.h"
 
 #pragma region Structs
+
+class UNiagaraSystem;
+enum class EDismemberColorChannel : uint8;
 
 USTRUCT()
 struct FSeveredLimbFrame
@@ -67,12 +71,22 @@ public:
 	FName Tag_MoveToSeveredLimb = "MoveToSeveredLimb";
 	UPROPERTY(EditDefaultsOnly, Category = "Limb Severing|Tags")
 	FName Tag_DetachOnSever = "DetachOnSever"; // "DropOnSever"
+
+	// FX
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
+	float BloodParticleScale = 1.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
+	class TObjectPtr<UNiagaraSystem> FX_BloodBurst = nullptr;
 	
 	
 	//Limb Data
 	UPROPERTY()
 	TMap<FName, TObjectPtr<AActor>> SeveredLimbs;
 	TMap<FName, TArray<TObjectPtr<USceneComponent>>> BoneAttachedComponents ;
+
+	// FX
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
+	EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::B_Channel;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -94,7 +108,7 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> SeveringMesh;
 
 	//
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="Limb Severing")
 	TArray<FSeveredLimbFrame> DelayedSeveredLimbs;
 	
 	// Defaults
@@ -122,6 +136,10 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//
+	UFUNCTION()
+	void InitializeVertexColors();
+
+	//
 	UFUNCTION(Server, Unreliable)
 	void LimbSevering_Server(FName BoneName, const FVector& Impulse);
 	UFUNCTION(NetMulticast, Unreliable)
@@ -141,6 +159,8 @@ private:
 	UFUNCTION(Category="Limb Severing")
 	static bool IsVirtualBone(FName BoneName);
 	UFUNCTION(Category="Limb Severing")
+	void LineTraceForBloodPool(FVector HitLocation, FVector Direction);
+	UFUNCTION(Category="Limb Severing")
 	void FindSkeletalMeshComponent();
 
 	UFUNCTION()
@@ -158,6 +178,8 @@ private:
 	TArray<USceneComponent*> GetAllAttachedMeshes(USkeletalMeshComponent* SkeletalMeshComponent, TSet<FName> UsedSockets);
 	UFUNCTION(Category = "Limb Severing")
 	void GenerateSeveredLimbPhysicsAsset(FName InLimb);
+	UFUNCTION()
+	void ApplyBlood(FName BoneName, float Radius, float Hardness);
 	UFUNCTION(Category = "Limb Severing", meta = (ToolTip = "Applies a custom AnimInstance to the specified severed limb bone's skeletal mesh component."))
 	void ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName);
 };

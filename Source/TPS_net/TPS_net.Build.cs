@@ -13,7 +13,7 @@ public class TPS_net : ModuleRules
 			 "NavigationSystem", "Landscape", "PhysicsCore",  "RecoilAnimation"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "Niagara" });
 		
 		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
         //DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
