@@ -45,8 +45,8 @@ void ULimbSeveringComponent::InitializeVertexColors()
 	for (int32 i = 0; i < SeveringMesh->GetNumLODs(); i++)
 	{
 		TArray<FLinearColor> Colors = UVertexColorUtility::GetCurrentVertexColors(SeveringMesh, i);
-		UVertexColorUtility::SetLinearColorChannel(Colors, 0.f, BloodVertexChannel);
-		SeveringMesh->SetVertexColorOverride_LinearColor(i, Colors);
+		//UVertexColorUtility::SetLinearColorChannel(Colors, 0.f, BloodVertexChannel);
+		//SeveringMesh->SetVertexColorOverride_LinearColor(i, Colors);
 	}
 }
 
@@ -116,11 +116,12 @@ void ULimbSeveringComponent::PreSevering(const FName BoneName, FVector Impulse)
 		OnPreSevering.Broadcast(BoneName, Impulse);
 
 	if (!FX_BloodBurst) return;
-	
-	FVector HitLocation = SeveringMesh->GetSocketLocation(BoneName);	
-	UEffectFXManager::SpawnFXEffect(FX_BloodBurst, nullptr, NAME_None, HitLocation, Impulse.Rotation(), FVector(BloodParticleScale));
 
-	LineTraceForBloodPool(HitLocation, Impulse.GetSafeNormal());
+	FVector LocalHit = SeveringMesh->GetSocketLocation(BoneName);
+	//FVector LocalHit = SeveringMesh->GetBoneLocation(BoneName, EBoneSpaces::ComponentSpace);
+	UEffectFXManager::SpawnFXEffect(FX_BloodBurst, nullptr, NAME_None, LocalHit, Impulse.Rotation(), FVector(BloodParticleScale));
+
+	LineTraceForBloodPool(LocalHit, Impulse.GetSafeNormal());
 
 	if(BoneName != NAME_None) ApplyBlood(BoneName);
 }
@@ -163,7 +164,7 @@ void ULimbSeveringComponent::LineTraceForBloodPool(FVector HitLocation, FVector 
 	
 	if(!HitResult.bBlockingHit) return;
 	
-	SpawnBloodPool(HitResult.ImpactPoint, HitResult.ImpactNormal, Direction, HitResult.GetComponent());
+	//SpawnBloodPool(HitResult.ImpactPoint, HitResult.ImpactNormal, Direction, HitResult.GetComponent());
 }
 
 void ULimbSeveringComponent::FindSkeletalMeshComponent()
@@ -439,8 +440,8 @@ void ULimbSeveringComponent::ApplyBlood(FName BoneName, float Radius, float Hard
 	if(IsRunningDedicatedServer()) return;
 
 	if(SeveringMesh->ComponentTags.Contains("Ignore Blood")) return;
-
-	ApplyBloodToMesh(Mesh, BoneName, Radius, Hardness);
+	
+	UVertexColorUtility::ApplyVertexColorMask(SeveringMesh, BoneName, 20.0f, Hardness, FLinearColor::Red, BloodVertexChannel);
 }
 
 void ULimbSeveringComponent::ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName)

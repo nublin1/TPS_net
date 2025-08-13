@@ -40,5 +40,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Vertex Colors")
 	static FLinearColor GetCurrentVertexColor(const USkeletalMeshComponent* Mesh, const int32 VertexIndex, const int32 LOD);
 
+	UFUNCTION(BlueprintCallable, Category = "Vertex Colors")
+	static void MaxLinearColorChannel(TArray<FLinearColor>& Colors, TArray<float>& Values, const EDismemberColorChannel Channel);
+	UFUNCTION(BlueprintCallable, Category = "Vertex Colors")
+	static void MaxColorOfChannel(FLinearColor& Color, float Value, EDismemberColorChannel Channel);
+
+	UFUNCTION(BlueprintCallable, Category = "Vertex Colors")
+	static void ApplyVertexColorMask(USkeletalMeshComponent* Mesh, FName BoneName, float Radius = 75.0f,
+		float Hardness = 0.2f, FLinearColor Color = FLinearColor::Red, EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::R_Channel);
+
+protected:
 	
+	static void SphereMask(FPositionVertexBuffer& PosBuffer, FVector& Center, float& Radius, float& Hardness, TArray<float>& OutMask);
 };

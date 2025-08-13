@@ -10,7 +10,7 @@
 #pragma region Structs
 
 class UNiagaraSystem;
-enum class EDismemberColorChannel : uint8;
+
 
 USTRUCT()
 struct FSeveredLimbFrame
@@ -76,17 +76,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
 	float BloodParticleScale = 1.f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
-	class TObjectPtr<UNiagaraSystem> FX_BloodBurst = nullptr;
-	
+	TObjectPtr<UNiagaraSystem> FX_BloodBurst = nullptr;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
+	EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::B_Channel;
 	
 	//Limb Data
 	UPROPERTY()
 	TMap<FName, TObjectPtr<AActor>> SeveredLimbs;
 	TMap<FName, TArray<TObjectPtr<USceneComponent>>> BoneAttachedComponents ;
-
-	// FX
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
-	EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::B_Channel;
+		
 	
 	//====================================================================
 	// FUNCTIONS
@@ -179,7 +177,7 @@ private:
 	UFUNCTION(Category = "Limb Severing")
 	void GenerateSeveredLimbPhysicsAsset(FName InLimb);
 	UFUNCTION()
-	void ApplyBlood(FName BoneName, float Radius, float Hardness);
+	void ApplyBlood(FName BoneName, float Radius = 75.0f, float Hardness = 0.2f);
 	UFUNCTION(Category = "Limb Severing", meta = (ToolTip = "Applies a custom AnimInstance to the specified severed limb bone's skeletal mesh component."))
 	void ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName);
 };
