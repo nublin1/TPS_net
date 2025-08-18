@@ -74,13 +74,17 @@ public:
 
 	// FX
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
+	TSubclassOf<AActor> BloodPoolClass;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
 	float BloodParticleScale = 1.f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
 	TObjectPtr<UNiagaraSystem> FX_BloodBurst = nullptr;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Limb Severing|FX")
-	EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::B_Channel;
+	EDismemberColorChannel BloodVertexChannel = EDismemberColorChannel::R_Channel;
 	
 	//Limb Data
+	UPROPERTY()
+	TArray<FName> RemovedBones;
 	UPROPERTY()
 	TMap<FName, TObjectPtr<AActor>> SeveredLimbs;
 	TMap<FName, TArray<TObjectPtr<USceneComponent>>> BoneAttachedComponents ;
@@ -159,6 +163,8 @@ private:
 	UFUNCTION(Category="Limb Severing")
 	void LineTraceForBloodPool(FVector HitLocation, FVector Direction);
 	UFUNCTION(Category="Limb Severing")
+	void SpawnBloodPool(FVector Location, FVector Normal, FVector SplatterDirection, USceneComponent* Attachment);
+	UFUNCTION(Category="Limb Severing")
 	void FindSkeletalMeshComponent();
 
 	UFUNCTION()
@@ -177,7 +183,7 @@ private:
 	UFUNCTION(Category = "Limb Severing")
 	void GenerateSeveredLimbPhysicsAsset(FName InLimb);
 	UFUNCTION()
-	void ApplyBlood(FName BoneName, float Radius = 75.0f, float Hardness = 0.2f);
+	void ApplyBlood(USkeletalMeshComponent* SkeletalMeshComponent, FName BoneName, float Radius = 75.0f, float Hardness = 0.2f);
 	UFUNCTION(Category = "Limb Severing", meta = (ToolTip = "Applies a custom AnimInstance to the specified severed limb bone's skeletal mesh component."))
 	void ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName);
 };

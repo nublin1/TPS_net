@@ -117,22 +117,22 @@ void UVertexColorUtility::MaxColorOfChannel(FLinearColor& Color, float Value, ED
 	{
 	case EDismemberColorChannel::R_Channel:
 		{
-			Color.R = FMath::Max(Color.R, Value);
+			Color.R = FMath::Min(Color.R, Value);
 			return;
 		}
 	case EDismemberColorChannel::G_Channel:
 		{
-			Color.G = FMath::Max(Color.G, Value);
+			Color.G = FMath::Min(Color.G, Value);
 			return;
 		}
 	case EDismemberColorChannel::B_Channel:
 		{
-			Color.B = FMath::Max(Color.B, Value);
+			Color.B = FMath::Min(Color.B, Value);
 			return;
 		}
 	case EDismemberColorChannel::A_Channel:
 		{
-			Color.A = FMath::Max(Color.A, Value);
+			Color.A = FMath::Min(Color.A, Value);
 			return;
 		}
 	}
@@ -173,8 +173,7 @@ void UVertexColorUtility::ApplyVertexColorMask(USkeletalMeshComponent* Mesh, FNa
         if (NumVerts == 0) continue;
 
         // Считываем «исходные» цвета вершин
-        TArray<FLinearColor> OriginalColors =
-            UVertexColorUtility::GetCurrentVertexColors(Mesh, LOD);
+        TArray<FLinearColor> OriginalColors = GetCurrentVertexColors(Mesh, LOD);
 
         // Создаём рабочий массив копий
         TArray<FLinearColor> Colors = OriginalColors;
@@ -185,8 +184,11 @@ void UVertexColorUtility::ApplyVertexColorMask(USkeletalMeshComponent* Mesh, FNa
 
 		for (int32 i = 0; i < NumVerts; ++i)
 		{
+			float NewValue = FMath::Min(Colors[i].R, Mask[i]);
+			Mask[i] = NewValue;
 			SetColorOfChannel(Colors[i], Mask[i], BloodVertexChannel);
 		}
+		
 		for (int32 i = 0; i < NumVerts; ++i)
 		{
 			float Alpha = 0.f;
@@ -197,11 +199,13 @@ void UVertexColorUtility::ApplyVertexColorMask(USkeletalMeshComponent* Mesh, FNa
 			case EDismemberColorChannel::B_Channel: Alpha = Colors[i].B; break;
 			case EDismemberColorChannel::A_Channel: Alpha = Colors[i].A; break;
 			}
-
+			
 			FLinearColor Lerped = FMath::Lerp(OriginalColors[i], Color, Alpha);
-
+			
 			Colors[i] = Lerped;
+			
 			SetColorOfChannel(Colors[i], Alpha, BloodVertexChannel);
+			
 		}
 		
 		//MaxLinearColorChannel(Colors, Mask, BloodVertexChannel);

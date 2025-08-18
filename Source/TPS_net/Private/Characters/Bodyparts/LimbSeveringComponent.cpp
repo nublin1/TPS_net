@@ -108,6 +108,8 @@ void ULimbSeveringComponent::LimbSevering_Internal(FName BoneName, const FVector
 	
 	SeveredLimbs.Add(BoneName, LimbSpawnedActor);
 	FrameDelayedSevering(LimbSpawnedActor, BoneName, Impulse, CachedBoneTransform);
+
+	RemovedBones.Add(BoneName);
 }
 
 void ULimbSeveringComponent::PreSevering(const FName BoneName, FVector Impulse)
@@ -123,13 +125,15 @@ void ULimbSeveringComponent::PreSevering(const FName BoneName, FVector Impulse)
 
 	LineTraceForBloodPool(LocalHit, Impulse.GetSafeNormal());
 
-	if(BoneName != NAME_None) ApplyBlood(BoneName);
+	if(BoneName != NAME_None) ApplyBlood(SeveringMesh, BoneName);
 }
 
 void ULimbSeveringComponent::PostSevering(const FName BoneName, USkeletalMeshComponent* DismemberMesh)
 {
 	if (OnPostSevering.IsBound())
 		OnPostSevering.Broadcast(BoneName, DismemberMesh);
+	
+	if(BoneName != NAME_None) ApplyBlood(DismemberMesh, BoneName);
 }
 
 bool ULimbSeveringComponent::CheckBoneFilter(const FName BoneName)
@@ -163,8 +167,23 @@ void ULimbSeveringComponent::LineTraceForBloodPool(FVector HitLocation, FVector 
 		EDrawDebugTrace::None, HitResult, true);
 	
 	if(!HitResult.bBlockingHit) return;
-	
-	//SpawnBloodPool(HitResult.ImpactPoint, HitResult.ImpactNormal, Direction, HitResult.GetComponent());
+
+	if (BloodPoolClass)
+		SpawnBloodPool(HitResult.ImpactPoint, HitResult.ImpactNormal, Direction, HitResult.GetComponent());
+}
+
+void ULimbSeveringComponent::SpawnBloodPool(FVector Location, FVector Normal, FVector SplatterDirection,
+	USceneComponent* Attachment)
+{
+	FTransform Transform;
+	Transform.SetLocation(Location);
+	//Transform.SetRotation(GetRotationForBloodActor(Normal).Quaternion());
+	Transform.SetScale3D(FVector(1));
+
+	TObjectPtr<AActor> Blood = GetWorld()->SpawnActorDeferred<AActor>(BloodPoolClass, Transform, GetOwner(), nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	Blood->FinishSpawning(Transform);
+	if(Attachment) Blood->AttachToComponent(Attachment, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 void ULimbSeveringComponent::FindSkeletalMeshComponent()
@@ -194,33 +213,40 @@ AActor* ULimbSeveringComponent::CreateSeveredLimb(const FName BoneName, const FT
 		return nullptr;
 	}
 
+	SpawnedSeveredLimbActor->SetActorScale3D(Transform.GetScale3D());
+
+	ULimbSeveringComponent* LimbSeveringComponent =  SpawnedSeveredLimbActor->FindComponentByClass<ULimbSeveringComponent>();
+	if (!LimbSeveringComponent)
+	{
+		LimbSeveringComponent = NewObject<ULimbSeveringComponent>(SpawnedSeveredLimbActor->GetRootComponent());
+	}
+	
 	if (bBlockFurtherSevering)
 	{
-		ULimbSeveringComponent* SpawnedLimbSeveringComponent = SpawnedSeveredLimbActor->FindComponentByClass<ULimbSeveringComponent>();
-		if (SpawnedLimbSeveringComponent)
-		{
-			SpawnedLimbSeveringComponent->bDisableSevering = true;
-			SpawnedLimbSeveringComponent->bBlockFurtherSevering = true;
-		}
+		LimbSeveringComponent->bDisableSevering = true;
+		LimbSeveringComponent->bBlockFurtherSevering = true;
 	}
 	else
 	{
-		ULimbSeveringComponent* TargetLimbSeveringComp = SpawnedSeveredLimbActor->FindComponentByClass<ULimbSeveringComponent>();
-		if (!TargetLimbSeveringComp)
-		{
-			TargetLimbSeveringComp = NewObject<ULimbSeveringComponent>(SpawnedSeveredLimbActor->GetRootComponent());
-		}
-
-		TargetLimbSeveringComp->bDisableSevering = false;
-		TargetLimbSeveringComp->bBlockFurtherSevering = false;
-		TargetLimbSeveringComp->AddBoneToBlackList(BoneName);
+		LimbSeveringComponent->bDisableSevering = false;
+		LimbSeveringComponent->bBlockFurtherSevering = false;
 	}
+
+	LimbSeveringComponent->AddBoneToBlackList(BoneName);
+	LimbSeveringComponent->RemovedBones = RemovedBones;
 	
 	USkeletalMeshComponent* SpawnedLimbMeshComponent = SpawnedSeveredLimbActor->FindComponentByClass<USkeletalMeshComponent>();
 	if (!SpawnedLimbMeshComponent)
 	{
 		SpawnedLimbMeshComponent = NewObject<USkeletalMeshComponent>(SpawnedSeveredLimbActor->GetRootComponent());
 		SpawnedLimbMeshComponent->RegisterComponent();
+	}
+
+	for (auto RemovedBone : RemovedBones)
+	{
+		if(RemovedBone != NAME_None) ApplyBlood(SpawnedLimbMeshComponent, RemovedBone);
+		SpawnedLimbMeshComponent->HideBoneByName(RemovedBone, EPhysBodyOp::PBO_Term);
+		//SpawnedLimbMeshComponent->BreakConstraint(FVector(0), FVector(0), RemovedBone);
 	}
 	
 	ApplyAnimInstanceToSeveredLimb(SpawnedLimbMeshComponent, BoneName);
@@ -435,13 +461,13 @@ void ULimbSeveringComponent::GenerateSeveredLimbPhysicsAsset(FName InLimb)
 	}
 }
 
-void ULimbSeveringComponent::ApplyBlood(FName BoneName, float Radius, float Hardness)
+void ULimbSeveringComponent::ApplyBlood(USkeletalMeshComponent* SkeletalMeshComponent, FName BoneName, float Radius, float Hardness)
 {
 	if(IsRunningDedicatedServer()) return;
 
-	if(SeveringMesh->ComponentTags.Contains("Ignore Blood")) return;
+	if(SkeletalMeshComponent->ComponentTags.Contains("Ignore Blood")) return;
 	
-	UVertexColorUtility::ApplyVertexColorMask(SeveringMesh, BoneName, 20.0f, Hardness, FLinearColor::Red, BloodVertexChannel);
+	UVertexColorUtility::ApplyVertexColorMask(SkeletalMeshComponent, BoneName, 20.0f, Hardness, FLinearColor::Red, BloodVertexChannel);
 }
 
 void ULimbSeveringComponent::ApplyAnimInstanceToSeveredLimb(USkeletalMeshComponent* Component, FName BoneName)
