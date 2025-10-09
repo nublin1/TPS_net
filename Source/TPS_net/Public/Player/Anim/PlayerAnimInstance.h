@@ -7,6 +7,7 @@
 #include "Library/AnimationStructLibrary.h"
 #include "PlayerAnimInstance.generated.h"
 
+class ULadderClimbingComponent;
 struct FGameplayTag;
 class UCharacterMovementComponent;
 class UMovementComponent;
@@ -22,10 +23,15 @@ class TPS_NET_API UPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FNewAnimState, FName, PrevState, FName, CurrentState);
+
 public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	//delegates
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FNewAnimState NewAnimState;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -41,12 +47,13 @@ protected:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector ReloadPosition;
-
 	
 	UPROPERTY(BlueprintReadWrite)
 	bool IsInitilize = false;
 
 	/** Anim Graph - Components */
+	UPROPERTY(BlueprintReadWrite,Category="References")
+	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
 	UPROPERTY(BlueprintReadWrite, Category="References")
 	TObjectPtr<UWeaponSystemComponent> WeaponSysComponent;
 	UPROPERTY(BlueprintReadWrite, Category="References")
@@ -122,5 +129,16 @@ protected:
 	UFUNCTION()
 	void OnJumped();
 
+	UFUNCTION()
+	void ChangedState();
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+	
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FName PreviousState;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FName CurrentState;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool StateWasChanged = false;
 };

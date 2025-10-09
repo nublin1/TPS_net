@@ -9,6 +9,7 @@
 #include "Interfaces/WeaponSystemInterface.h"
 #include "PlayerCharacter.generated.h"
 
+class ULadderClimbingComponent;
 struct FGameplayTag;
 class UBoxComponent;
 class UStateMachineComponent;
@@ -21,6 +22,12 @@ class TPS_NET_API APlayerCharacter : public ACharacter, public IIHealthInterface
 	GENERATED_BODY()
 
 public:
+	APlayerCharacter();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
@@ -31,8 +38,6 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	APlayerCharacter();
-
 	// Getters
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
@@ -44,6 +49,9 @@ public:
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
 	UFUNCTION()
 	virtual UStateMachineComponent* GetActiveStateCharacter() {return ActiveStateCharacter;}
+	virtual ULadderClimbingComponent* GetLadderClimbingComponent() const {return LadderClimbingComponent;}
+
+	FTimerHandle GetShootingPoseTransitionTimer() const {return ShootingPoseTransitionTimer;}
 
 	/** Essential Information Getters/Setters */
 	UFUNCTION(BlueprintGetter, Category = "Essential Information")
@@ -71,6 +79,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsAimingButtonHeld = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool IsAimingAnimPose = false;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Essential Information")
 	float Speed = 0.0f;
@@ -92,7 +102,13 @@ protected:
 	/* Smooth out aiming by interping control rotation*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator AimingRotation = FRotator::ZeroRotator;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsUseDesiredRotation = false;
 
+	// Components Clasees
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<ULadderClimbingComponent> LadderClimbingComponentClass = nullptr;
+	
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
@@ -102,29 +118,25 @@ protected:
 	UStateMachineComponent* StateMachine_Aiming;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* ActiveStateCharacter;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//TSubclassOf<UWeaponSystemComponent> WeaponSystemComponentClass;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UWeaponSystemComponent> WeaponSystemComponent;
-	
-	//Ladder
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* LadderTarget;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsUpLadderEntry;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ladder")
-	bool LadderIsNextLeftArm;
 
 	//Timers
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	FTimerHandle CollisionOffTimerHandle;
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FTimerHandle HipFireCooldownTimeHandle;
-	UPROPERTY(BlueprintReadWrite)
-	float HipFireToIdleTransitionTime;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HipFireToIdleTransitionTime = 3.3f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FTimerHandle ShootingPoseTransitionTimer;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -150,31 +162,24 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticastOnHealthDepleted();
 
-	// MovemantSpeed
+	// MovementSpeed
 	UFUNCTION(BlueprintCallable)
 	void ChangeMaxMoveSpeed(float NewMaxSpeed);
 	UFUNCTION(Server, Unreliable, BlueprintCallable)
 	void ServerSetSpeed(float NewMaxSpeed);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastSetSpeed(float NewMaxSpeed);
-	
-	// Ladder climbing
-	UFUNCTION(BlueprintCallable)
-	virtual void StartClimbing();	
-	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
-	void ServerStartClimbing(USceneComponent* TargetMoveToComponent);
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastStartClimbing(USceneComponent* TargetMoveToComponent);
 
 	//
 	UFUNCTION(BlueprintCallable)
 	bool IsStateTransitionAllowed(FGameplayTag NewState);
-
 	
 	//
 	UFUNCTION(BlueprintCallable)
 	void ShortCollisionOff(UBoxComponent* TargetCollision);
 
+	UFUNCTION()
+	void AnimStateChanged(FName PrevState, FName CurrentState);
 
 public:	
 	virtual void Tick(float DeltaTime) override;

@@ -28,11 +28,6 @@ UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr),
 	SetIsReplicatedByDefault(true);
 }
 
-bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
-{
-	return CurrentWeaponInHands != nullptr;
-}
-
 void UWeaponSystemComponent::PostInitProperties()
 {
 	Super::PostInitProperties();
@@ -44,6 +39,8 @@ void UWeaponSystemComponent::PostInitProperties()
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)
 	{
+		PlayerCharacterLink = Owner;
+		
 		auto ResultStateMachine_Aiming =  Cast<UStateMachineComponent>(Owner->GetDefaultSubobjectByName(TEXT("StateMachine_Aiming")));
 		if (ResultStateMachine_Aiming)
 		{
@@ -61,6 +58,11 @@ void UWeaponSystemComponent::BeginPlay()
 	SkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
 
 	SwitchState(InitialStateTag);
+}
+
+bool UWeaponSystemComponent::bIsAnyWeaponInHands() const
+{
+	return CurrentWeaponInHands != nullptr;
 }
 
 bool UWeaponSystemComponent:: bCheckHolsterAvaibility(EHolsterWeaponType BeingCheckedType, int NumberOfHolster) const
@@ -131,7 +133,7 @@ FShootReadyResult UWeaponSystemComponent::CheckIsCanShoot()
 		return FShootReadyResult(EShootReadyStatus::NoAmmo, TEXT("No ammo left."));
 	
 	if (CurrentStateTag == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
-		|| OwnerStateMachineComponent_Aiming->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.NoAiming")))
+		|| OwnerStateMachineComponent_Aiming->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.VelocityDirection")))
 	{
 		FString StateMessage = FString::Printf(TEXT("Weapon reload in progress or player not aiming. Current state: %s, Aiming state: %s"),
 		*CurrentStateTag.ToString(),
@@ -140,7 +142,12 @@ FShootReadyResult UWeaponSystemComponent::CheckIsCanShoot()
 	}
 	
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
-		return FShootReadyResult(EShootReadyStatus::ShootDelayActive, TEXT("Shoot delay timer is active."));	
+		return FShootReadyResult(EShootReadyStatus::ShootDelayActive, TEXT("Shoot delay timer is active."));
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(PlayerCharacterLink->GetShootingPoseTransitionTimer()))
+	{
+		return FShootReadyResult(EShootReadyStatus::Unknown, TEXT("Anim state transition in progress"));
+	}
 	
 	if(bIsReadyToNextShoot && AvailableShootsCount>0)
 	{

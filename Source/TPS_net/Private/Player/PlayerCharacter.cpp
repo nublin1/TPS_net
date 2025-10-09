@@ -5,8 +5,10 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Componets/Ladder/LadderClimbingComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/Anim/PlayerAnimInstance.h"
 #include "Player/Components/HealthComponent.h"
 #include "StateMachine/StateMachineComponent.h"
 #include "World/Ladders/ProceduralLadder.h"
@@ -37,6 +39,18 @@ APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
 	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
 	ActiveStateCharacter->OnComponentCreated();
 	ActiveStateCharacter->SetIsReplicated(true);
+		
+}
+
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	auto AnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->NewAnimState.AddDynamic(this, &APlayerCharacter::AnimStateChanged);
+	}
 }
 
 UHealthComponent* APlayerCharacter::GetHealthComponent() const
@@ -58,6 +72,13 @@ void APlayerCharacter::PostInitializeComponents()
 	if (HasAuthority())
 	{
 		HealthComponent->OnKilledDelegate.AddUniqueDynamic(this, &APlayerCharacter::OnHealthDepleted);
+	}
+
+	if (LadderClimbingComponentClass)
+	{
+		LadderClimbingComponent = NewObject<ULadderClimbingComponent>(this, LadderClimbingComponentClass);
+		LadderClimbingComponent->RegisterComponent();
+		AddInstanceComponent(LadderClimbingComponent);
 	}
 }
 
@@ -183,74 +204,6 @@ void APlayerCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
 	
 }
 
-void APlayerCharacter::StartClimbing()
-{
-	if (IsUpLadderEntry)
-	{
-		AProceduralLadder* Ladder = Cast<AProceduralLadder>(LadderTarget);
-		
-		
-		if (HasAuthority())
-		{
-			ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("ExitBox"))));
-			ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("ClimbTriggerUp"))));
-			MulticastStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningUpPosition"))));
-		}
-		else
-		{
-			ServerStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningUpPosition"))));
-		}
-	}
-	else
-	{
-		AProceduralLadder* Ladder = Cast<AProceduralLadder>(LadderTarget);
-		
-		
-		if (HasAuthority())
-		{
-			//ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("EnterBox"))));
-			//ShortCollisionOff(Cast<UBoxComponent>(Ladder->GetDefaultSubobjectByName(TEXT("SlideExitBox"))));
-			MulticastStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
-		}
-		else
-		{
-			ServerStartClimbing(Cast<USceneComponent>(Ladder->GetDefaultSubobjectByName(TEXT("LadderBeginningDownPosition"))));
-		}
-	}
-}
-
-void APlayerCharacter::ServerStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
-{
-	
-	MulticastStartClimbing_Implementation(TargetMoveToComponent);
-}
-
-bool APlayerCharacter::ServerStartClimbing_Validate(USceneComponent* TargetMoveToComponent)
-{
-	//if (!LadderTarget)
-	//	return false;
-	
-	return true;
-}
-
-void APlayerCharacter::MulticastStartClimbing_Implementation(USceneComponent* TargetMoveToComponent)
-{		
-	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.EnteringLadder")));
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-	GetCharacterMovement()->MaxFlySpeed = 0.0f;
-	GetCharacterMovement()->BrakingDecelerationFlying = 3000.0f;	
-	
-	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	UKismetSystemLibrary::MoveComponentTo(
-		RootComponent,
-		TargetMoveToComponent->GetComponentLocation(),
-		TargetMoveToComponent->GetComponentRotation(),
-		false, false, 0.5f,true, EMoveComponentAction::Type::Move, LatentInfo);
-
-	StateMachine_Movement->SwitchState(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder.OnLadder")));
-}
-
 bool APlayerCharacter::IsStateTransitionAllowed(FGameplayTag NewState)
 {
 	if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
@@ -276,6 +229,14 @@ void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)
 	{
 		TempCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	},  1.0f , false);
+}
+
+void APlayerCharacter::AnimStateChanged(FName PrevState, FName CurrentState)
+{
+	if (PrevState == "Pistols Relaxed" && CurrentState == "Hip Aiming")
+	{
+		UE_LOG(LogTemp, Display, TEXT("PlayerCharacter::AnimStateChanged"));
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

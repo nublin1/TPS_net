@@ -42,6 +42,12 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
+
+	/*UAnimInstance* Anim = Character->GetMesh()->GetAnimInstance();
+	if (UAnimBlueprintGeneratedClass* AnimClass = Cast<UAnimBlueprintGeneratedClass>(Anim->GetClass()))
+	{
+		//FName CurrentState = Anim->GetCurrentStateName("YourStateMachineName");
+	}*/
 }
 
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -73,6 +79,9 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	UpdateLayerValues();
 	UpdateAimingValues(DeltaSeconds);
 	SetIKHands();
+
+	if (StateWasChanged)
+		ChangedState();
 }
 
 void UPlayerAnimInstance::SighUp()
@@ -89,6 +98,8 @@ void UPlayerAnimInstance::SighUp()
 	{
 		StateMachine_Aiming->StateChangedDelegate.AddDynamic(this, &UPlayerAnimInstance::UPlayerAnimInstance::AimingStateChanged);
 	}
+
+	LadderClimbingComponent = Character->GetLadderClimbingComponent();
 	
 	IsInitilize = true;
 }
@@ -265,6 +276,14 @@ void UPlayerAnimInstance::OnJumped()
 	InAir.bJumped = true;
 	InAir.JumpPlayRate = FMath::GetMappedRangeValueClamped<float, float>({0.0f, 600.0f},
 		{1.2f, 1.5f}, CharacterInformation.Speed);
+}
+
+void UPlayerAnimInstance::ChangedState()
+{
+	StateWasChanged = false;
+
+	if (NewAnimState.IsBound())
+		NewAnimState.Broadcast(PreviousState, CurrentState);
 }
 
 void UPlayerAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

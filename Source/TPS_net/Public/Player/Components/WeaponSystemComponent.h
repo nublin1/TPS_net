@@ -10,6 +10,7 @@
 #include "Weapon/WeaponBase.h"
 #include "WeaponSystemComponent.generated.h"
 
+class APlayerCharacter;
 class UStateMachineComponent;
 class UCameraComponent;
 struct FGameplayTag;
@@ -78,6 +79,13 @@ class TPS_NET_API UWeaponSystemComponent : public UActorComponent, public IState
 	GENERATED_BODY()
 
 public:
+	UWeaponSystemComponent();
+
+protected:
+	virtual void PostInitProperties() override;
+	virtual void BeginPlay() override;
+
+public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
@@ -106,13 +114,9 @@ public:
 	FTickStateSinganture TickStateDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FStateChangedSignature OnStateChangedDelegate;
-
-	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================	
-	UWeaponSystemComponent();
-
 	UFUNCTION(BlueprintCallable)
 	bool bIsAnyWeaponInHands() const;
 	
@@ -198,6 +202,8 @@ protected:
 	
 
 	// Player Data
+	UPROPERTY()
+	TObjectPtr<APlayerCharacter> PlayerCharacterLink = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* PlayerCamera;
 	UPROPERTY(BlueprintReadWrite)
@@ -240,9 +246,6 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void PostInitProperties() override;
-	virtual void BeginPlay() override;
-
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
 	UFUNCTION(BlueprintCallable)
