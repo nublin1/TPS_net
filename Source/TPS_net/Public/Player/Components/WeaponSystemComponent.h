@@ -117,7 +117,7 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool bIsAnyWeaponInHands() const;
 	
 	UFUNCTION()
@@ -242,6 +242,10 @@ protected:
 	FGameplayTag InitialStateTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDebug = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FGameplayTag> StateHistory;	
+	int StateHistoryLenght = 5;
 	
 	//====================================================================
 	// FUNCTIONS

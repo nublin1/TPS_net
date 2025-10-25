@@ -47,6 +47,7 @@ void UCustomBulletProjectile::DestroyReq()
 		GetOwner()->GetWorldTimerManager().ClearTimer(DestroyHandle);
 
 	IsNeedToDestroy = true;
+	HitResultDelegate.Clear();
 }
 
 

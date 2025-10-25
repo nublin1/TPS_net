@@ -84,7 +84,7 @@
 /DUE_BUILD_DEVELOPMENT=1
 /DORIGINAL_FILE_NAME="UnrealEditor-AdvancedSteamSessions.dll"
 /DBUILD_ICON_FILE_NAME="\"..\\Build\\Windows\\Resources\\Default.ico\""
-/DPROJECT_COPYRIGHT_STRING="Fill out your copyright notice in the Description page of Project Settings."
+/DPROJECT_COPYRIGHT_STRING="Nublin Studio 2025 All Rights Reserved."
 /DPROJECT_PRODUCT_NAME="Third Person BP Game Template"
 /DPROJECT_PRODUCT_IDENTIFIER=TPS_net
 /fo "G:/UEProjects/TPS_net 5.4/Plugins/AdvancedSessions/AdvancedSteamSessions/Intermediate/Build/Win64/x64/UnrealEditor/Development/AdvancedSteamSessions/Default.rc2.res"

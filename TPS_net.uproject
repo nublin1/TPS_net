@@ -31,6 +31,11 @@
 			"Name": "RecoilAnimation",
 			"Enabled": true,
 			"MarketplaceURL": "https://www.fab.com/listings/c664053f-900b-4f33-aa26-4bdb46959e4c"
+		},
+		{
+			"Name": "SkinnedDecalComponent",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/05b6b0f2f8f049aaa469a1da4e09275c"
 		}
 	],
 	"TargetPlatforms": [

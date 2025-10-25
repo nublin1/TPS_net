@@ -28,16 +28,6 @@ ANPCZombie::ANPCZombie()
 	
 }
 
-UHealthComponent* ANPCZombie::GetHealthComponent() const
-{
-	return FindComponentByClass<UHealthComponent>();
-}
-
-void ANPCZombie::RerunConstructionScripts()
-{
-	Super::RerunConstructionScripts();
-}
-
 void ANPCZombie::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
@@ -51,8 +41,11 @@ void ANPCZombie::PostInitializeComponents()
 void ANPCZombie::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	
+UHealthComponent* ANPCZombie::GetHealthComponent() const
+{
+	return FindComponentByClass<UHealthComponent>();
 }
 
 void ANPCZombie::ChangeMaxMoveSpeed(float NewMaxSpeed)

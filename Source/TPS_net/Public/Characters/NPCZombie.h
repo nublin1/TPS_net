@@ -1,30 +1,35 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/IHealthInterface.h"
 #include "NPC/Inrfaces/ZombieCombatInterface.h"
 #include "NPCZombie.generated.h"
 
 UCLASS()
-class TPS_NET_API ANPCZombie : public ACharacter, public IIHealthInterface, public IZombieCombatInterface
+class TPS_NET_API ANPCZombie : public ABaseCharacter, public IIHealthInterface, public IZombieCombatInterface
 {
 	GENERATED_BODY()
+public:
+	// Sets default values for this character's properties
+	ANPCZombie();
+
+protected:
+	virtual void PreInitializeComponents() override;
+	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
 
 public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	// Sets default values for this character's properties
-	ANPCZombie();
-
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
@@ -51,12 +56,7 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void RerunConstructionScripts() override;
-	virtual void PreInitializeComponents() override;
-	virtual void PostInitializeComponents() override;
-	virtual void BeginPlay() override;
-
-	// MovemantSpeed
+	// MovementSpeed
 	UFUNCTION(BlueprintCallable)
 	void ChangeMaxMoveSpeed(float NewMaxSpeed);
 	UFUNCTION(Server, Unreliable, BlueprintCallable)
@@ -79,7 +79,6 @@ protected:
 	void Server_NPCDead(AActor* KilledActor);
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticast_NPCDead(AActor* KilledActor);
-	
 
 public:
 	//====================================================================

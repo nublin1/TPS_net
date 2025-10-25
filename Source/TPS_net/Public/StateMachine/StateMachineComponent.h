@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -48,6 +48,8 @@ public:
 	virtual FGameplayTag GetCurrentStateTag() const override { return CurrentStateTag; }
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
 	virtual FString GetCurrentStateTagName() const override {return CurrentStateTag.ToString();}
+	UFUNCTION()
+	virtual FGameplayTag GetPrevStateTag() const { return PrevStateTag;}
 
 protected:
 	//====================================================================
@@ -57,6 +59,11 @@ protected:
 	FGameplayTag PrevStateTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FGameplayTag CurrentStateTag;
+
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FGameplayTag> StateHistory;	
+	int StateHistoryLenght = 5;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTag InitialStateTag;

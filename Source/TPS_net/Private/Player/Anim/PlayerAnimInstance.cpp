@@ -65,6 +65,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	CharacterInformation.AimingRotation = Character->GetAimingRotation();
 	CharacterInformation.CharacterActorRotation = Character->GetActorRotation();
+
+	AimingValues = Character->GetAimingValues();
 	
 	if (WeaponSysComponent)
 	{
@@ -77,7 +79,6 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 	
 	UpdateLayerValues();
-	UpdateAimingValues(DeltaSeconds);
 	SetIKHands();
 
 	if (StateWasChanged)
@@ -141,21 +142,7 @@ void UPlayerAnimInstance::UpdateLayerValues()
 
 void UPlayerAnimInstance::UpdateAimingValues(float DeltaSeconds)
 {
-	AimingValues.SmoothedAimingRotation = FMath::RInterpTo(AimingValues.SmoothedAimingRotation,
-														   CharacterInformation.AimingRotation, DeltaSeconds,
-														   Config.SmoothedAimingRotationInterpSpeed);
 	
-	// Calculate the Aiming angle and Smoothed Aiming Angle by getting
-	// the delta between the aiming rotation and the actor rotation.
-	FRotator Delta = CharacterInformation.AimingRotation - CharacterInformation.CharacterActorRotation;
-	Delta.Normalize();
-	AimingValues.AimingAngle.X = Delta.Yaw;
-	AimingValues.AimingAngle.Y = Delta.Pitch;
-
-	Delta = AimingValues.SmoothedAimingRotation - CharacterInformation.CharacterActorRotation;
-	Delta.Normalize();
-	AimingValues.SmoothedAimingAngle.X = Delta.Yaw;
-	AimingValues.SmoothedAimingAngle.Y = Delta.Pitch;
 }
 
 void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
@@ -221,6 +208,13 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 	}
 	else
 	{
+		if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
+			|| WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
+		{
+			LayerBlendingValues.EnableHandIK_L = 0.0f;
+			return;
+		}
+		
 		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{

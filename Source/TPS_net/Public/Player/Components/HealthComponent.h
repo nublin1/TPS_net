@@ -6,25 +6,25 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-#pragma region Delegates
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnKilledSignature, AActor*, KilledActor, AController*, KilledByInstigator);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, CurrentHealth);
-
-#pragma endregion
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+#pragma region Delegates
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnKilledSignature, AActor*, KilledActor, AController*, KilledByInstigator);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, CurrentHealth);
+#pragma endregion
+
 public:	
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	// Deleagates
 	UPROPERTY(VisibleAnywhere, BlueprintAssignable)
 	FOnKilledSignature OnKilledDelegate;
-
 	UPROPERTY(VisibleAnywhere, BlueprintAssignable)
 	FOnHealthChangedSignature OnHealthChangedDelegate;
 

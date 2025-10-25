@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Nublin Studio 2025 All Rights Reserved.
 
 #include "Player/PlayerCharacter.h"
 
@@ -11,9 +10,6 @@
 #include "Player/Anim/PlayerAnimInstance.h"
 #include "Player/Components/HealthComponent.h"
 #include "StateMachine/StateMachineComponent.h"
-#include "World/Ladders/ProceduralLadder.h"
-
-#include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
@@ -29,33 +25,12 @@ APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
 
-	StateMachine_Movement = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movemant"));
-	StateMachine_Movement->OnComponentCreated();
-	StateMachine_Movement->SetIsReplicated(true);
-
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
 	StateMachine_Aiming->OnComponentCreated();
 
 	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
 	ActiveStateCharacter->OnComponentCreated();
 	ActiveStateCharacter->SetIsReplicated(true);
-		
-}
-
-void APlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	auto AnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	if (AnimInstance)
-	{
-		AnimInstance->NewAnimState.AddDynamic(this, &APlayerCharacter::AnimStateChanged);
-	}
-}
-
-UHealthComponent* APlayerCharacter::GetHealthComponent() const
-{
-	return FindComponentByClass<UHealthComponent>();
 }
 
 void APlayerCharacter::PostInitProperties()
@@ -81,6 +56,34 @@ void APlayerCharacter::PostInitializeComponents()
 		AddInstanceComponent(LadderClimbingComponent);
 	}
 }
+
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	auto AnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->NewAnimState.AddDynamic(this, &APlayerCharacter::AnimStateChanged);
+	}
+}
+
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Set required values
+	SetEssentialValues(DeltaTime);
+
+	UpdateAimingValues(DeltaTime);
+}
+
+UHealthComponent* APlayerCharacter::GetHealthComponent() const
+{
+	return FindComponentByClass<UHealthComponent>();
+}
+
+
 
 void APlayerCharacter::SetEssentialValues(float DeltaTime)
 {
@@ -116,6 +119,25 @@ void APlayerCharacter::SetEssentialValues(float DeltaTime)
 	const FVector CurrentVel = GetVelocity();
 	Speed = CurrentVel.Size2D();
 	IsMoving = Speed > 1.0f; 
+}
+
+void APlayerCharacter::UpdateAimingValues(float DeltaTime)
+{
+	AimingValues.SmoothedAimingRotation = FMath::RInterpTo(AimingValues.SmoothedAimingRotation,
+														   AimingRotation, DeltaTime,
+														   Config.SmoothedAimingRotationInterpSpeed);
+	
+	// Calculate the Aiming angle and Smoothed Aiming Angle by getting
+	// the delta between the aiming rotation and the actor rotation.
+	FRotator Delta = AimingRotation - GetActorRotation();
+	Delta.Normalize();
+	AimingValues.AimingAngle.X = Delta.Yaw;
+	AimingValues.AimingAngle.Y = Delta.Pitch;
+
+	Delta = AimingValues.SmoothedAimingRotation - GetActorRotation();
+	Delta.Normalize();
+	AimingValues.SmoothedAimingAngle.X = Delta.Yaw;
+	AimingValues.SmoothedAimingAngle.Y = Delta.Pitch;
 }
 
 void APlayerCharacter::EventOnJumped()
@@ -213,6 +235,25 @@ bool APlayerCharacter::IsStateTransitionAllowed(FGameplayTag NewState)
 			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder"))))
 			return false;
 	}
+
+	else if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")))
+	{
+		if (!IsGrounded)
+			return false;
+
+		FGameplayTagContainer TestTags;
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder")));
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")));
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")));
+
+		for (const auto TestTag : TestTags)
+		{
+			if (NewState.MatchesTag(TestTag))
+				return false;
+		}
+
+		return false;
+	}
 	
 	return true;
 }
@@ -239,15 +280,6 @@ void APlayerCharacter::AnimStateChanged(FName PrevState, FName CurrentState)
 	}
 }
 
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// Set required values
-	SetEssentialValues(DeltaTime);
-
-}
-
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -264,8 +296,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
-
-	DOREPLIFETIME(APlayerCharacter, StateMachine_Movement);
+	
 	DOREPLIFETIME(APlayerCharacter, StateMachine_Aiming);
 	DOREPLIFETIME(APlayerCharacter, ReplicatedControlRotation);
 	DOREPLIFETIME(APlayerCharacter, WeaponSystemComponent);

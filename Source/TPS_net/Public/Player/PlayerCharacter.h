@@ -1,31 +1,40 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerStructsLibrary.h"
+#include "Characters/BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/ClimbableInterface.h"
 #include "Interfaces/IHealthInterface.h"
 #include "Interfaces/WeaponSystemInterface.h"
+#include "Library/AnimationStructLibrary.h"
 #include "PlayerCharacter.generated.h"
 
+class ACoverPoint_Player;
 class ULadderClimbingComponent;
 struct FGameplayTag;
 class UBoxComponent;
 class UStateMachineComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJumpedSignature);
-
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ACharacter, public IIHealthInterface, public IWeaponSystemInterface
+class TPS_NET_API APlayerCharacter : public ABaseCharacter, public IIHealthInterface, public IWeaponSystemInterface
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJumpedSignature);
 
 public:
 	APlayerCharacter();
 
 protected:
+	virtual void PostInitProperties() override;
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	//====================================================================
@@ -43,8 +52,7 @@ public:
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
 	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
-	UFUNCTION()
-	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
+	
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
 	UFUNCTION()
@@ -62,6 +70,9 @@ public:
 	float GetSpeed() const { return Speed; }
 	UFUNCTION(BlueprintGetter, Category = "Essential Information")
 	FRotator GetAimingRotation() const {return AimingRotation;}
+
+	UFUNCTION(BlueprintGetter, Category = "Essential Information")
+	FAnimGraphAimingValues GetAimingValues() const { return AimingValues; }
 
 protected:
 	//====================================================================
@@ -105,6 +116,34 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsUseDesiredRotation = false;
 
+	/** Cover System */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Refs")
+	TObjectPtr<ACoverPoint_Player> CurrentCoverPoint_Player = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bIsInsideCoverArea = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCoverAimRightAvailible = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCoverAimLeftAvailible = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bIsInEndAreaRight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bIsInEndAreaLeft = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	EStandCrouchCoverPose CoverPose = EStandCrouchCoverPose::Standing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Refs")
+	TObjectPtr<UStaticMeshComponent> CoverBackWallMesh = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Settings")
+	float CoverEnterAngleArea = 35.0f;
+
+	/** Aiming Values */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Aiming Values")
+	FAnimGraphAimingValues AimingValues;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configuration|Anim")
+	FAnimConfiguration Config;
+
 	// Components Clasees
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<ULadderClimbingComponent> LadderClimbingComponentClass = nullptr;
@@ -112,8 +151,6 @@ protected:
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
-	UStateMachineComponent* StateMachine_Movement;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
@@ -141,10 +178,8 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void PostInitProperties() override;
-	virtual void PostInitializeComponents() override;
-
 	void SetEssentialValues(float DeltaTime);
+	void UpdateAimingValues(float DeltaTime);
 
 	/** On Jumped*/
 	UFUNCTION(BlueprintCallable, Category = "Character States")
@@ -182,8 +217,6 @@ protected:
 	void AnimStateChanged(FName PrevState, FName CurrentState);
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 	

@@ -19,3 +19,10 @@ enum class EDirection8 : uint8
 	UpLeft
 };
 
+UENUM(BlueprintType, BlueprintType)
+enum class EStandCrouchCoverPose : uint8
+{
+	Standing = 0,
+	Crouching = 1,
+};
+

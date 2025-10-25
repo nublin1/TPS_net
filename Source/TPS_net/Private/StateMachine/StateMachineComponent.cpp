@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 
 #include "StateMachine/StateMachineComponent.h"
@@ -115,7 +115,7 @@ void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	if (bDebug)
 	{
-		if (GPlayInEditorID == 0)
+		if (UE::GetPlayInEditorID())
 			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("CurrentState for %s: %s"), *GetOwner()->GetName(), *CurrentStateTag.ToString()));
 		else
 		{

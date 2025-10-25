@@ -86,10 +86,6 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	FTransform LeftHandIKTransform = FTransform();
-
-	/** Configuration */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configuration|Main Configuration")
-	FAnimConfiguration Config;
 	
 	//====================================================================
 	// FUNCTIONS

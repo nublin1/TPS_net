@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -46,9 +46,7 @@ public:
 
 protected:
 	bool bCanTickState = false;
-	TArray<FGameplayTag> StateHistory;	
-	int StateHistoryLenght = 5;
-
+	
 	//
 	virtual void InitState() = 0;
 	virtual void TickState(float DeltaTime) const= 0;
