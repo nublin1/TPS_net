@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -21,6 +21,11 @@ class TPS_NET_API APlayerController_TPS : public APlayerController, public IPCCh
 	GENERATED_BODY()
 
 public:
+	APlayerController_TPS();
+protected:
+	virtual void PostInitializeComponents() override;
+public:
+	
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
@@ -28,15 +33,9 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	APlayerController_TPS();
-
 	UFUNCTION(BlueprintCallable)
 	void SendMessageTo_PcGs_Implementation(FString Sender, FString Message);
-
-	UFUNCTION(Server, Reliable)
-	void RequestHitDetectOnServer(AActor* Actor);
-	UFUNCTION(Server, Reliable)
-	void RequestClearAlreadyHitTargetsOnServer(AActor* Actor);
+	
 
 	//Getters
 	UGameCoreHUDLayout* GetHUDLayout() const {return GameCoreHudLayout;}
@@ -65,13 +64,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBUIUserWidget> GameOverWidget;
-
 	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	virtual void PostInitializeComponents() override;
-	
+
 	virtual void GameHasEnded(AActor* EndGameFocus, bool bIsWinner) override;
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastGameHasEnded(AActor* EndGameFocus, bool bIsWinner);

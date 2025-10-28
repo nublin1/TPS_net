@@ -26,9 +26,6 @@ public:
 	//====================================================================
 	UStoreCard();
 
-	UFUNCTION()
-	void InitStoreCard(UUpgradeBase* UpgradeBase);
-
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES

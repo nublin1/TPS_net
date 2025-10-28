@@ -27,9 +27,6 @@ public:
 	//====================================================================
 	UUpgradesStore();
 
-	UFUNCTION(BlueprintCallable)
-	void InitUpgradesStore(FUpgrades UpgradesList);
-
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES

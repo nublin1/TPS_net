@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -89,7 +89,6 @@ protected:
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	
-	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
@@ -105,8 +104,6 @@ protected:
 	void RegisterPlayer(FName SessionName, const FUniqueNetIdRepl& PlayerID, bool bWasInvited = false);
 	
 	void OnFindSessionsComplete(bool bWasSuccessful);
-
-	
 
 private:
 	//====================================================================

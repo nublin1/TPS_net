@@ -26,9 +26,6 @@ public:
 	//====================================================================
 	UStoreCardRowWidget();
 
-	UFUNCTION()
-	void InitStoreCardRow(FBaseUpgrade BaseUpgrade);
-
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES

@@ -21,16 +21,6 @@ enum class EUGameStates : uint8
 	GameState_Victory,
 };
 
-USTRUCT(BlueprintType)
-struct FUpgrades
-{
-	GENERATED_BODY()
-	
-	UPROPERTY()
-	TArray<TObjectPtr<UUpgradeBase>> ListOfUpgrades;
-};
-
-
 UCLASS()
 class TPS_NET_API ADefenceGameMode : public AGameModeBase
 {
@@ -54,9 +44,6 @@ public:
 	UFUNCTION()
 	virtual void Logout(AController* Exiting) override;
 
-	UFUNCTION(BlueprintCallable)
-	FUpgrades GetPlayerUpgrades(APlayerController* PlayerController);
-
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
@@ -68,8 +55,6 @@ protected:
 	TMap<TObjectPtr<APlayerController>, int> PlayersMoney;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> AvaiablePlayersUpgrades;
-	UPROPERTY(VisibleAnywhere)
-	TMap<TObjectPtr<APlayerController>, FUpgrades> IndividualPlayerUpgrades ;
 
 	UPROPERTY()
 	EUGameStates GameStated = EUGameStates::GameState_Gameplay;

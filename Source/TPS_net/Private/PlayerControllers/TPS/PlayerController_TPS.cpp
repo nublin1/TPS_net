@@ -1,42 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Nublin Studio 2025 All Rights Reserved.
 
 #include "PlayerControllers/TPS/PlayerController_TPS.h"
 
-#include "Characters/NPC/Components/ZombieCombatComponent.h"
+#include "Characters/NPC/Components/AIAttackComponent.h"
 #include "UI/BUIUserWidget.h"
 #include "UI/HUD/Layers/MainHUDLayout.h"
 
 APlayerController_TPS::APlayerController_TPS(): MainHUDContainer(nullptr), GameCoreHudLayout(nullptr),
                                                 ChatOnScreen(nullptr)
 {
-}
-
-void APlayerController_TPS::SendMessageTo_PcGs_Implementation(FString Sender, FString Message)
-{
-}
-
-void APlayerController_TPS::RequestClearAlreadyHitTargetsOnServer_Implementation(AActor* Actor)
-{
-	if (!Actor)
-		return;
-
-	if (UZombieCombatComponent* CombatComponent = Actor->FindComponentByClass<UZombieCombatComponent>())
-	{
-		CombatComponent->ServerClearAlreadyHitTargets();
-	}
-	
-}
-
-void APlayerController_TPS::RequestHitDetectOnServer_Implementation(AActor* Actor)
-{
-	if (Actor)
-	{
-		if (UZombieCombatComponent* CombatComponent = Actor->FindComponentByClass<UZombieCombatComponent>())
-		{
-			CombatComponent->Server_HitDetect();
-		}
-	}
 }
 
 void APlayerController_TPS::PostInitializeComponents()
@@ -55,6 +27,10 @@ void APlayerController_TPS::PostInitializeComponents()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GameOverWidgetClass is null"));
 	}
+}
+
+void APlayerController_TPS::SendMessageTo_PcGs_Implementation(FString Sender, FString Message)
+{
 }
 
 void APlayerController_TPS::GameHasEnded(AActor* EndGameFocus, bool bIsWinner)

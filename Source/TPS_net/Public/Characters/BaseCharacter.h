@@ -27,7 +27,6 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
@@ -40,5 +39,20 @@ protected:
 	//====================================================================
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Movement;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================
+	// MovementSpeed
+	UFUNCTION(BlueprintCallable)
+	virtual void ChangeMaxMoveSpeed(float NewMaxSpeed);
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	virtual void ServerSetSpeed(float NewMaxSpeed);
+	UFUNCTION(NetMulticast, Unreliable)
+	virtual void MulticastSetSpeed(float NewMaxSpeed);
+
 
 };

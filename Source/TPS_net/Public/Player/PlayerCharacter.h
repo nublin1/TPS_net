@@ -198,12 +198,9 @@ protected:
 	void NetMulticastOnHealthDepleted();
 
 	// MovementSpeed
-	UFUNCTION(BlueprintCallable)
-	void ChangeMaxMoveSpeed(float NewMaxSpeed);
-	UFUNCTION(Server, Unreliable, BlueprintCallable)
-	void ServerSetSpeed(float NewMaxSpeed);
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastSetSpeed(float NewMaxSpeed);
+	virtual void ChangeMaxMoveSpeed(float NewMaxSpeed) override;
+	void ServerSetSpeed_Implementation(float NewMaxSpeed);
+	void MulticastSetSpeed_Implementation(float NewMaxSpeed);
 
 	//
 	UFUNCTION(BlueprintCallable)

@@ -4,7 +4,7 @@
 #include "Characters/NPCZombie.h"
 
 #include "Animation/AnimInstance.h"
-#include "Characters/NPC/Components/ZombieCombatComponent.h"
+#include "Characters/NPC/Components/AIAttackComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,9 +20,9 @@ ANPCZombie::ANPCZombie()
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
 	
-	ZombieCombatComponent = CreateDefaultSubobject<UZombieCombatComponent>(TEXT("ZombieCombatComponent"));
-	ZombieCombatComponent->OnComponentCreated();
-	ZombieCombatComponent->SetIsReplicated(true);
+	AIAttackComponent = CreateDefaultSubobject<UAIAttackComponent>(TEXT("AttackComponent"));
+	AIAttackComponent->OnComponentCreated();
+	AIAttackComponent->SetIsReplicated(true);
 
 	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
 	
@@ -43,45 +43,22 @@ void ANPCZombie::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ANPCZombie::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ANPCZombie, SprintSpeed);
+	DOREPLIFETIME(ANPCZombie, AIAttackComponent);
+}
+
 UHealthComponent* ANPCZombie::GetHealthComponent() const
 {
 	return FindComponentByClass<UHealthComponent>();
-}
-
-void ANPCZombie::ChangeMaxMoveSpeed(float NewMaxSpeed)
-{
-	if (!Controller)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Controller is Null"));
-		return;
-	}
-
-	if (Controller->IsPlayerController())
-	{
-		if (HasAuthority())
-		{
-			MulticastSetSpeed(NewMaxSpeed);
-		}
-		else
-		{
-			ServerSetSpeed(NewMaxSpeed);
-		}
-	}
-	else
-	{
-		MulticastSetSpeed(NewMaxSpeed);
-	}
-	
-}
-
-void ANPCZombie::ServerSetSpeed_Implementation(float NewMaxSpeed)
-{
-	MulticastSetSpeed(NewMaxSpeed);
-}
-
-void ANPCZombie::MulticastSetSpeed_Implementation(float NewMaxSpeed)
-{
-	GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
 }
 
 void ANPCZombie::SimpleAttack(UAnimMontage* MontageToPlay)
@@ -118,7 +95,6 @@ void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 {
 	if (KilledActor == this)
 	{
-		auto SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
 		if (SkeletalMeshComponent)
 		{
 			SkeletalMeshComponent->SetSimulatePhysics(true);
@@ -126,8 +102,8 @@ void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 			FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 
-		FTimerHandle UnusedHandle;
-		GetWorldTimerManager().SetTimer(UnusedHandle, [this, SkeletalMeshComponent]()
+		
+		GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
 		{
 			//SkeletalMeshComponent->SetSimulatePhysics(false);
 			SkeletalMeshComponent->Stop();
@@ -140,22 +116,4 @@ void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 		if (DyingSound)
 			UGameplayStatics::PlaySoundAtLocation(this, DyingSound, GetActorLocation());
 	}
-}
-
-void ANPCZombie::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void ANPCZombie::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(ANPCZombie, SprintSpeed);
-	DOREPLIFETIME(ANPCZombie, ZombieCombatComponent);
 }

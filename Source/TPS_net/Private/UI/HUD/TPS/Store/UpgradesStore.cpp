@@ -7,33 +7,8 @@
 #include "GameModes/DefenceGameMode.h"
 #include "UI/HUD/TPS/Store/StoreCard.h"
 
-UUpgradesStore::UUpgradesStore()
+UUpgradesStore::UUpgradesStore(): StoreCardsHolderRowsNumber(0), StoreCardsHolderCollumsNumber(0)
 {
-}
-
-void UUpgradesStore::InitUpgradesStore(FUpgrades UpgradesList)
-{
-	if (UpgradesList.ListOfUpgrades.Num() == 0)
-		return;
-
-	if (!StoreCardClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("StoreCardClass is null"));
-		return;
-	}
-
-	StoreCardsHolder->ClearChildren();
-
-	for (auto UpgradeBase : UpgradesList.ListOfUpgrades)
-	{
-		auto UpgradeCard = CreateWidget<UStoreCard>(this, StoreCardClass);
-		if (!UpgradeCard)
-			continue;
-
-		UpgradeCard->InitStoreCard(UpgradeBase);
-
-		StoreCardsHolder->AddChildToUniformGrid(UpgradeCard, 0, 0);
-	}
 }
 
 void UUpgradesStore::NativeConstruct()
