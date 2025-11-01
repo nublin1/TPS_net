@@ -3,7 +3,9 @@
 
 #include "Characters/BaseCharacter.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
 
@@ -74,5 +76,41 @@ void ABaseCharacter::ServerSetSpeed_Implementation(float NewMaxSpeed)
 void ABaseCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
+}
+
+void ABaseCharacter::NPCDead(AActor* KilledActor, AController* EventInstigator)
+{
+	Server_NPCDead(KilledActor);
+}
+
+void ABaseCharacter::Server_NPCDead_Implementation(AActor* KilledActor)
+{
+	ensure(HasAuthority());
+	NetMulticast_NPCDead(KilledActor);
+}
+
+void ABaseCharacter::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
+{
+	if (KilledActor == this)
+	{
+		if (SkeletalMeshComponent)
+		{
+			SkeletalMeshComponent->SetSimulatePhysics(true);
+			SkeletalMeshComponent->SetCollisionProfileName(TEXT("Ragdoll"), true);
+			FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		
+		GetWorldTimerManager().SetTimer(DeadHandle, [this]()
+		{
+			//SkeletalMeshComponent->SetSimulatePhysics(false);
+			SkeletalMeshComponent->Stop();
+			SkeletalMeshComponent->bPauseAnims = true;
+			SkeletalMeshComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+			SkeletalMeshComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+		}, 3.0f, false);
+
+		if (DyingSound)
+			UGameplayStatics::PlaySoundAtLocation(this, DyingSound, GetActorLocation());
+	}
 }
 

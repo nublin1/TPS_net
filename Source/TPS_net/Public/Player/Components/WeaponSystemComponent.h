@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -40,17 +40,6 @@ enum EWeaponTransitionType: uint8
 	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
 };
 #pragma endregion Enums
-#pragma region Delegates
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedProjectileSignature, int32, RoundsInMagazine);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartFireSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopFireSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHideArmsSignature,  AMasterWeapon*, HideWeaponInHands);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchFireMode, EFireMode, FireMode);
-
-#pragma endregion
 
 USTRUCT(BlueprintType)
 struct FShootReadyResult
@@ -77,6 +66,16 @@ UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, Bl
 class TPS_NET_API UWeaponSystemComponent : public UActorComponent, public IStateMachineInterface
 {
 	GENERATED_BODY()
+
+#pragma region Delegates
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedProjectileSignature, int32, RoundsInMagazine);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartFireSignature);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopFireSignature);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeupArmsSignature, AMasterWeapon*, TakeupWeaponInHands);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHideArmsSignature,  AMasterWeapon*, HideWeaponInHands);
+	//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCompleteReloadSignature, AMasterWeapon*, ReloadedWeapon);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchFireMode, EFireMode, FireMode);
+#pragma endregion
 
 public:
 	UWeaponSystemComponent();

@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
+
 
 #pragma once
 
@@ -8,11 +9,7 @@
 #include "Weapon/AmmoBase.h"
 #include "CustomBulletProjectile.generated.h"
 
-#pragma region Delegates
 class UAmmoBase;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, HitResult);
-
-#pragma endregion
 
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -20,14 +17,28 @@ class TPS_NET_API UCustomBulletProjectile : public UActorComponent
 {
 	GENERATED_BODY()
 
+#pragma region Delegates
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, HitResult);
+#pragma endregion
+
 public:
+	// Sets default values for this component's properties
+	UCustomBulletProjectile();
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+							   FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(BlueprintAssignable)
+	FHitSignature HitResultDelegate;	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	// Sets default values for this component's properties
-	UCustomBulletProjectile();
-
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Init();
 
 	//Getters
@@ -42,9 +53,6 @@ public:
 	void SetAmmoData( TObjectPtr<UAmmoBase> NewAmmoData ) {BulletAmmoData = NewAmmoData;}
 
 protected:
-	UPROPERTY(BlueprintAssignable)
-	FHitSignature HitResultDelegate;
-
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn="true"))
 	TObjectPtr<UAmmoBase> BulletAmmoData;
 
@@ -58,7 +66,6 @@ protected:
 	FVector StartPosition;
 	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
-	
 
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -67,19 +74,11 @@ protected:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	UFUNCTION(BlueprintCallable)
 	virtual void HitDetected();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void DestroyReq();
-
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	FTimerHandle DestroyHandle;

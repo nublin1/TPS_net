@@ -6,10 +6,13 @@
 #include "Animation/AnimInstance.h"
 #include "Characters/NPC/Components/AIAttackComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Componets/Sense/NPCSenseComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Components/HealthComponent.h"
+#include "StateMachine/StateMachineComponent.h"
+#include "Subsystems/FactionSubsystem/FactionSubsystem.h"
 
 // Sets default values
 ANPCZombie::ANPCZombie()
@@ -24,8 +27,14 @@ ANPCZombie::ANPCZombie()
 	AIAttackComponent->OnComponentCreated();
 	AIAttackComponent->SetIsReplicated(true);
 
+	SenseComponent = CreateDefaultSubobject<UNPCSenseComponent>(TEXT("SenseComponent"));
+	SenseComponent->OnComponentCreated();
+	SenseComponent->SetIsReplicated(true);
+
+	BehavorState = CreateDefaultSubobject<UStateMachineComponent>(TEXT("BehavorState"));
+
 	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
-	
+
 }
 
 void ANPCZombie::PreInitializeComponents()
@@ -36,6 +45,11 @@ void ANPCZombie::PreInitializeComponents()
 void ANPCZombie::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	SenseComponent->OnActorSensed.AddDynamic(this, &ANPCZombie::OnActorSensed);
+
+	AIAttackComponent->StartAttackDelegate.AddDynamic(this, &ANPCZombie::OnAttack);
+	AIAttackComponent->EndAttackDelegate.AddDynamic(this, &ANPCZombie::OnAttackCompleted);
 }
 
 void ANPCZombie::BeginPlay()
@@ -54,6 +68,7 @@ void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	
 	DOREPLIFETIME(ANPCZombie, SprintSpeed);
 	DOREPLIFETIME(ANPCZombie, AIAttackComponent);
+	DOREPLIFETIME(ANPCZombie, SenseComponent);
 }
 
 UHealthComponent* ANPCZombie::GetHealthComponent() const
@@ -61,59 +76,30 @@ UHealthComponent* ANPCZombie::GetHealthComponent() const
 	return FindComponentByClass<UHealthComponent>();
 }
 
-void ANPCZombie::SimpleAttack(UAnimMontage* MontageToPlay)
+void ANPCZombie::OnAttack()
 {
-	UAnimInstance* AnimInstance = FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance();
-	if (AnimInstance && MontageToPlay)
-	{
-		FOnMontageEnded EndDelegate;
-		EndDelegate.BindUObject(this, &ANPCZombie::SimpleAttackCompleted);
-
-		AnimInstance->Montage_Play(MontageToPlay, 1.0f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlay);
-	}
+	ChangeMaxMoveSpeed(SprintSpeed * 0.8f);
 }
 
-void ANPCZombie::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
+void ANPCZombie::OnAttackCompleted()
 {
-	ReadyToAttack = true;
 	ChangeMaxMoveSpeed(SprintSpeed);
 }
 
-void ANPCZombie::NPCDead(AActor* KilledActor, AController* EventInstigator)
+void ANPCZombie::OnActorSensed(AActor* SensedActor)
 {
-	Server_NPCDead(KilledActor);
-}
+	ABaseCharacter* SensedCharacter = Cast<ABaseCharacter>(SensedActor);
+	if (!SensedCharacter)
+		return;
 
-void ANPCZombie::Server_NPCDead_Implementation(AActor* KilledActor)
-{
-	ensure(HasAuthority());
-	NetMulticast_NPCDead(KilledActor);
-}
-
-void ANPCZombie::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
-{
-	if (KilledActor == this)
+	auto AnotherFactionName = SensedCharacter->GetFactionName_Implementation();
+	UFactionSubsystem* FactionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFactionSubsystem>();
+	
+	auto Result = FactionSubsystem->GetAttitudeBetween(FactionName, AnotherFactionName);
+	if (Result == EFactionAttitude::Hostile)
 	{
-		if (SkeletalMeshComponent)
-		{
-			SkeletalMeshComponent->SetSimulatePhysics(true);
-			SkeletalMeshComponent->SetCollisionProfileName(TEXT("Ragdoll"), true);
-			FindComponentByClass<UCapsuleComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-
-		
-		GetWorldTimerManager().SetTimer(UnusedHandle, [this]()
-		{
-			//SkeletalMeshComponent->SetSimulatePhysics(false);
-			SkeletalMeshComponent->Stop();
-			SkeletalMeshComponent->bPauseAnims = true;
-			SkeletalMeshComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
-			SkeletalMeshComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
-			//Destroy();
-		}, 3.0f, false);
-
-		if (DyingSound)
-			UGameplayStatics::PlaySoundAtLocation(this, DyingSound, GetActorLocation());
+		BehavorState->SwitchState(FGameplayTag::RequestGameplayTag(FName("NPCBehavorState.ChasingTarget")));
+		ChaseTarget = SensedActor;
+		AIAttackComponent->SetTargetActor(ChaseTarget);
 	}
 }

@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/FactionSystem/FactionOwnerInterface.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API ABaseCharacter : public ACharacter
+class TPS_NET_API ABaseCharacter : public ACharacter, public IFactionOwnerInterface
 {
 	GENERATED_BODY()
 
@@ -32,16 +33,28 @@ public:
 	//====================================================================
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
+	UFUNCTION()
+	virtual FName GetFactionName_Implementation() const override { return FactionName; }
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	// Components
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Movement;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Faction")
+	FName FactionName = "Neutral";
+
+	//Dying
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TObjectPtr<USoundBase> DyingSound;
+	UPROPERTY()
+	FTimerHandle DeadHandle;
 
 	//====================================================================
 	// FUNCTIONS
@@ -54,5 +67,12 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	virtual void MulticastSetSpeed(float NewMaxSpeed);
 
-
+	//
+	UFUNCTION(BlueprintCallable)
+	void NPCDead(AActor* KilledActor, AController* EventInstigator);
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void Server_NPCDead(AActor* KilledActor);
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticast_NPCDead(AActor* KilledActor);
+	
 };

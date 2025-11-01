@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "Interfaces/IHealthInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 UAIAttackComponent::UAIAttackComponent()
@@ -20,25 +21,86 @@ void UAIAttackComponent::BeginPlay()
 
 	if (auto OwnerSkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>())
 		SkeletalMeshComponent = OwnerSkeletalMeshComponent;
+
+	if (UAnimInstance* TempAnimInstance = SkeletalMeshComponent->GetAnimInstance())
+	{
+		AnimInstance = TempAnimInstance;
+	}
 }
 
 void UAIAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 										   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (CanStartAttack())
+	{
+		SimpleMeleeAttack();
+	}
 }
 
-bool UAIAttackComponent::RequestHitDetect()
+void UAIAttackComponent::SetTargetActor(AActor* NewTargetActor)
+{
+	TargetActor = NewTargetActor;
+}
+
+bool UAIAttackComponent::CanStartAttack()
+{
+	if (!TargetActor || GetWorld()->GetTimerManager().IsTimerActive(TimerHandleAttackPeriod) || !ReadyToAttack)
+		return false;
+
+	if (!InRangeToAttack())
+		return false;
+	
+	return true;
+}
+
+void UAIAttackComponent::SimpleMeleeAttack()
+{
+	if (AnimInstance && MontageAttack)
+	{
+		if (StartAttackDelegate.IsBound())
+			StartAttackDelegate.Broadcast();
+		
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &UAIAttackComponent::SimpleAttackCompleted);
+
+		AnimInstance->Montage_Play(MontageAttack, 1.0f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageAttack);
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
+		{
+			ReadyToAttack = true;
+		}, AttackCooldown, false);
+	}
+}
+
+void UAIAttackComponent::RangedAttack()
+{
+	
+}
+
+void UAIAttackComponent::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (EndAttackDelegate.IsBound())
+		EndAttackDelegate.Broadcast();
+}
+
+void UAIAttackComponent::RequestHitDetect()
 {
 	AActor* Owner = GetOwner();
-	if (!Owner) return false;
+	if (!Owner || !TargetActor)
+		return;
 
 	if (Owner->HasAuthority())
 	{
-		return HitDetect();
+		HitDetect();
 	}
-
-	return false;
+	else
+	{
+		Server_HitDetect();
+	}
+	
 }
 
 bool UAIAttackComponent::HitDetect()
@@ -47,6 +109,8 @@ bool UAIAttackComponent::HitDetect()
 	if (!Owner) return false;
 	
 	if (!SkeletalMeshComponent) return false;
+
+	RotateToTarget();
 
 	//AttackSocketName = FName("hand_r");
 	SocketLocation = SkeletalMeshComponent->GetSocketLocation(AttackSocketName);
@@ -122,11 +186,7 @@ void UAIAttackComponent::Server_HitDetect_Implementation()
 void UAIAttackComponent::ServerApplyDamage_Implementation(AActor* HitActor)
 {
 	if (!HitActor) return;
-	//UE_LOG(LogTemp, Warning, TEXT("ApplyDamage on Server"));
 	
-	//FVector ShotDirection = (HitActor->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();    
-	//AController* InstigatorController = HitActor->GetInstigatorController();    
-	//UGameplayStatics::ApplyPointDamage(HitActor, 10.0f, ShotDirection, nullptr, InstigatorController, GetOwner(), nullptr);
 	
 	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(),  GetOwner(), UDamageType::StaticClass());
 }
@@ -143,4 +203,30 @@ void UAIAttackComponent::ClearAlreadyHitTargets()
 void UAIAttackComponent::ServerClearAlreadyHitTargets_Implementation()
 {
 	AlreadyHitTargets.Empty();
+}
+
+bool UAIAttackComponent::InRangeToAttack() const
+{
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+
+	FVector Start = GetOwner()->GetActorLocation();
+	FVector End = TargetActor->GetActorLocation();
+
+	const float Distance = FVector::Dist(Start, End);
+	if (Distance > AttackRange)
+		return false;
+
+	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, TraceChannel, Params);
+
+	return !bHit || Hit.GetActor() == TargetActor;
+}
+
+void UAIAttackComponent::RotateToTarget()
+{
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), TargetActor->GetActorLocation());
+	FRotator YawOnlyRotation(0.f, LookAtRotation.Yaw, 0.f);
+	GetOwner()->SetActorRotation(YawOnlyRotation);
 }

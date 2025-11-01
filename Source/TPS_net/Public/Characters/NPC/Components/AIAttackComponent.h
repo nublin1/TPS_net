@@ -14,6 +14,11 @@ class TPS_NET_API UAIAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+#pragma region Delegates
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartAttackSignature);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndAttackSignature);
+#pragma endregion
+
 public:
 	UAIAttackComponent();
 protected:
@@ -24,6 +29,11 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	// Delegates
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnEndAttackSignature EndAttackDelegate;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnStartAttackSignature StartAttackDelegate;
 
 	//====================================================================
 	// FUNCTIONS
@@ -33,18 +43,15 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerClearAlreadyHitTargets();
 
-	//Getters
-	
+	UFUNCTION()
+	void SetTargetActor (AActor* NewTargetActor);
 
 protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AgroRange = 500;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AgroOutRange = 750;*/
-
+	
+	//
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Attack")
 	FVector SocketLocation = FVector(0.0f, 0.0f, 0.0f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Attack")
@@ -52,29 +59,58 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Attack")
 	float TraceRadius = 45.0f;
 
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AActor> TargetActor = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ReadyToAttack = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackCooldown = 2.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackRange = 115.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UAnimMontage> MontageAttack;
+
+	//
+	UPROPERTY()
+	FTimerHandle TimerHandleAttackPeriod;
+
 	UPROPERTY(BlueprintReadOnly)
 	TMap<AActor*, bool> AlreadyHitTargets;
 
 	UPROPERTY(EditAnywhere)
 	bool IsDebug = false;
 
-	//Anim
+	//Data
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UAnimInstance> AnimInstance = nullptr;
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	
-
 	UFUNCTION(BlueprintCallable)
-	bool RequestHitDetect();
+	bool CanStartAttack();
+	UFUNCTION(blueprintCallable)
+	void SimpleMeleeAttack();
+	UFUNCTION(blueprintCallable)
+	void RangedAttack();
+	UFUNCTION()
+	void SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted);
+	
+	UFUNCTION(BlueprintCallable)
+	void RequestHitDetect();
 	UFUNCTION()
 	bool HitDetect();	
 	UFUNCTION(Server, Reliable)
 	void ServerApplyDamage(AActor* HitActor);
 	UFUNCTION(BlueprintCallable)
 	void ClearAlreadyHitTargets();
+	UFUNCTION()
+	bool InRangeToAttack() const;
+	UFUNCTION(BlueprintCallable)
+	void RotateToTarget();
 
 private:
 

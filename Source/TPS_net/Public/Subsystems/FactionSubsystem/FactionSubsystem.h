@@ -19,7 +19,11 @@ class TPS_NET_API UFactionSubsystem : public UGameInstanceSubsystem
 public:
 	UFactionSubsystem();
 	
-	UFUNCTION(BlueprintCallable, Category="Factions")
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+
+	UFUNCTION(BlueprintNativeEvent, Category="Factions")
 	UFactionDataAsset* GetFactionByName(FName Name) const;
 	UFUNCTION(BlueprintCallable, Category="Factions")
 	EFactionAttitude GetAttitudeBetween(FName FactionA, FName FactionB) const;
@@ -30,4 +34,10 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Factions")
 	TArray<TObjectPtr<UFactionDataAsset>> AllFactions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Factions")
+	TArray<TObjectPtr<UFactionDataAsset>> StartFactions;
+
+	UFUNCTION(BlueprintNativeEvent, Category="Factions")
+	void InitFactions();
 };

@@ -1,16 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 
 #include "Componets/Bullets/CustomBulletProjectile.h"
 
 // Sets default values for this component's properties
-UCustomBulletProjectile::UCustomBulletProjectile()
+UCustomBulletProjectile::UCustomBulletProjectile(): Velocity(), StartPosition()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+}
 
-	// ...
+void UCustomBulletProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void UCustomBulletProjectile::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UCustomBulletProjectile::Init()
@@ -26,11 +32,6 @@ void UCustomBulletProjectile::Init()
 		GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, this, &UCustomBulletProjectile::DestroyReq, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
 	    
 	}
-}
-
-void UCustomBulletProjectile::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 void UCustomBulletProjectile::HitDetected()
@@ -50,10 +51,4 @@ void UCustomBulletProjectile::DestroyReq()
 	HitResultDelegate.Clear();
 }
 
-
-// Called every frame
-void UCustomBulletProjectile::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
 
