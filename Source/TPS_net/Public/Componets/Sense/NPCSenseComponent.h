@@ -7,6 +7,8 @@
 #include "NPCSenseComponent.generated.h"
 
 
+struct FSenseData;
+
 UCLASS(ClassGroup=(AI), meta=(BlueprintSpawnableComponent))
 class TPS_NET_API UNPCSenseComponent : public UActorComponent
 {
@@ -50,6 +52,9 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
+	virtual void InitSense(FSenseData SenseData);
+	
 	UFUNCTION(blueprintCallable, Category="Sense")
 	void SetSensingEnabled(bool bEnable);
 };

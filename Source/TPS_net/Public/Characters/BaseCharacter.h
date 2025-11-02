@@ -5,12 +5,16 @@
 #include "CoreMinimal.h"
 #include "Data/FactionSystem/FactionOwnerInterface.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "AbilitySystemComponent.h"
 #include "BaseCharacter.generated.h"
 
+class UCharacterDataAsset;
+class UBaseAttributeSet;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API ABaseCharacter : public ACharacter, public IFactionOwnerInterface
+class TPS_NET_API ABaseCharacter : public ACharacter, public IFactionOwnerInterface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -19,18 +23,33 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override {return AbilitySystemComponent;}
+
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	//ASC
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AbilitySystem")
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AbilitySystem")
+	TObjectPtr<UBaseAttributeSet> BaseAttributes;
+	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
+	virtual void InitCharacterData();
+	UFUNCTION(BlueprintNativeEvent)
+	void InitSetBaseCharacterStats();
+	
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
 	UFUNCTION()
@@ -46,8 +65,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
 
+	//ASC
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+	EGameplayEffectReplicationMode ASCReplicationMode = EGameplayEffectReplicationMode::Mixed;
+
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Faction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
+	TObjectPtr<UCharacterDataAsset> CharacterData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data|Faction")
 	FName FactionName = "Neutral";
 
 	//Dying

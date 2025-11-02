@@ -7,6 +7,7 @@
 #include "Characters/NPC/Components/AIAttackComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Componets/Sense/NPCSenseComponent.h"
+#include "Data/Characters/CharacterDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -69,6 +70,19 @@ void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ANPCZombie, SprintSpeed);
 	DOREPLIFETIME(ANPCZombie, AIAttackComponent);
 	DOREPLIFETIME(ANPCZombie, SenseComponent);
+}
+
+void ANPCZombie::InitCharacterData()
+{
+	if (!CharacterData)
+		return;
+	
+	Super::InitCharacterData();
+
+	if (SenseComponent)
+		SenseComponent->InitSense(CharacterData->SenseData);
+	if (AIAttackComponent)
+		AIAttackComponent->InitAttackComponent(CharacterData->Attacks);
 }
 
 UHealthComponent* ANPCZombie::GetHealthComponent() const

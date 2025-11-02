@@ -16,17 +16,24 @@ class TPS_NET_API ABaseBulletActor : public AActor
 public:	
 	ABaseBulletActor();
 
-
 protected:	
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Destroy();
-	
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FHitResult Hit;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool SpawnEffectOnGroundAfterHit = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AActor> SpawnOnGroundEffect = nullptr;
+	
 
 };

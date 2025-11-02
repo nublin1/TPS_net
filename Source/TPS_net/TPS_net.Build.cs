@@ -8,12 +8,16 @@ public class TPS_net : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI" ,"GameplayTags",
-			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule", "GameplayTasks", 
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI",
+			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule",  
 			 "NavigationSystem", "Landscape", "PhysicsCore",  "RecoilAnimation"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "Niagara" });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Slate", "SlateCore", "UMG", "Niagara", "GameplayAbilities",
+			"GameplayTags", "GameplayTasks",
+		});
 		
 		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
         //DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");

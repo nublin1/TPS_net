@@ -10,7 +10,6 @@
 #include "NPC/Inrfaces/AIAttackInterface.h"
 #include "NPCZombie.generated.h"
 
-enum class EBehavorState : uint8;
 class UNPCSenseComponent;
 
 UCLASS()
@@ -36,6 +35,8 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	virtual void InitCharacterData() override;
+	
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()

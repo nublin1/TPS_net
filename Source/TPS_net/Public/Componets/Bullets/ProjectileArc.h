@@ -41,8 +41,13 @@ protected:
 	//Data
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	FVector PreviousLocation;
+	
+	FCollisionQueryParams Params;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_GameTraceChannel1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TArray<TObjectPtr<AActor>> ActorsToIgnore;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FHitResult OutHit;
 	
@@ -52,23 +57,24 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void HitDetected();
 
-private:
+protected:
 	bool bLaunched = false;
 	FVector StartLocation;
 	FVector TargetLocation;
 
 	/** Нормализованное расстояние (0..1) от минимума до MaxRange */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float NormalizedDistance = 0.f;
-
 	/** Угол броска (в радианах) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float LaunchAngleRad = 0.f;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	/** Скорость движения вдоль траектории (см/с) */
-	float MoveSpeed = 1000.f;
-
+	float MoveSpeed = 1500.f;
 	/** Текущее "время" движения по траектории (вдоль кривой) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float TravelT = 0.f;
-
 	/** Общая длительность полёта в секундах */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float TotalFlightTime = 1.f;
 };

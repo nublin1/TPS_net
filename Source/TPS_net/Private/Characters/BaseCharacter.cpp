@@ -4,7 +4,9 @@
 #include "Characters/BaseCharacter.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Data/Characters/CharacterDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameplayAbilitySystem/BaseAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
@@ -16,6 +18,12 @@ ABaseCharacter::ABaseCharacter()
 	StateMachine_Movement = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movement"));
 	StateMachine_Movement->OnComponentCreated();
 	StateMachine_Movement->SetIsReplicated(true);
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(ASCReplicationMode);
+
+	BaseAttributes = CreateDefaultSubobject<UBaseAttributeSet>(TEXT("BaseAttributes"));
 }
 
 void ABaseCharacter::BeginPlay()
@@ -23,6 +31,27 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
+
+	InitCharacterData();
+}
+
+void ABaseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	}
+}
+
+void ABaseCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	}
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -40,6 +69,22 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ABaseCharacter, StateMachine_Movement);
+}
+
+void ABaseCharacter::InitCharacterData()
+{
+	if (!CharacterData)
+		return;
+
+	FactionName = CharacterData->FactionName;
+	
+	InitSetBaseCharacterStats();
+}
+
+void ABaseCharacter::InitSetBaseCharacterStats_Implementation()
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	//if (!ASC || !GE_InitStats) return;
 }
 
 void ABaseCharacter::ChangeMaxMoveSpeed(float NewMaxSpeed)
@@ -85,8 +130,8 @@ void ABaseCharacter::NPCDead(AActor* KilledActor, AController* EventInstigator)
 
 void ABaseCharacter::Server_NPCDead_Implementation(AActor* KilledActor)
 {
-	ensure(HasAuthority());
-	NetMulticast_NPCDead(KilledActor);
+	if(HasAuthority())
+		NetMulticast_NPCDead(KilledActor);
 }
 
 void ABaseCharacter::NetMulticast_NPCDead_Implementation(AActor* KilledActor)

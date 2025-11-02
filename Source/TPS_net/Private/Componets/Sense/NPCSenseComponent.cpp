@@ -3,6 +3,8 @@
 
 #include "Componets/Sense/NPCSenseComponent.h"
 
+#include "Data/Characters/CharacterStructs.h"
+
 // Sets default values for this component's properties
 UNPCSenseComponent::UNPCSenseComponent()
 {
@@ -89,6 +91,15 @@ bool UNPCSenseComponent::HasLineOfSight(AActor* OtherActor) const
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, TraceChannel, Params);
 
 	return !bHit || Hit.GetActor() == OtherActor;
+}
+
+void UNPCSenseComponent::InitSense(FSenseData SenseData)
+{
+	SenseRadius = SenseData.SenseRadius;
+	VisionAngle = SenseData.VisionAngle;
+	UpdateInterval = SenseData.UpdateInterval;
+	TraceChannel = SenseData.TraceChannel;
+	DetectableClasses = SenseData.DetectableClasses;
 }
 
 void UNPCSenseComponent::SetSensingEnabled(bool bEnable)

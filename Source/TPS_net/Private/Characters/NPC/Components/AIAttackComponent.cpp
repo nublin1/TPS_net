@@ -29,14 +29,23 @@ void UAIAttackComponent::BeginPlay()
 }
 
 void UAIAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-										   FActorComponentTickFunction* ThisTickFunction)
+                                       FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (CanStartAttack())
 	{
-		SimpleMeleeAttack();
+		PerformAttack();
 	}
+}
+
+void UAIAttackComponent::InitAttackComponent(TArray<FAttackData> Attacks)
+{
+	if (Attacks.Num() < 0)
+		return;
+	
+	AvailableAttacks = Attacks;
+	CurrentAttack = AvailableAttacks[0];
 }
 
 void UAIAttackComponent::SetTargetActor(AActor* NewTargetActor)
@@ -51,36 +60,93 @@ bool UAIAttackComponent::CanStartAttack()
 
 	if (!InRangeToAttack())
 		return false;
-	
+
 	return true;
 }
 
-void UAIAttackComponent::SimpleMeleeAttack()
+void UAIAttackComponent::PerformAttack()
 {
-	if (AnimInstance && MontageAttack)
+	if (!AnimInstance || !CurrentAttack.AttackMontage)
 	{
-		if (StartAttackDelegate.IsBound())
-			StartAttackDelegate.Broadcast();
-		
-		FOnMontageEnded EndDelegate;
-		EndDelegate.BindUObject(this, &UAIAttackComponent::SimpleAttackCompleted);
+		return;
+	}
 
-		AnimInstance->Montage_Play(MontageAttack, 1.0f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageAttack);
-
-		GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
-		{
-			ReadyToAttack = true;
-		}, AttackCooldown, false);
+	switch (CurrentAttack.AttackType)
+	{
+	case EAttackType::Melee:
+		HandleSimpleMeleeAttack();
+		break;
+	case EAttackType::Ranged:
+		HandleRangedAttack();
+		break;
+	case EAttackType::Explosive:
+		HandleExplosiveAttack();
+		break;
+	case EAttackType::AOE:
+		HandleAOEAttack();
+		break;
+	case EAttackType::Throw:
+		HandleThrowAttack();
+		break;
+	case EAttackType::SelfDestruct:
+		HandleSelfDestruct();
+		break;
+	default:
+		break;
 	}
 }
 
-void UAIAttackComponent::RangedAttack()
+void UAIAttackComponent::HandleSimpleMeleeAttack()
 {
-	
+	if (StartAttackDelegate.IsBound())
+		StartAttackDelegate.Broadcast();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &UAIAttackComponent::AttackCompleted);
+
+	AnimInstance->Montage_Play(CurrentAttack.AttackMontage, 1.0f);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentAttack.AttackMontage);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
+	{
+		ReadyToAttack = true;
+	}, CurrentAttack.Cooldown, false);
 }
 
-void UAIAttackComponent::SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted)
+void UAIAttackComponent::HandleRangedAttack()
+{
+	if (StartAttackDelegate.IsBound())
+		StartAttackDelegate.Broadcast();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &UAIAttackComponent::AttackCompleted);
+
+	AnimInstance->Montage_Play(CurrentAttack.AttackMontage, 1.0f);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentAttack.AttackMontage);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
+	{
+		ReadyToAttack = true;
+	}, CurrentAttack.Cooldown, false);
+}
+
+void UAIAttackComponent::HandleExplosiveAttack()
+{
+}
+
+void UAIAttackComponent::HandleAOEAttack()
+{
+}
+
+void UAIAttackComponent::HandleThrowAttack()
+{
+}
+
+void UAIAttackComponent::HandleSelfDestruct()
+{
+}
+
+void UAIAttackComponent::AttackCompleted(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (EndAttackDelegate.IsBound())
 		EndAttackDelegate.Broadcast();
@@ -100,14 +166,13 @@ void UAIAttackComponent::RequestHitDetect()
 	{
 		Server_HitDetect();
 	}
-	
 }
 
 bool UAIAttackComponent::HitDetect()
 {
 	AActor* Owner = GetOwner();
 	if (!Owner) return false;
-	
+
 	if (!SkeletalMeshComponent) return false;
 
 	RotateToTarget();
@@ -186,9 +251,10 @@ void UAIAttackComponent::Server_HitDetect_Implementation()
 void UAIAttackComponent::ServerApplyDamage_Implementation(AActor* HitActor)
 {
 	if (!HitActor) return;
-	
-	
-	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(),  GetOwner(), UDamageType::StaticClass());
+
+
+	UGameplayStatics::ApplyDamage(HitActor, 10.0f, HitActor->GetInstigatorController(), GetOwner(),
+	                              UDamageType::StaticClass());
 }
 
 void UAIAttackComponent::ClearAlreadyHitTargets()
@@ -215,7 +281,7 @@ bool UAIAttackComponent::InRangeToAttack() const
 	FVector End = TargetActor->GetActorLocation();
 
 	const float Distance = FVector::Dist(Start, End);
-	if (Distance > AttackRange)
+	if (Distance > CurrentAttack.AttackRange)
 		return false;
 
 	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
@@ -226,7 +292,8 @@ bool UAIAttackComponent::InRangeToAttack() const
 
 void UAIAttackComponent::RotateToTarget()
 {
-	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), TargetActor->GetActorLocation());
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(),
+	                                                                 TargetActor->GetActorLocation());
 	FRotator YawOnlyRotation(0.f, LookAtRotation.Yaw, 0.f);
 	GetOwner()->SetActorRotation(YawOnlyRotation);
 }

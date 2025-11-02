@@ -4,7 +4,7 @@
 #include "Componets/Bullets/ProjectileArc.h"
 
 
-UProjectileArc::UProjectileArc(): StartLocation(), TargetLocation()
+UProjectileArc::UProjectileArc(): PreviousLocation(), StartLocation(), TargetLocation()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -22,13 +22,6 @@ void UProjectileArc::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		return;
 
 	TravelT += DeltaTime / TotalFlightTime;
-	if (TravelT >= 1.0f)
-	{
-		GetOwner()->SetActorLocation(TargetLocation);
-		bLaunched = false;
-		GetOwner()->Destroy();
-		return;
-	}
 
 	// Интерполяция позиции между началом и целью по XY
 	FVector FlatStart = FVector(StartLocation.X, StartLocation.Y, 0.f);
@@ -54,7 +47,8 @@ void UProjectileArc::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		Hit,
 		PreviousLocation,
 		NewLocation,
-		CollisionChannel
+		CollisionChannel,
+		Params
 	);
 
 #if WITH_EDITOR
@@ -81,6 +75,9 @@ void UProjectileArc::Launch(const FVector& Start, const FVector& Target, float M
 	if (Start.Equals(Target))
 		return;
 
+	StartLocation = Start;
+	TargetLocation = Target;
+
 	float Distance = FVector::Dist2D(Start, Target);
 	NormalizedDistance = FMath::Clamp(Distance / MaxRange, 0.f, 1.f);
 
@@ -90,6 +87,9 @@ void UProjectileArc::Launch(const FVector& Start, const FVector& Target, float M
 
 	// Время полета рассчитываем пропорционально расстоянию (скорость влияет только на скорость движения)
 	TotalFlightTime = Distance / MoveSpeed;
+
+	Params.AddIgnoredActor(GetOwner());
+	Params.AddIgnoredActors(ActorsToIgnore);
 
 	bLaunched = true;
 	TravelT = 0.f;

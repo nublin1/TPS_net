@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Data/Characters/CharacterStructs.h"
 #include "AIAttackComponent.generated.h"
 
 
@@ -38,6 +39,9 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
+	virtual void InitAttackComponent(TArray<FAttackData> Attacks);
+	
 	UFUNCTION(Server, Reliable)
 	void Server_HitDetect();
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -50,7 +54,6 @@ protected:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
-	
 	//
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Attack")
 	FVector SocketLocation = FVector(0.0f, 0.0f, 0.0f);
@@ -60,16 +63,14 @@ protected:
 	float TraceRadius = 45.0f;
 
 	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Attack")
+	TArray<FAttackData> AvailableAttacks;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	FAttackData CurrentAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<AActor> TargetActor = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ReadyToAttack = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AttackCooldown = 2.5f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AttackRange = 115.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UAnimMontage> MontageAttack;
 
 	//
 	UPROPERTY()
@@ -92,12 +93,18 @@ protected:
 	//====================================================================
 	UFUNCTION(BlueprintCallable)
 	bool CanStartAttack();
-	UFUNCTION(blueprintCallable)
-	void SimpleMeleeAttack();
-	UFUNCTION(blueprintCallable)
-	void RangedAttack();
+	UFUNCTION(BlueprintCallable)
+	void PerformAttack();
+	
+	void HandleSimpleMeleeAttack();
+	void HandleRangedAttack();
+	void HandleExplosiveAttack();
+	void HandleAOEAttack();
+	void HandleThrowAttack();
+	void HandleSelfDestruct();
+	
 	UFUNCTION()
-	void SimpleAttackCompleted(UAnimMontage* Montage, bool bInterrupted);
+	void AttackCompleted(UAnimMontage* Montage, bool bInterrupted);
 	
 	UFUNCTION(BlueprintCallable)
 	void RequestHitDetect();

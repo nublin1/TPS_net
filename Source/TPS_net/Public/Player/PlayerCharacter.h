@@ -10,6 +10,7 @@
 #include "Interfaces/IHealthInterface.h"
 #include "Interfaces/WeaponSystemInterface.h"
 #include "Library/AnimationStructLibrary.h"
+
 #include "PlayerCharacter.generated.h"
 
 class ACoverPoint_Player;
@@ -19,7 +20,7 @@ class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ABaseCharacter, public IIHealthInterface, public IWeaponSystemInterface
+class TPS_NET_API APlayerCharacter : public ABaseCharacter, public IIHealthInterface
 {
 	GENERATED_BODY()
 
@@ -51,7 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
-	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
+	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const {return WeaponSystemComponent;}
 	
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
