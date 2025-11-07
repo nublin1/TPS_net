@@ -4,10 +4,10 @@
 #include "UI/HUD/TPS/AmmoWidget.h"
 
 #include "Components/TextBlock.h"
-#include "Player/Components/WeaponSystemComponent.h"
+#include "Componets/Weapon/WeaponSystemComponent.h"
 #include "Player/Interfaces/WeaponSystemInterface.h"
 #include "Utilities/GeneralUtils.h"
-#include "World/Weapons/MasterWeapon.h"
+#include "World/Weapons/MasterWeaponRanged.h"
 
 UAmmoWidget::UAmmoWidget()
 {
@@ -46,11 +46,15 @@ void UAmmoWidget::SighUp()
 	if (!WeaponSystemComponent)
 		return;
 
-	WeaponSystemComponent->OnSpawnedProjectile.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	AMasterWeaponRanged* WeaponRanged = Cast<AMasterWeaponRanged>(WeaponSystemComponent->GetCurrentWeaponInHands());
+	if (!WeaponRanged)
+		return;
+
+	WeaponRanged->OnSpawnedProjectile.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	WeaponSystemComponent->OnTakeupArmsDelegate.AddDynamic(this, &UAmmoWidget::RefreshWeaponDetails);
 	
 	WeaponSystemComponent->OnHideArmsDelegate.AddDynamic(this, &UAmmoWidget::ClearWeaponDetails);
-	WeaponSystemComponent->OnSwitchFireModeDelegate.AddDynamic(this, &UAmmoWidget::SetFireMode);
+	WeaponRanged->OnSwitchFireModeDelegate.AddDynamic(this, &UAmmoWidget::SetFireMode);
 }
 
 void UAmmoWidget::SetFireMode(EFireMode newFireMode)
@@ -65,24 +69,27 @@ void UAmmoWidget::SetCurrentAmmo(const int32 RoundsInMagazine)
 		CurrentAmmo->SetText(FText::AsNumber(RoundsInMagazine));
 }
 
-void UAmmoWidget::RefreshWeaponDetails(AMasterWeapon* WeaponInfo)
+void UAmmoWidget::RefreshWeaponDetails(ABaseWeapon* WeaponInfo)
 {
-	WeaponInfo->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	AMasterWeaponRanged* WeaponRanged = Cast<AMasterWeaponRanged>(WeaponInfo);
 	
-	SetCurrentAmmo(WeaponInfo->GetRoundsInMagazine());
+	WeaponRanged->OnCompleteReloadDelegate.AddDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	
+	SetCurrentAmmo(WeaponRanged->GetRoundsInMagazine());
 	
 	if(MaxMagazineAmmo)
-		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponInfo->GetWeaponBaseRef()->GetCharacteristicsOfTheWeapon().MagazineSize));
+		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponRanged->GetWeaponDataAssetRef()->CharacteristicsOfTheWeapon.MagazineSize));
 	
 	if (FireMode)
-		SetFireMode(WeaponInfo->GetSelectedFireMode());
+		SetFireMode(WeaponRanged->GetSelectedFireMode());
 
 	this->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UAmmoWidget::ClearWeaponDetails(AMasterWeapon* WeaponInfo)
+void UAmmoWidget::ClearWeaponDetails(ABaseWeapon* WeaponInfo)
 {
-	WeaponInfo->OnCompleteReloadDelegate.RemoveDynamic(this, &UAmmoWidget::SetCurrentAmmo);
+	AMasterWeaponRanged* WeaponRanged = Cast<AMasterWeaponRanged>(WeaponInfo);
+	WeaponRanged->OnCompleteReloadDelegate.RemoveDynamic(this, &UAmmoWidget::SetCurrentAmmo);
 	
 	CollapseWidget();
 }

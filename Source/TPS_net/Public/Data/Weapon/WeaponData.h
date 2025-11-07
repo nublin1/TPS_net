@@ -1,12 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Engine/DataAsset.h"
-#include "RecoilAnimation.h"
 #include "RecoilAnimationComponent.h"
+#include "Weapon/Bullets/BaseBulletActor.h"
 #include "WeaponData.generated.h"
 
 
@@ -19,6 +19,8 @@ enum class EWeaponType : uint8
 	Rifle UMETA(DisplayName = "Rifle"),
 	Pistol	UMETA(DisplayName = "Pistol"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
+	Melee UMETA(DisplayName = "Melee"),
+	Unarmed UMETA(DisplayName = "Unarmed")
 };
 
 UENUM(BlueprintType)
@@ -35,6 +37,7 @@ enum class EHolsterWeaponType : uint8
 	Primary				UMETA(DisplayName = "Primary"),
 	AlternativePrimary	UMETA(DisplayName = "AlternativePrimary"),
 	Pistol				UMETA(DisplayName = "Pistol"),
+	Unarmed				UMETA(DisplayName = "Unarmed")
 };
 
 UENUM(Blueprintable, BlueprintType)
@@ -54,30 +57,38 @@ enum class EFireMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FWeaponAssetData
+struct FShootActionData
 {
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere)
-	USkeletalMesh* SkeletalMesh;
-	
+	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> WeaponShootAnimMontage;
-
+	bool bSpawnFromCamera = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> CharShootAnimMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ReloadAnimMontage;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="BulletMode == EBulletMode::Projectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBlueprint> BulletActor;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UAnimBlueprint* AnimationBlueprint;
+	EBulletFlightMode BulletFlightMode = EBulletFlightMode::Physical;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
+};
+
+USTRUCT(BlueprintType)
+struct FWeaponPresentationData
+{
+	GENERATED_USTRUCT_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName HolsterName = "HolsterName";
+	TObjectPtr<UStaticMesh> StaticMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkeletalMesh> SkeletalMesh;	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> WeaponShootAnimMontage;	
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UAnimBlueprint* WeaponAnimationBlueprint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName ClipBoneName = "Clip_Bone";	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<URecoilData> RecoilAnimData;
 };
@@ -92,15 +103,18 @@ struct FCharacteristicsOfTheWeapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
 	TArray<FDataTableRowHandle> UsableAmmo;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Weapon Characteristics")
-	float WeaponMass = 1.0f; // kilograms
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = "Weapon Characteristics")
 	float SpreadAngle = 1.0f;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = "Weapon Characteristics")
+	int ShotsPerBurst = 3;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
-	float RPM = 600; //Rounds per minute	
+	float RPM = 600; //Rounds per minute
 	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics")
+	bool bInfinityMagazine = false;
+	UPROPERTY(EditAnywhere, Category = "Weapon Characteristics", meta=(
+		EditCondition = "!bInfinityMagazine" // Условие: редактируется, если bInfinityMagazine == false
+	))
 	uint16 MagazineSize = 30; // Rounds
-	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Weapon Characteristics")
 	float MuzzleVelocity = 55000; // cm/sec
 
@@ -110,30 +124,79 @@ struct FCharacteristicsOfTheWeapon
 	}
 };
 
-USTRUCT()
-struct TPS_NET_API FWeaponData : public FTableRowBase
+UCLASS(BlueprintType)
+class TPS_NET_API UWeaponDataAsset : public UDataAsset
 {
-	GENERATED_USTRUCT_BODY()
+    GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
-	FName Name;
+public:
+    //====================================================================
+    // ОСНОВНЫЕ ДАННЫЕ ОРУЖИЯ (общие)
+    //====================================================================
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+    FName Name;
 
-	UPROPERTY(EditAnywhere)
-	EWeaponType WeaponType = EWeaponType::Rifle;
-	UPROPERTY(EditAnywhere)
-	EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+    EWeaponType WeaponType = EWeaponType::Rifle;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base",
+        meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+    EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+	FName HolsterName = "HolsterName";
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+    EWeaponGripType WeaponGripType = EWeaponGripType::TwoHanded;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+	float WeaponMass = 1.0f; // kilograms
+
+    //====================================================================
+    // ДАННЫЕ СТРЕЛКОВОГО ОРУЖИЯ
+    //====================================================================
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+        meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+    EBulletMode BulletMode = EBulletMode::Projectile;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+		meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+	bool ShowTrace = false;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+        meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+    FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+	   meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+	bool bAutoReload = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+	   meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+	bool bReloadingByCooldown = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EWeaponGripType WeaponGripType = EWeaponGripType::TwoHanded;
+	float CooldownReload = 2.0f;
 
-	UPROPERTY(EditAnywhere)
-	EBulletMode BulletMode = EBulletMode::Projectile;
+    //====================================================================
+    // ДАННЫЕ БЛИЖНЕГО БОЯ
+    //====================================================================
+	// описание типа урона
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
+        meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
+    float MeleeDamage = 50.0f;
+    
+    // монтаж для анимации атаки ближнего боя
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
+        meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
+    TObjectPtr<UAnimMontage> MeleeAttackAnimMontage;
+    
+    //====================================================================
+    // АССЕТЫ ОРУЖИЯ (WeaponAssetData)
+    //====================================================================
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Asset",
+		meta = (EditCondition = "WeaponType != EWeaponType::Unarmed", EditConditionHides))
+    FWeaponPresentationData WeaponAssetData;
 
-	UPROPERTY(EditAnywhere)
-	FCharacteristicsOfTheWeapon CharacteristicsOfTheWeapon;
-
-	UPROPERTY(EditAnywhere)
-	FWeaponAssetData WeaponAssetData;	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Asset")
+	FShootActionData ShootActionData;  
 };
 
 UCLASS(Blueprintable)
@@ -151,6 +214,8 @@ public:
 			return FName("PrimaryHolster");
 		case EHolsterWeaponType::Pistol:
 			return FName("R_PistolHolster");
+		case EHolsterWeaponType::None: 
+			return FName("Melee");
 		default:
 			return FName("");
 		}

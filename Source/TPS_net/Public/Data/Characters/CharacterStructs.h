@@ -39,7 +39,6 @@ enum class EAttackType : uint8
 {
 	Melee,
 	Ranged,
-	Explosive,
 	AOE,
 	Throw,
 	SelfDestruct
@@ -55,15 +54,15 @@ struct FAttackData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	EAttackType AttackType = EAttackType::Melee;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	float Damage = 20.f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	float AttackRange = 150.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	float Cooldown = 2.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Attack")
+	FTimerHandle AttackCooldown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	UAnimMontage* AttackMontage = nullptr;

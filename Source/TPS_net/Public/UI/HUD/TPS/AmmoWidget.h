@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UI/BUIUserWidget.h"
+#include "World/Weapons/BaseWeapon.h"
 #include "AmmoWidget.generated.h"
 
 class UWeaponSystemComponent;
 enum class EFireMode : uint8;
-class AMasterWeapon;
+class AMasterWeaponRanged;
 class UWeaponBase;
 class UTextBlock;
 /**
@@ -58,9 +59,9 @@ protected:
 	UFUNCTION()
 	void SetCurrentAmmo(int32 RoundsInMagazine);
 	UFUNCTION()
-	void RefreshWeaponDetails(AMasterWeapon* WeaponInfo);
+	void RefreshWeaponDetails(ABaseWeapon* WeaponInfo);
 	UFUNCTION()
-	void ClearWeaponDetails(AMasterWeapon* WeaponInfo);
+	void ClearWeaponDetails(ABaseWeapon* WeaponInfo);
 	UFUNCTION()
 	void CollapseWidget();
 };

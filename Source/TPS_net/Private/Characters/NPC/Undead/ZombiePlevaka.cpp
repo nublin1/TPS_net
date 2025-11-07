@@ -3,3 +3,6 @@
 
 #include "Characters/NPC/Undead/ZombiePlevaka.h"
 
+AZombiePlevaka::AZombiePlevaka()
+{
+}

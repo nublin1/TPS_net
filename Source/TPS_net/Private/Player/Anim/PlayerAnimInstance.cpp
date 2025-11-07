@@ -2,12 +2,11 @@
 
 #include "Player/Anim/PlayerAnimInstance.h"
 
-#include "Misc/Iteration.h"
+#include "Componets/Weapon/WeaponSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/PlayerCharacter.h"
-#include "Player/Components/WeaponSystemComponent.h"
 #include "StateMachine/StateMachineComponent.h"
-#include "World/Weapons/MasterWeapon.h"
+#include "World/Weapons/MasterWeaponRanged.h"
 
 static const FName NAME_BasePose_N(TEXT("BasePose_N"));
 static const FName NAME_Pelvis(TEXT("Pelvis"));
@@ -157,17 +156,17 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{
-			auto WeaponBaseRef = CurrentWeapon->GetWeaponBaseRef();
-			if (WeaponBaseRef ->GetWeaponType() == EWeaponType::Pistol)
+			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
+			if (WeaponBaseRef->WeaponType == EWeaponType::Pistol)
 			{
 				LayerBlendingValues.EnableHandIK_L = 0.0f;
 				return;
 			}
 			
-			LayerBlendingValues.Arm_L = WeaponBaseRef->GetWeaponGripType() ==
+			LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 			LayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->GetWeaponGripType() == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 			
 		}
 	}
@@ -189,7 +188,7 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 	}
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
 	{
-		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 		LayerBlendingValues.EnableHandIK_L = 0.0f;
 	}
@@ -203,7 +202,7 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		if (!IsHoldWeapon)
 			return;
 		
-		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponBaseRef()->GetWeaponGripType() ==
+		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 	}
 	else
@@ -218,17 +217,17 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{
-			auto WeaponBaseRef = CurrentWeapon->GetWeaponBaseRef();
-			if (WeaponBaseRef ->GetWeaponType() == EWeaponType::Pistol)
+			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
+			if (WeaponBaseRef->WeaponType == EWeaponType::Pistol)
 			{
 				LayerBlendingValues.EnableHandIK_L = 0.0f;
 				return;
 			}
 			
-			LayerBlendingValues.Arm_L = WeaponBaseRef->GetWeaponGripType() ==
+			LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 			LayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->GetWeaponGripType() == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 		}
 		
 	}
@@ -249,12 +248,12 @@ void UPlayerAnimInstance::UpdateWeaponHoldPose()
 	
 }
 
-void UPlayerAnimInstance::CleanWeaponData(AMasterWeapon* MasterWeapon)
+void UPlayerAnimInstance::CleanWeaponData(ABaseWeapon* MasterWeapon)
 {
 	IsHoldWeapon = false;
 }
 
-void UPlayerAnimInstance::UpdateWeaponData(AMasterWeapon* newMasterWeapon)
+void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
 }

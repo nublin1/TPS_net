@@ -50,10 +50,11 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void InitSetBaseCharacterStats();
 	
-	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
 	UFUNCTION()
 	virtual FName GetFactionName_Implementation() const override { return FactionName; }
+
+	virtual USkeletalMeshComponent* GetSkeletalMeshComponent() {return SkeletalMeshComponent;}
 
 protected:
 	//====================================================================

@@ -14,4 +14,7 @@ class TPS_NET_API AZombiePlevaka : public ANPCZombie
 {
 	GENERATED_BODY()
 	
+public:
+	AZombiePlevaka();
+	
 };

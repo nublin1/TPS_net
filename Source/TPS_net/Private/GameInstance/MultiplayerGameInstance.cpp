@@ -95,7 +95,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 
 void UMultiplayerGameInstance::DestroyCurrentSession()
 {
-	if (SessionInterface.IsValid())
+	/*if (SessionInterface.IsValid())
 	{		
 		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(PendingServerName);
 		if (ExistingSession != nullptr)
@@ -103,7 +103,7 @@ void UMultiplayerGameInstance::DestroyCurrentSession()
 			OnDestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
 			SessionInterface->DestroySession(PendingServerName);
 		}
-	}
+	}*/
 }
 
 bool UMultiplayerGameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,

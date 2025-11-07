@@ -7,12 +7,13 @@
 #include "Library/AnimationStructLibrary.h"
 #include "PlayerAnimInstance.generated.h"
 
+class ABaseWeapon;
 class ULadderClimbingComponent;
 struct FGameplayTag;
 class UCharacterMovementComponent;
 class UMovementComponent;
 class UStateMachineComponent;
-class AMasterWeapon;
+class AMasterWeaponRanged;
 class APlayerCharacter;
 class UWeaponSystemComponent;
 /**
@@ -115,9 +116,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponHoldPose();
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void CleanWeaponData(AMasterWeapon* MasterWeapon);
+	virtual void CleanWeaponData(ABaseWeapon* MasterWeapon);
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
-	virtual void UpdateWeaponData(AMasterWeapon* newMasterWeapon);
+	virtual void UpdateWeaponData(ABaseWeapon* newMasterWeapon);
 
 	UFUNCTION()
 	void OnRep_Character();

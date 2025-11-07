@@ -18,7 +18,7 @@ void UProjectileArc::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!bLaunched)
+	if (!IsInitialized)
 		return;
 
 	TravelT += DeltaTime / TotalFlightTime;
@@ -42,12 +42,14 @@ void UProjectileArc::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 	GetOwner()->SetActorLocation(NewLocation);
 
+	ECollisionChannel TraceChannel = UEngineTypes::ConvertToCollisionChannel(CollisionChannel.GetValue());
+	
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(
 		Hit,
 		PreviousLocation,
 		NewLocation,
-		CollisionChannel,
+		TraceChannel,
 		Params
 	);
 
@@ -81,9 +83,16 @@ void UProjectileArc::Launch(const FVector& Start, const FVector& Target, float M
 	float Distance = FVector::Dist2D(Start, Target);
 	NormalizedDistance = FMath::Clamp(Distance / MaxRange, 0.f, 1.f);
 
-	// Вычисляем угол (при макс. расстоянии = MaxAngle, при близком — меньше)
-	float AngleDeg = MaxAngle * NormalizedDistance;
-	LaunchAngleRad = FMath::DegreesToRadians(AngleDeg);
+	if (bAutoCalculateAngle)
+	{
+		// Вычисляем угол (при макс. расстоянии = MaxAngle, при близком — меньше)
+		float AngleDeg = MaxAngle * NormalizedDistance;
+		LaunchAngleRad = FMath::DegreesToRadians(AngleDeg);
+	}
+	else
+	{
+		LaunchAngleRad = 0.f;
+	}
 
 	// Время полета рассчитываем пропорционально расстоянию (скорость влияет только на скорость движения)
 	TotalFlightTime = Distance / MoveSpeed;
@@ -91,7 +100,7 @@ void UProjectileArc::Launch(const FVector& Start, const FVector& Target, float M
 	Params.AddIgnoredActor(GetOwner());
 	Params.AddIgnoredActors(ActorsToIgnore);
 
-	bLaunched = true;
+	IsInitialized = true;
 	TravelT = 0.f;
 
 	GetOwner()->SetActorLocation(StartLocation);

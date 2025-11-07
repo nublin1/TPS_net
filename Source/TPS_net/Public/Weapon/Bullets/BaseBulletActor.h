@@ -8,6 +8,16 @@
 
 class UAmmoBase;
 
+UENUM(BlueprintType)
+enum class EBulletFlightMode : uint8
+{
+	/**  */
+	Physical UMETA(DisplayName="Physical"),
+
+	/** Простая баллистическая дуга */
+	Parabolic UMETA(DisplayName="Parabolic"),
+};
+
 UCLASS()
 class TPS_NET_API ABaseBulletActor : public AActor
 {
@@ -23,17 +33,44 @@ protected:
 	virtual void Destroy();
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EBulletFlightMode BulletFlightMode = EBulletFlightMode::Physical;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<UAmmoBase> SelectedAmmoData;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TArray<TObjectPtr<AActor>> ActorsToIgnore;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void InitBullet();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile")
+	TEnumAsByte<ETraceTypeQuery> CollisionChannel = ETraceTypeQuery::TraceTypeQuery1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
 	FHitResult Hit;
+
+	// 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool SpawnDecalAfterHit = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool SpawnEffectOnGroundAfterHit = true;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AActor> SpawnOnGroundEffect = nullptr;
-	
 
+	//
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAutoAim = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector SpawnLocation = FVector::Zero();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector TargetLocation = FVector::Zero();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxAngle = 85.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxRange = 10000.0f;
 };

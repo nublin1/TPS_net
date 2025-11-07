@@ -66,6 +66,8 @@ protected:
 	FVector StartPosition;
 	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<ETraceTypeQuery> CollisionChannel = ETraceTypeQuery::TraceTypeQuery1;
 
 	//HitResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -34,6 +34,8 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile|Settings")
+	bool bAutoCalculateAngle = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile|Settings")
 	float Gravity = 980.f; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile|Settings")
 	float LifeTime = 10.0f;
@@ -44,8 +46,8 @@ protected:
 	
 	FCollisionQueryParams Params;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
-	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_GameTraceChannel1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile")
+	TEnumAsByte<ETraceTypeQuery> CollisionChannel = ETraceTypeQuery::TraceTypeQuery1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -58,7 +60,7 @@ protected:
 	virtual void HitDetected();
 
 protected:
-	bool bLaunched = false;
+	bool IsInitialized = false;
 	FVector StartLocation;
 	FVector TargetLocation;
 

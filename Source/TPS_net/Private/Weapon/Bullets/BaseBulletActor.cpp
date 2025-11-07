@@ -5,11 +5,10 @@
 
 
 // Sets default values
-ABaseBulletActor::ABaseBulletActor()
+ABaseBulletActor::ABaseBulletActor(): SpawnLocation(), TargetLocation()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ABaseBulletActor::BeginPlay()
@@ -27,4 +26,8 @@ void ABaseBulletActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABaseBulletActor::InitBullet_Implementation()
+{
 }

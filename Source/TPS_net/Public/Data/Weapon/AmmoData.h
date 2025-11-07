@@ -48,15 +48,27 @@ struct FBulletBehaviour
 	bool IsEffectOfDragForce = true;
 };
 
+USTRUCT(Blueprintable)
+struct TPS_NET_API FAmmoVisualAssets
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bullet visual")
+	UStaticMeshComponent* MeshComponent = nullptr;
+};
+
 USTRUCT(Blueprintable, meta=(ScriptName="FAmmoData"))
 struct TPS_NET_API FAmmoData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
 	FAmmoCharacteristics AmmoCharacteristics;
 
-	UPROPERTY(EditAnywhere, Category = "Ammo Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
 	FBulletBehaviour AmmoBehaviour;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Characteristics")
+	FAmmoVisualAssets AmmoVisualAssets;
 	
 };

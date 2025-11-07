@@ -13,6 +13,7 @@
 
 #include "PlayerCharacter.generated.h"
 
+class UCameraComponent;
 class ACoverPoint_Player;
 class ULadderClimbingComponent;
 struct FGameplayTag;
@@ -49,6 +50,8 @@ public:
 	// FUNCTIONS
 	//====================================================================
 	// Getters
+	UFUNCTION()
+	virtual UCameraComponent* GetCamera() {return FollowCamera;}
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
@@ -150,6 +153,8 @@ protected:
 	TSubclassOf<ULadderClimbingComponent> LadderClimbingComponentClass = nullptr;
 	
 	// Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Camera")
+	TObjectPtr<UCameraComponent> FollowCamera;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)

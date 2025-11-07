@@ -15,6 +15,7 @@ class TPS_NET_API UNPCSenseComponent : public UActorComponent
 	GENERATED_BODY()
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorSensed, AActor*, SensedActor);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorOutOfSense, AActor*, LostActor);
 
 public:
 	UNPCSenseComponent();
@@ -22,9 +23,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, Category="Sense")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Sense")
 	bool bIsSensingEnabled = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sense|Debug")
+	bool bDrawDebug = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sense")
+	FName ViewComponentTag = TEXT("ViewMesh");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sense")
+	TObjectPtr<USceneComponent> ViewComponent = nullptr;
 	UPROPERTY(EditAnywhere, Category="Sense")
 	float SenseRadius = 1000.f;
 	UPROPERTY(EditAnywhere, Category="Sense")
@@ -38,16 +45,28 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Sense")
 	TArray<TSubclassOf<AActor>> DetectableClasses;
 
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<TObjectPtr<AActor>> DetectedActors;
+	
 	FTimerHandle TimerHandle_Sense;
 
+	//====================================================================
+	// FUNCTIONS
+	//====================================================================	
 	void PerformSenseCheck();
 
 	bool IsInViewCone(AActor* OtherActor) const;
 	bool HasLineOfSight(AActor* OtherActor) const;
 
+	FVector GetViewLocation() const;
+	FVector GetViewForward() const;
+
 public:
 	UPROPERTY(BlueprintAssignable, Category="Sense")
 	FOnActorSensed OnActorSensed;
+	UPROPERTY(BlueprintAssignable, Category="Sense")
+	FOnActorOutOfSense OnActorOutOfSense;
 
 	//====================================================================
 	// FUNCTIONS

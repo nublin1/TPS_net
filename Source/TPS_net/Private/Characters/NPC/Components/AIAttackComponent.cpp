@@ -79,9 +79,6 @@ void UAIAttackComponent::PerformAttack()
 	case EAttackType::Ranged:
 		HandleRangedAttack();
 		break;
-	case EAttackType::Explosive:
-		HandleExplosiveAttack();
-		break;
 	case EAttackType::AOE:
 		HandleAOEAttack();
 		break;
@@ -110,6 +107,10 @@ void UAIAttackComponent::HandleSimpleMeleeAttack()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
 	{
 		ReadyToAttack = true;
+	}, 2.0f, false);
+	
+	GetWorld()->GetTimerManager().SetTimer(CurrentAttack.AttackCooldown, [this]()
+	{
 	}, CurrentAttack.Cooldown, false);
 }
 
@@ -127,6 +128,9 @@ void UAIAttackComponent::HandleRangedAttack()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
 	{
 		ReadyToAttack = true;
+	}, 2.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(CurrentAttack.AttackCooldown, [this]()
+	{
 	}, CurrentAttack.Cooldown, false);
 }
 
