@@ -81,7 +81,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void DestroyReq();
-
-private:
-	FTimerHandle DestroyHandle;
 };

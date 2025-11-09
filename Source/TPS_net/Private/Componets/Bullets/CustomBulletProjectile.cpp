@@ -1,6 +1,5 @@
 // Nublin Studio 2025 All Rights Reserved.
 
-
 #include "Componets/Bullets/CustomBulletProjectile.h"
 
 // Sets default values for this component's properties
@@ -28,10 +27,6 @@ void UCustomBulletProjectile::Init()
 	StartPosition = GetOwner()->GetActorLocation();
 	IsInitialized = true;
 	
-	if(GetOwner()){
-		GetOwner()->GetWorldTimerManager().SetTimer(DestroyHandle, this, &UCustomBulletProjectile::DestroyReq, BulletAmmoData->GetAmmoCharacteristics().BulletLifeTime, false);
-	    
-	}
 }
 
 void UCustomBulletProjectile::HitDetected()
@@ -44,9 +39,6 @@ void UCustomBulletProjectile::HitDetected()
 
 void UCustomBulletProjectile::DestroyReq()
 {
-	if (GetOwner()->GetWorldTimerManager().IsTimerActive(DestroyHandle))
-		GetOwner()->GetWorldTimerManager().ClearTimer(DestroyHandle);
-
 	IsNeedToDestroy = true;
 	HitResultDelegate.Clear();
 }

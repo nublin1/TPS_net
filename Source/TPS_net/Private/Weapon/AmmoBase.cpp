@@ -12,4 +12,13 @@ void UAmmoBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	DOREPLIFETIME(UAmmoBase, AmmoCharacteristics);
 	DOREPLIFETIME(UAmmoBase, AmmoBehaviour);
+	DOREPLIFETIME(UAmmoBase, AmmoAssets);
+}
+
+void UAmmoBase::SetAmmoData(const FAmmoCharacteristics& NewAmmoCharacteristics, const FBulletBehaviour& NewAmmoBehaviour,
+	const FAmmoAssets& NewAmmoAssets)
+{
+	AmmoCharacteristics = NewAmmoCharacteristics;
+	AmmoBehaviour = NewAmmoBehaviour;
+	AmmoAssets = NewAmmoAssets;
 }

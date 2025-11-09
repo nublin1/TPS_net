@@ -19,9 +19,10 @@ enum class EAttackReadyStatus : uint8
 UENUM(Blueprintable, BlueprintType)
 enum EWeaponTransitionType: uint8
 {
-	Holster			UMETA(DisplayName = "Holster"),
-	SwitchToPrimary UMETA(DisplayName = "Switch to Primary"),
-	SwitchToPistol	UMETA(DisplayName = "Switch to Pistol")
+	Holster = 0			UMETA(DisplayName = "Holster"),
+	SwitchToPrimary		UMETA(DisplayName = "Switch to Primary"),
+	SwitchToPistol		UMETA(DisplayName = "Switch to Pistol"),
+	SwitchToUnarmed		UMETA(DisplayName = "Switch to Unarmed")
 };
 #pragma endregion Enums
 

@@ -95,7 +95,7 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void ServerProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics);
 	UFUNCTION()
-	void HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation, const FAmmoCharacteristics& AmmoCharacteristics);
+	void HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation);
 
 	UFUNCTION(BlueprintCallable)
 	void PlayShootEffect(UParticleSystem* ParticleSystem, FName SocketName);

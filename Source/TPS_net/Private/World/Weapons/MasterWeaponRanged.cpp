@@ -91,7 +91,7 @@ void AMasterWeaponRanged::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsse
 					continue;
 
 				UAmmoBase* AmmoBase = NewObject<UAmmoBase>(this, UAmmoBase::StaticClass());
-				AmmoBase->SetAmmoCharacteristics(AData->AmmoCharacteristics);
+				AmmoBase->SetAmmoData(AData->AmmoCharacteristics, AData->AmmoBehaviour, AData->AmmoAssets);
 
 				tempAmmo.Add(AmmoBase);
 			}
@@ -320,11 +320,10 @@ void AMasterWeaponRanged::ServerProjectileSpawn_Implementation(const FVector& Sp
                                                                const FRotator& SpawnRotation,
                                                                const FAmmoCharacteristics& AmmoCharacteristics)
 {
-	HandleProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
+	HandleProjectileSpawn(SpawnLocation, SpawnRotation);
 }
 
-void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation,
-                                                const FAmmoCharacteristics& AmmoCharacteristics)
+void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, const FRotator& SpawnRotation)
 {
 	if (!ProjectileFactory)
 	{
@@ -334,8 +333,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 
 	const FActorSpawnParameters SpawnParameters;
 	auto NewBulletAmmoData = SelectedAmmoData;
-	auto NewAmmoCharacteristics = AmmoCharacteristics;
-	NewBulletAmmoData->SetAmmoCharacteristics(NewAmmoCharacteristics);
+	
 
 	auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation,
 	                                                           SpawnRotation, SpawnParameters);
@@ -376,7 +374,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 			BulletActor->SelectedAmmoData = NewBulletAmmoData;
 			if (bOwnerIsPlayer)
 			{
-				//SpawnedActorRef->SetActorRotation( PlayerCamera->GetForwardVector().Rotation());
+				SpawnedActorRef->SetActorRotation( PlayerCamera->GetForwardVector().Rotation());
 			}
 			break;
 		}

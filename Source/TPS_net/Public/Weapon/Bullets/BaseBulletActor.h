@@ -47,6 +47,8 @@ public:
 	void InitBullet();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FTimerHandle DestroyHandle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile")
 	TEnumAsByte<ETraceTypeQuery> CollisionChannel = ETraceTypeQuery::TraceTypeQuery1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
@@ -62,15 +64,7 @@ protected:
 	TSubclassOf<AActor> SpawnOnGroundEffect = nullptr;
 
 	//
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAutoAim = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector SpawnLocation = FVector::Zero();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector TargetLocation = FVector::Zero();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxAngle = 85.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxRange = 10000.0f;
+	
 };
