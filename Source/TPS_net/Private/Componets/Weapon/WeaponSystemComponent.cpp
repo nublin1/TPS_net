@@ -13,6 +13,7 @@
 #include "Player/PlayerCharacter.h"
 
 #include "StateMachine/StateMachineComponent.h"
+#include "World/Weapons/MasterWeaponMelee.h"
 
 
 // Sets default values for this component's properties
@@ -100,6 +101,11 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 {
 	if (CurrentWeaponInHands && SkeletalMeshComponent)
 	{
+		if (CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Melee)
+		{
+			LeftHandSocketTransform = FTransform::Identity;
+			return;
+		}
 		//LeftHandSocketTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
 		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
 		auto rhand = SkeletalMeshComponent->GetSocketTransform("hand_r", RTS_World);
@@ -212,7 +218,7 @@ void UWeaponSystemComponent::InitStartingWeapon()
 	}
 }
 
-void UWeaponSystemComponent::AddWeapon(AMasterWeaponRanged* Weapon, int NumberSlot)
+void UWeaponSystemComponent::AddWeapon(ABaseWeapon* Weapon, int NumberSlot)
 {
 	AssignWeaponToHolsterSlot(Weapon, NumberSlot);
 }
@@ -268,42 +274,56 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	const FVector SpawnLocation{GetOwner()->GetActorLocation()};
 	const FTransform SpawnTransform(GetOwner()->GetActorRotation(), SpawnLocation);
 
+	ABaseWeapon* Weapon;
 	if (WeaponData->WeaponType == EWeaponType::Melee)
 	{
-		
+		if (!WeaponClassMelee)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("WeaponClassMelee is null"));
+			return;
+		}
+
+		Weapon = GetWorld()->SpawnActorDeferred<AMasterWeaponMelee>(WeaponClassMelee, SpawnTransform, GetOwner(),
+			nullptr, SpawnParameters.SpawnCollisionHandlingOverride);
+		if (!Weapon)
+		{
+			return;
+		}
 	}
 	else
 	{
 		// Spawn the weapon
 		if (!WeaponClassRanged)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("WeaponClass is null"));
+			UE_LOG(LogTemp, Warning, TEXT("WeaponClassRanged is null"));
 			return;
 		}
 
-		auto Weapon = GetWorld()->SpawnActorDeferred<AMasterWeaponRanged>(WeaponClassRanged, SpawnTransform, GetOwner(),
+		Weapon = GetWorld()->SpawnActorDeferred<AMasterWeaponRanged>(WeaponClassRanged, SpawnTransform, GetOwner(),
 			nullptr, SpawnParameters.SpawnCollisionHandlingOverride);
 		if (!Weapon)
 		{
 			return;
 		}
-		Weapon->SetOwner(GetOwner());
-		Weapon->SetWeaponOwnerActor(GetOwner());
-		Weapon->SetReplicates(true);
-
-		UGameplayStatics::FinishSpawningActor(Weapon, SpawnTransform);
-		Weapon->SetWeaponBaseRef(WeaponData);
-		Weapon->SwitchFireMode();
-		Weapon-> StartReload();
-		Weapon->UpdateVisual();
-
-		const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
-												   EAttachmentRule::SnapToTarget, true);
-		Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
-								  UWeaponHelper::ConvertHolsterTypeToText(WeaponData->HolsterWeaponType));
-		
-		AddWeapon(Weapon, NumberSlot);
 	}
+
+	
+	Weapon->SetOwner(GetOwner());
+	Weapon->SetWeaponOwnerActor(GetOwner());
+	Weapon->SetReplicates(true);
+
+	UGameplayStatics::FinishSpawningActor(Weapon, SpawnTransform);
+	Weapon->SetWeaponBaseRef(WeaponData);
+	//Weapon->SwitchFireMode();
+	Weapon-> StartReload();
+	Weapon->UpdateVisual();
+
+	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
+											   EAttachmentRule::SnapToTarget, true);
+	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
+							  UWeaponHelper::ConvertHolsterTypeToText(WeaponData->HolsterWeaponType));
+	
+	AddWeapon(Weapon, NumberSlot);
 }
 
 void UWeaponSystemComponent::AssignWeaponToHolsterSlot(ABaseWeapon* WeaponInstance, int NumberSlot)

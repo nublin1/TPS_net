@@ -7,6 +7,7 @@
 #include "Library/AnimationStructLibrary.h"
 #include "PlayerAnimInstance.generated.h"
 
+enum class EWeaponType : uint8;
 class ABaseWeapon;
 class ULadderClimbingComponent;
 struct FGameplayTag;
@@ -63,7 +64,7 @@ protected:
 	TObjectPtr<UStateMachineComponent> StateMachine_Aiming;
 	UPROPERTY(BlueprintReadWrite, Category="References")
 	TObjectPtr<UCharacterMovementComponent> ChMovementComponent;
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Character,  BlueprintReadWrite, Category="References")
+	UPROPERTY(BlueprintReadWrite, Category="References")
 	TObjectPtr<APlayerCharacter> Character;
 
 	/** Anim Graph - In Air */
@@ -74,8 +75,10 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Read Only Data|Character Information", Meta = (
 		ShowOnlyInnerProperties))
 	FAnimCharacterInformation CharacterInformation;
-	UPROPERTY(Replicated, BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool IsHoldWeapon;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EWeaponType WeaponType;
 
 	/** Anim Graph - Layer Blending */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
@@ -128,8 +131,6 @@ protected:
 
 	UFUNCTION()
 	void ChangedState();
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)

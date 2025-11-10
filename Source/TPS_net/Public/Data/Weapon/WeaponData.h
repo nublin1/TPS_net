@@ -16,10 +16,22 @@ class ABaseBulletActor;
 UENUM(BlueprintType, meta=(ScriptName="EWeaponType"))
 enum class EWeaponType : uint8
 {
+	Ranged	UMETA(DisplayName = "Ranged"),
+	Melee	UMETA(DisplayName = "Melee"),
+	//Unarmed UMETA(DisplayName = "Unarmed")
+};
+
+UENUM(BlueprintType, meta=(ScriptName="ERangedWeaponType"))
+enum class ERangedWeaponType : uint8
+{
 	Rifle UMETA(DisplayName = "Rifle"),
 	Pistol	UMETA(DisplayName = "Pistol"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
-	Melee UMETA(DisplayName = "Melee"),
+	Throw UMETA(DisplayName = "Throw")
+};
+UENUM(BlueprintType, meta=(ScriptName="EMeleeWeaponType"))
+enum class EMeleeWeaponType : uint8
+{
 	Unarmed UMETA(DisplayName = "Unarmed")
 };
 
@@ -124,6 +136,15 @@ struct FCharacteristicsOfTheWeapon
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FCharacteristicsOfTheWeaponMelee
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AttackDelay = 2.0f;
+};
+
 UCLASS(BlueprintType)
 class TPS_NET_API UWeaponDataAsset : public UDataAsset
 {
@@ -137,10 +158,9 @@ public:
     FName Name;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
-    EWeaponType WeaponType = EWeaponType::Rifle;
+    EWeaponType WeaponType = EWeaponType::Ranged;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base",
-        meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
     EHolsterWeaponType HolsterWeaponType = EHolsterWeaponType::Primary;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
 	FName HolsterName = "HolsterName";
@@ -154,6 +174,10 @@ public:
     //====================================================================
     // ДАННЫЕ СТРЕЛКОВОГО ОРУЖИЯ
     //====================================================================
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
+	   meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
+	ERangedWeaponType RangedWeaponType = ERangedWeaponType::Rifle;
+	
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Ranged",
         meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
     EBulletMode BulletMode = EBulletMode::Projectile;
@@ -178,6 +202,10 @@ public:
     //====================================================================
     // ДАННЫЕ БЛИЖНЕГО БОЯ
     //====================================================================
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
+			meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
+	EMeleeWeaponType MeleeWeaponType = EMeleeWeaponType::Unarmed;
+	
 	// описание типа урона
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
         meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
@@ -187,6 +215,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
         meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
     TObjectPtr<UAnimMontage> MeleeAttackAnimMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
+	   meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
+	FCharacteristicsOfTheWeaponMelee CharacteristicsOfTheWeaponMelee;
     
     //====================================================================
     // АССЕТЫ ОРУЖИЯ (WeaponAssetData)
@@ -195,7 +227,8 @@ public:
 		meta = (EditCondition = "WeaponType != EWeaponType::Unarmed", EditConditionHides))
     FWeaponPresentationData WeaponAssetData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Asset")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Asset",
+		  meta = (EditCondition = "WeaponType != EWeaponType::Melee", EditConditionHides))
 	FShootActionData ShootActionData;  
 };
 

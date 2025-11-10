@@ -157,7 +157,7 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{
 			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
-			if (WeaponBaseRef->WeaponType == EWeaponType::Pistol)
+			if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
 			{
 				LayerBlendingValues.EnableHandIK_L = 0.0f;
 				return;
@@ -218,7 +218,7 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{
 			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
-			if (WeaponBaseRef->WeaponType == EWeaponType::Pistol)
+			if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
 			{
 				LayerBlendingValues.EnableHandIK_L = 0.0f;
 				return;
@@ -240,6 +240,9 @@ void UPlayerAnimInstance::UpdateWeaponHoldPose()
 		return;
 	}
 
+	if (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Melee)
+		return;
+
 	// Получение позиции для левой руки и перезарядки
 	//LeftHandIKLoc = WeaponSysComponent->GetLeftHandSocketTransform().GetLocation();
 	ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(
@@ -256,6 +259,7 @@ void UPlayerAnimInstance::CleanWeaponData(ABaseWeapon* MasterWeapon)
 void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
+	WeaponType = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType;
 }
 
 void UPlayerAnimInstance::OnRep_Character()
@@ -277,12 +281,4 @@ void UPlayerAnimInstance::ChangedState()
 
 	if (NewAnimState.IsBound())
 		NewAnimState.Broadcast(PreviousState, CurrentState);
-}
-
-void UPlayerAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{	
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(UPlayerAnimInstance, Character);
-	DOREPLIFETIME(UPlayerAnimInstance, IsHoldWeapon);
 }

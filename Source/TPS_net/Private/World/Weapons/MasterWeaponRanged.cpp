@@ -121,7 +121,7 @@ void AMasterWeaponRanged::UpdateVisual()
 		return;
 	}
 
-	if (WeaponDataAssetRef->WeaponType == EWeaponType::Unarmed)
+	if (WeaponDataAssetRef->RangedWeaponType == ERangedWeaponType::Throw)
 	{
 		return;
 	}
@@ -133,8 +133,7 @@ void AMasterWeaponRanged::UpdateVisual()
 			WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint->GetAnimBlueprintGeneratedClass());
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class: %s"),
-		       *WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint->GetBlueprintClass()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class"));
 	}
 }
 
@@ -477,22 +476,6 @@ void AMasterWeaponRanged::SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset)
 
 	InitWeaponBaseData(NewWeaponDataAsset);
 }
-
-/*void AMasterWeaponRanged::SetWeaponDataAssetRef(UWeaponRanged* _WeaponBase)
-{
-	if (!_WeaponBase)
-		return;
-
-	if(IsValid(WeaponDataAssetRef))
-	{
-		RemoveReplicatedSubObject(WeaponDataAssetRef->GetSelectedAmmoData());
-		RemoveReplicatedSubObject(WeaponDataAssetRef);
-	}
-	WeaponDataAssetRef = _WeaponBase;
-
-	AddReplicatedSubObject(WeaponDataAssetRef);
-	AddReplicatedSubObject(WeaponDataAssetRef->GetSelectedAmmoData());
-}*/
 
 void AMasterWeaponRanged::OnRep_RoundsInMagazine() const
 {

@@ -21,7 +21,7 @@ enum class EHolsterWeaponType : uint8;
 class UWeaponBase;
 enum class EWeaponType : uint8;
 class AMasterWeaponRanged;
-
+class AMasterWeaponMelee;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, BlueprintSpawnable) )
 class TPS_NET_API UWeaponSystemComponent : public UActorComponent, public IStateMachineInterface
@@ -134,9 +134,16 @@ protected:
 	int NumberOfWeaponUnarmedHolsters = 10;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	TArray<TObjectPtr<ABaseWeapon>> UnarmedHolster;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int NumberOfWeaponMeleeHolsters = 10;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	TArray<TObjectPtr<ABaseWeapon>> MeleeHolster;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AMasterWeaponRanged> WeaponClassRanged;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AMasterWeaponMelee> WeaponClassMelee;
 	
 
 	// Player Data
@@ -176,7 +183,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void InitStartingWeapon();
 	UFUNCTION(BlueprintCallable)
-	virtual void AddWeapon(AMasterWeaponRanged* Weapon, int NumberSlot);
+	virtual void AddWeapon(ABaseWeapon* Weapon, int NumberSlot);
 	UFUNCTION(Server, Unreliable)
 	virtual void ServerAddWeapon(UWeaponDataAsset* WeaponData);
 	UFUNCTION(BlueprintCallable)
