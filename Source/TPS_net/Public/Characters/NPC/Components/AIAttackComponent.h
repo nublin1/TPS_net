@@ -8,6 +8,7 @@
 #include "AIAttackComponent.generated.h"
 
 
+class UWeaponSystemComponent;
 class UBoxComponent;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,8 +40,8 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	UFUNCTION(BlueprintCallable)
-	virtual void InitAttackComponent(TArray<FAttackData> Attacks);
+	UFUNCTION()
+	void InitAttackComponent();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_HitDetect();
@@ -63,45 +64,28 @@ protected:
 	float TraceRadius = 45.0f;
 
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Attack")
-	TArray<FAttackData> AvailableAttacks;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	FAttackData CurrentAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<AActor> TargetActor = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ReadyToAttack = true;
 
 	//
-	UPROPERTY()
-	FTimerHandle TimerHandleAttackPeriod;
-
 	UPROPERTY(BlueprintReadOnly)
 	TMap<AActor*, bool> AlreadyHitTargets;
 
 	UPROPERTY(EditAnywhere)
 	bool IsDebug = false;
 
-	//Data
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UAnimInstance> AnimInstance = nullptr;
+	//Refs
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UWeaponSystemComponent> WeaponSystemComponentRef;
+	
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	UFUNCTION(BlueprintCallable)
-	bool CanStartAttack();
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent)
 	void PerformAttack();
-	
-	void HandleSimpleMeleeAttack();
-	void HandleRangedAttack();
-	void HandleExplosiveAttack();
-	void HandleAOEAttack();
-	void HandleThrowAttack();
-	void HandleSelfDestruct();
 	
 	UFUNCTION()
 	void AttackCompleted(UAnimMontage* Montage, bool bInterrupted);

@@ -14,10 +14,7 @@ AMasterWeaponRanged::AMasterWeaponRanged()
 {
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
-
-	// Initialize the SkeletalMeshWeapon component
-	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
-	SetRootComponent(SkeletalMeshWeapon);
+	
 }
 
 void AMasterWeaponRanged::PostInitializeComponents()
@@ -50,8 +47,9 @@ void AMasterWeaponRanged::BeginPlay()
 			else
 			{
 				bOwnerIsPlayer = false;
+				if (auto OwnerSkeletalMesh = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
+					SkeletalMeshCharacter = OwnerSkeletalMesh;
 			}
-			
 		}
 	}
 }
@@ -114,27 +112,6 @@ void AMasterWeaponRanged::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsse
 void AMasterWeaponRanged::UpdateVisual()
 {
 	Super::UpdateVisual();
-
-	if (!WeaponDataAssetRef)
-	{
-		UE_LOG(LogTemp, Warning, TEXT(" AMasterWeapon WeaponDataAssetRef is null"));
-		return;
-	}
-
-	if (WeaponDataAssetRef->RangedWeaponType == ERangedWeaponType::Throw)
-	{
-		return;
-	}
-
-	SkeletalMeshWeapon->SetSkeletalMesh(WeaponDataAssetRef->WeaponAssetData.SkeletalMesh);
-
-	if (WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint)
-		SkeletalMeshWeapon->SetAnimInstanceClass(
-			WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint->GetAnimBlueprintGeneratedClass());
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class"));
-	}
 }
 
 bool AMasterWeaponRanged::IsCanStartReload()
@@ -254,6 +231,16 @@ void AMasterWeaponRanged::StartFireWeapon()
 	case EBulletMode::HitScan:
 		break;
 	case EBulletMode::Projectile:
+		if (WeaponDataAssetRef->ShootActionData.DelayBeforeSpawnBullet > 0)
+		{
+			GetWorld()->GetTimerManager().SetTimer(SpawnBulletDelay, [this]()
+			{
+				ConfigureSpawnedProjectile();
+		
+			}, WeaponDataAssetRef->ShootActionData.DelayBeforeSpawnBullet, false);
+			break;
+		}
+		
 		ConfigureSpawnedProjectile();
 		break;
 	default:
@@ -272,7 +259,8 @@ void AMasterWeaponRanged::StartFireWeapon()
 
 void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 {
-	auto BulletSpawnPointTransform = GetMuzzleTransform(WeaponDataAssetRef->ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
+	auto BulletSpawnPointTransform = GetMuzzleTransform(
+		WeaponDataAssetRef->ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
 
 	BulletBlueprint = WeaponDataAssetRef->ShootActionData.BulletActor;
 	if (BulletBlueprint)
@@ -307,7 +295,7 @@ void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 				SpawnLocation = BulletSpawnPointTransform.GetLocation();
 				SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
 			}
-			
+
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
 			if (OnSpawnedProjectile.IsBound())
 				OnSpawnedProjectile.Broadcast(RoundsInMagazine);
@@ -332,7 +320,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 
 	const FActorSpawnParameters SpawnParameters;
 	auto NewBulletAmmoData = SelectedAmmoData;
-	
+
 
 	auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation,
 	                                                           SpawnRotation, SpawnParameters);
@@ -363,7 +351,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 			}
 			BulletActor->SelectedAmmoData = NewBulletAmmoData;
 			break;
-			
+
 		case EBulletFlightMode::Parabolic:
 			if (!SelectedAmmoData)
 			{
@@ -373,11 +361,16 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 			BulletActor->SelectedAmmoData = NewBulletAmmoData;
 			if (bOwnerIsPlayer)
 			{
-				SpawnedActorRef->SetActorRotation( PlayerCamera->GetForwardVector().Rotation());
+				BulletActor->SetActorRotation(PlayerCamera->GetForwardVector().Rotation());
+			}
+			else
+			{
+				BulletActor->SetActorRotation(WeaponOwnerActor->GetActorForwardVector().Rotation());
+				BulletActor->SetAutoAim(true, TargetPoint);
 			}
 			break;
 		}
-		
+
 		SpawnedActorRef->SetActorTickEnabled(true);
 		SpawnedActorRef->SetActorHiddenInGame(false);
 
@@ -431,7 +424,7 @@ void AMasterWeaponRanged::DecreaseRoundsInMagazine()
 {
 	if (WeaponDataAssetRef->CharacteristicsOfTheWeapon.bInfinityMagazine)
 		return;
-	
+
 	if (HasAuthority())
 		RoundsInMagazine--;
 	else
@@ -477,6 +470,11 @@ void AMasterWeaponRanged::SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset)
 	InitWeaponBaseData(NewWeaponDataAsset);
 }
 
+void AMasterWeaponRanged::SetTargetPoint(FVector NewPoint)
+{
+	TargetPoint = NewPoint;
+}
+
 void AMasterWeaponRanged::OnRep_RoundsInMagazine() const
 {
 	if (OnCompleteReloadDelegate.IsBound())
@@ -484,10 +482,10 @@ void AMasterWeaponRanged::OnRep_RoundsInMagazine() const
 }
 
 FTransform AMasterWeaponRanged::GetMuzzleTransform(FName SocketName, USceneComponent* OverrideComponent)
-{	
+{
 	if (!WeaponOwnerActor)
 		return FTransform::Identity;
-	
+
 	// 1. Проверяем скелетный меш
 	if (USkeletalMeshComponent* Skel = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
 	{
@@ -510,7 +508,7 @@ FTransform AMasterWeaponRanged::GetMuzzleTransform(FName SocketName, USceneCompo
 	{
 		if (OverrideComponent->DoesSocketExist(SocketName))
 			return OverrideComponent->GetSocketTransform(SocketName, RTS_World);
-		
+
 		return OverrideComponent->GetComponentTransform();
 	}
 

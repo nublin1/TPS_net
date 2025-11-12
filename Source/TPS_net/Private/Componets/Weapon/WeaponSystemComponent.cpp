@@ -30,6 +30,7 @@ void UWeaponSystemComponent::PostInitProperties()
 
 	WeaponPrimaryHolster.SetNum(NumberOfWeaponPrimaryHolsters);
 	UnarmedHolster.SetNum(NumberOfWeaponUnarmedHolsters);
+	MeleeHolster.SetNum(NumberOfWeaponMeleeHolsters);
 
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)

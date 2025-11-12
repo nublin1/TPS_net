@@ -3,10 +3,21 @@
 
 #include "World/Weapons/BaseWeapon.h"
 
+#include "Data/Weapon/WeaponData.h"
+
 
 ABaseWeapon::ABaseWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	USceneComponent* RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
+	SetRootComponent(RootScene);
+
+	SkeletalMeshWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMeshWeapon->SetupAttachment(RootScene);
+
+	StaticMeshWeapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	StaticMeshWeapon->SetupAttachment(RootScene);
 }
 
 void ABaseWeapon::PostInitializeComponents()
@@ -35,6 +46,33 @@ void ABaseWeapon::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset)
 
 void ABaseWeapon::UpdateVisual()
 {
+	if (!WeaponDataAssetRef)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" AMasterWeapon WeaponDataAssetRef is null"));
+		return;
+	}
+
+	if (WeaponDataAssetRef->WeaponType != EWeaponType::Melee)
+	{
+		return;
+	}
+
+	if (WeaponDataAssetRef->WeaponAssetData.SkeletalMesh)
+	{
+		SkeletalMeshWeapon->SetSkeletalMesh(WeaponDataAssetRef->WeaponAssetData.SkeletalMesh);
+	}
+	if (WeaponDataAssetRef->WeaponAssetData.StaticMesh)
+	{
+		StaticMeshWeapon->SetStaticMesh(WeaponDataAssetRef->WeaponAssetData.StaticMesh);
+	}
+
+	if (WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint)
+		SkeletalMeshWeapon->SetAnimInstanceClass(
+			WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint->GetAnimBlueprintGeneratedClass());
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class"));
+	}
 }
 
 void ABaseWeapon::ToggleBoneVisibility(FName BoneName)

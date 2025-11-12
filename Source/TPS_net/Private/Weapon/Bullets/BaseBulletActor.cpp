@@ -26,6 +26,12 @@ void ABaseBulletActor::Tick(float DeltaTime)
 
 }
 
+void ABaseBulletActor::SetAutoAim(bool IsAutoAim, FVector NewAimTargetPoint)
+{
+	bAutoAim = IsAutoAim;
+	AimTargetPoint = NewAimTargetPoint;
+}
+
 void ABaseBulletActor::InitBullet_Implementation()
 {
 }

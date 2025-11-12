@@ -33,37 +33,3 @@ struct FSenseData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sense")
 	TArray<TSubclassOf<AActor>> DetectableClasses;
 };
-
-UENUM(BlueprintType)
-enum class EAttackType : uint8
-{
-	Melee,
-	Ranged,
-	AOE,
-	Throw,
-	SelfDestruct
-};
-
-USTRUCT(BlueprintType)
-struct FAttackData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	FName AttackName = NAME_None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	EAttackType AttackType = EAttackType::Melee;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	float Damage = 20.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	float AttackRange = 150.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	float Cooldown = 2.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Attack")
-	FTimerHandle AttackCooldown;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	UAnimMontage* AttackMontage = nullptr;
-};

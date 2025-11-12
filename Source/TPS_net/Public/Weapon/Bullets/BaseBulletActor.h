@@ -46,6 +46,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void InitBullet();
 
+	UFUNCTION(BlueprintCallable)
+	void SetAutoAim(bool IsAutoAim, FVector NewAimTargetPoint);
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FTimerHandle DestroyHandle;
@@ -65,6 +68,7 @@ protected:
 
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAutoAim = true;
-	
+	bool bAutoAim = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FVector AimTargetPoint = FVector::Zero();
 };

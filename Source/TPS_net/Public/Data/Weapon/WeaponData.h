@@ -84,6 +84,8 @@ struct FShootActionData
 	EBulletFlightMode BulletFlightMode = EBulletFlightMode::Physical;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName BulletSpawnSocketTransformName = "MuzzleFlash";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DelayBeforeSpawnBullet = 0.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -109,6 +111,10 @@ USTRUCT(BlueprintType)
 struct FCharacteristicsOfTheWeapon
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics",
+		meta = (ToolTip = "Attack radius used by AI to determine strike distance"))
+	float AttackRange = 1500.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Characteristics")
 	TArray<EFireMode> AvailableShootingModes;
@@ -141,6 +147,8 @@ struct FCharacteristicsOfTheWeaponMelee
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ToolTip = "Melee attack radius used by AI to determine strike distance"))
+	float MeleeAttackRange = 150.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackDelay = 2.0f;
 };

@@ -10,6 +10,7 @@
 #include "NPC/Inrfaces/AIAttackInterface.h"
 #include "NPCZombie.generated.h"
 
+class UWeaponSystemComponent;
 class UNPCSenseComponent;
 
 UCLASS()

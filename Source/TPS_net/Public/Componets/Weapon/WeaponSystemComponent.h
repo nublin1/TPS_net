@@ -76,6 +76,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	FAttackReadyResult CheckIsCanAttack();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void AiPerformAttack();
 	
 	UFUNCTION(BlueprintCallable)
 	void TriggerAttack();

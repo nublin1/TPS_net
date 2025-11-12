@@ -20,9 +20,7 @@ public:
 	FCharacterStats CharacterStats;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	FName FactionName = "Neutral";
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
-	TArray<FAttackData> Attacks;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	FSenseData SenseData;
 };

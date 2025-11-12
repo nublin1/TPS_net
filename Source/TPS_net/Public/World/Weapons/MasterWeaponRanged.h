@@ -127,6 +127,8 @@ public:
 	//
 	virtual void SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset) override;
 
+	virtual void SetTargetPoint(FVector NewPoint);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ClipBoneName;
@@ -156,13 +158,19 @@ protected:
 	UPROPERTY()
 	FTimerHandle ShootDelayTimerHandle;
 	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
-	FTimerHandle ReloadCooldownTimerHandle; 
+	FTimerHandle ReloadCooldownTimerHandle;
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	FTimerHandle SpawnBulletDelay;
 
 	// Recoil
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsRecoiling = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentRecoilTime;
+
+	//Data
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FVector TargetPoint = FVector::Zero();
 	
 	//====================================================================
 	// FUNCTIONS

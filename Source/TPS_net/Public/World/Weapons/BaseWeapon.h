@@ -96,6 +96,8 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshCharacter;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshWeapon;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> StaticMeshWeapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimInstance> AnimInstanceCharacter = nullptr;
 

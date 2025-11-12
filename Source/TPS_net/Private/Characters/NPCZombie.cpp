@@ -7,6 +7,7 @@
 #include "Characters/NPC/Components/AIAttackComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Componets/Sense/NPCSenseComponent.h"
+#include "Componets/Weapon/WeaponSystemComponent.h"
 #include "Data/Characters/CharacterDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -82,7 +83,7 @@ void ANPCZombie::InitCharacterData()
 	if (SenseComponent)
 		SenseComponent->InitSense(CharacterData->SenseData);
 	if (AIAttackComponent)
-		AIAttackComponent->InitAttackComponent(CharacterData->Attacks);
+		AIAttackComponent->InitAttackComponent();
 }
 
 UHealthComponent* ANPCZombie::GetHealthComponent() const

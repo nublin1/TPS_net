@@ -36,6 +36,8 @@ void AMasterWeaponMelee::BeginPlay()
 			else
 			{
 				bOwnerIsPlayer = false;
+				if (auto OwnerSkeletalMesh = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
+					SkeletalMeshCharacter = OwnerSkeletalMesh;
 			}
 			
 		}
@@ -62,30 +64,7 @@ void AMasterWeaponMelee::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset
 void AMasterWeaponMelee::UpdateVisual()
 {
 	Super::UpdateVisual();
-
-	if (!WeaponDataAssetRef)
-	{
-		UE_LOG(LogTemp, Warning, TEXT(" AMasterWeapon WeaponDataAssetRef is null"));
-		return;
-	}
-
-	if (WeaponDataAssetRef->WeaponType != EWeaponType::Melee)
-	{
-		return;
-	}
-
-	if (WeaponDataAssetRef->WeaponAssetData.SkeletalMesh)
-	{
-		SkeletalMeshWeapon->SetSkeletalMesh(WeaponDataAssetRef->WeaponAssetData.SkeletalMesh);
-	}
-
-	if (WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint)
-		SkeletalMeshWeapon->SetAnimInstanceClass(
-			WeaponDataAssetRef->WeaponAssetData.WeaponAnimationBlueprint->GetAnimBlueprintGeneratedClass());
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load animation class"));
-	}
+	
 }
 
 void AMasterWeaponMelee::SwitchAttackMode()

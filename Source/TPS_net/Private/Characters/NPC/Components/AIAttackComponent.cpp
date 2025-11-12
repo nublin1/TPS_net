@@ -2,10 +2,13 @@
 
 #include "Characters/NPC/Components/AIAttackComponent.h"
 
+#include "Componets/Weapon/WeaponSystemComponent.h"
 #include "Engine/Engine.h"
 #include "Interfaces/IHealthInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "World/Weapons/BaseWeapon.h"
+#include "World/Weapons/MasterWeaponRanged.h"
 
 
 UAIAttackComponent::UAIAttackComponent()
@@ -18,14 +21,6 @@ UAIAttackComponent::UAIAttackComponent()
 void UAIAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (auto OwnerSkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>())
-		SkeletalMeshComponent = OwnerSkeletalMeshComponent;
-
-	if (UAnimInstance* TempAnimInstance = SkeletalMeshComponent->GetAnimInstance())
-	{
-		AnimInstance = TempAnimInstance;
-	}
 }
 
 void UAIAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -33,19 +28,16 @@ void UAIAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (CanStartAttack())
+	if (TargetActor && InRangeToAttack())
 	{
 		PerformAttack();
 	}
 }
 
-void UAIAttackComponent::InitAttackComponent(TArray<FAttackData> Attacks)
+void UAIAttackComponent::InitAttackComponent()
 {
-	if (Attacks.Num() < 0)
-		return;
-	
-	AvailableAttacks = Attacks;
-	CurrentAttack = AvailableAttacks[0];
+	if (auto WeaponSystem = GetOwner()->FindComponentByClass<UWeaponSystemComponent>())
+		WeaponSystemComponentRef = WeaponSystem;
 }
 
 void UAIAttackComponent::SetTargetActor(AActor* NewTargetActor)
@@ -53,101 +45,10 @@ void UAIAttackComponent::SetTargetActor(AActor* NewTargetActor)
 	TargetActor = NewTargetActor;
 }
 
-bool UAIAttackComponent::CanStartAttack()
+void UAIAttackComponent::PerformAttack_Implementation()
 {
-	if (!TargetActor || GetWorld()->GetTimerManager().IsTimerActive(TimerHandleAttackPeriod) || !ReadyToAttack)
-		return false;
-
-	if (!InRangeToAttack())
-		return false;
-
-	return true;
-}
-
-void UAIAttackComponent::PerformAttack()
-{
-	if (!AnimInstance || !CurrentAttack.AttackMontage)
-	{
-		return;
-	}
-
-	switch (CurrentAttack.AttackType)
-	{
-	case EAttackType::Melee:
-		HandleSimpleMeleeAttack();
-		break;
-	case EAttackType::Ranged:
-		HandleRangedAttack();
-		break;
-	case EAttackType::AOE:
-		HandleAOEAttack();
-		break;
-	case EAttackType::Throw:
-		HandleThrowAttack();
-		break;
-	case EAttackType::SelfDestruct:
-		HandleSelfDestruct();
-		break;
-	default:
-		break;
-	}
-}
-
-void UAIAttackComponent::HandleSimpleMeleeAttack()
-{
-	if (StartAttackDelegate.IsBound())
-		StartAttackDelegate.Broadcast();
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &UAIAttackComponent::AttackCompleted);
-
-	AnimInstance->Montage_Play(CurrentAttack.AttackMontage, 1.0f);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentAttack.AttackMontage);
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
-	{
-		ReadyToAttack = true;
-	}, 2.0f, false);
-	
-	GetWorld()->GetTimerManager().SetTimer(CurrentAttack.AttackCooldown, [this]()
-	{
-	}, CurrentAttack.Cooldown, false);
-}
-
-void UAIAttackComponent::HandleRangedAttack()
-{
-	if (StartAttackDelegate.IsBound())
-		StartAttackDelegate.Broadcast();
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &UAIAttackComponent::AttackCompleted);
-
-	AnimInstance->Montage_Play(CurrentAttack.AttackMontage, 1.0f);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentAttack.AttackMontage);
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackPeriod, [this]()
-	{
-		ReadyToAttack = true;
-	}, 2.0f, false);
-	GetWorld()->GetTimerManager().SetTimer(CurrentAttack.AttackCooldown, [this]()
-	{
-	}, CurrentAttack.Cooldown, false);
-}
-
-void UAIAttackComponent::HandleExplosiveAttack()
-{
-}
-
-void UAIAttackComponent::HandleAOEAttack()
-{
-}
-
-void UAIAttackComponent::HandleThrowAttack()
-{
-}
-
-void UAIAttackComponent::HandleSelfDestruct()
-{
+	RotateToTarget();
+	WeaponSystemComponentRef->AiPerformAttack();
 }
 
 void UAIAttackComponent::AttackCompleted(UAnimMontage* Montage, bool bInterrupted)
@@ -177,12 +78,12 @@ bool UAIAttackComponent::HitDetect()
 	AActor* Owner = GetOwner();
 	if (!Owner) return false;
 
-	if (!SkeletalMeshComponent) return false;
+	//if (!SkeletalMeshComponent) return false;
 
-	RotateToTarget();
+	
 
 	//AttackSocketName = FName("hand_r");
-	SocketLocation = SkeletalMeshComponent->GetSocketLocation(AttackSocketName);
+	//SocketLocation = SkeletalMeshComponent->GetSocketLocation(AttackSocketName);
 	FVector TraceStart = SocketLocation;
 	FVector TraceEnd = TraceStart;
 
@@ -277,6 +178,14 @@ void UAIAttackComponent::ServerClearAlreadyHitTargets_Implementation()
 
 bool UAIAttackComponent::InRangeToAttack() const
 {
+	if (!WeaponSystemComponentRef)
+	{
+		return false;
+	}
+
+	if (!WeaponSystemComponentRef->bIsAnyWeaponInHands())
+		return false;
+
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
@@ -285,8 +194,28 @@ bool UAIAttackComponent::InRangeToAttack() const
 	FVector End = TargetActor->GetActorLocation();
 
 	const float Distance = FVector::Dist(Start, End);
-	if (Distance > CurrentAttack.AttackRange)
-		return false;
+
+	if (WeaponSystemComponentRef->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Melee)
+	{
+		auto Attackrange = WeaponSystemComponentRef->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->
+		                                             CharacteristicsOfTheWeaponMelee.MeleeAttackRange;
+		if (Distance > Attackrange)
+			return false;
+	}
+	else
+	{
+		TObjectPtr<AMasterWeaponRanged> WeaponInHands = Cast<AMasterWeaponRanged>(WeaponSystemComponentRef->GetCurrentWeaponInHands());
+		
+		auto Attackrange = WeaponInHands->GetWeaponDataAssetRef()->CharacteristicsOfTheWeapon.AttackRange;
+
+		if (Distance > Attackrange)
+			return false;
+		else
+		{
+			WeaponInHands->SetTargetPoint(End);
+		}
+	}
+
 
 	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, TraceChannel, Params);
