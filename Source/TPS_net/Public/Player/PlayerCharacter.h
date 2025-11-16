@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "PlayerStructsLibrary.h"
 #include "Characters/BaseCharacter.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/ClimbableInterface.h"
+
 #include "Interfaces/IHealthInterface.h"
 #include "Interfaces/WeaponSystemInterface.h"
 #include "Library/AnimationStructLibrary.h"
@@ -77,6 +76,8 @@ public:
 
 	UFUNCTION(BlueprintGetter, Category = "Essential Information")
 	FAnimGraphAimingValues GetAimingValues() const { return AimingValues; }
+	UFUNCTION(BlueprintGetter, Category = "Essential Information")
+	FAnimGraphCoverValues GetCoverValues() const { return AnimCoverValues; }
 
 protected:
 	//====================================================================
@@ -94,8 +95,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsAimingButtonHeld = false;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	bool IsAimingAnimPose = false;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Essential Information")
 	float Speed = 0.0f;
@@ -137,9 +136,19 @@ protected:
 	EStandCrouchCoverPose CoverPose = EStandCrouchCoverPose::Standing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Refs")
 	TObjectPtr<UStaticMeshComponent> CoverBackWallMesh = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Settings")
-	float CoverEnterAngleArea = 35.0f;
+	float CoverEnterAngleArea = 95.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Settings")
+	float CapsuleRadiusInCover = 20.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCharacterFacingToCoverRight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCharacterMovingInCoverRight = false;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Cover Values")
+	FAnimGraphCoverValues AnimCoverValues;
+	
 
 	/** Aiming Values */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Aiming Values")
@@ -185,6 +194,7 @@ protected:
 	// FUNCTIONS
 	//====================================================================
 	void SetEssentialValues(float DeltaTime);
+	void UpdateCoverValues(float DeltaTime);
 	void UpdateAimingValues(float DeltaTime);
 
 	/** On Jumped*/

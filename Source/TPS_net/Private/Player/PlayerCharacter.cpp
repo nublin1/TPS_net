@@ -76,6 +76,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	SetEssentialValues(DeltaTime);
 
 	UpdateAimingValues(DeltaTime);
+
+	UpdateCoverValues(DeltaTime);
 }
 
 UHealthComponent* APlayerCharacter::GetHealthComponent() const
@@ -119,6 +121,16 @@ void APlayerCharacter::SetEssentialValues(float DeltaTime)
 	const FVector CurrentVel = GetVelocity();
 	Speed = CurrentVel.Size2D();
 	IsMoving = Speed > 1.0f; 
+}
+
+void APlayerCharacter::UpdateCoverValues(float DeltaTime)
+{
+	AnimCoverValues.bCharacterMovingInCoverRight = bCharacterMovingInCoverRight;
+	AnimCoverValues.bCharacterFacingToCoverRight = bCharacterFacingToCoverRight;
+	AnimCoverValues.bCoverAimLeftAvailible = bCoverAimLeftAvailible;
+	AnimCoverValues.bCoverAimRightAvailible = bCoverAimRightAvailible;
+	AnimCoverValues.bIsInEndAreaLeft = bIsInEndAreaLeft;
+	AnimCoverValues.bIsInEndAreaRight = bIsInEndAreaRight;
 }
 
 void APlayerCharacter::UpdateAimingValues(float DeltaTime)

@@ -80,6 +80,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	UpdateLayerValues();
 	SetIKHands();
 
+	AnimCoverValues = Character->GetCoverValues();
+
 	if (StateWasChanged)
 		ChangedState();
 }
@@ -260,12 +262,33 @@ void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
 	WeaponType = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType;
+	UpdateOverrideData();
 }
 
-void UPlayerAnimInstance::OnRep_Character()
+void UPlayerAnimInstance::UpdateOverrideData()
 {
-	WeaponSysComponent = Character->GetWeaponSystemComponent();
-	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
+	if (WeaponType == EWeaponType::Melee)
+	{
+		LayerBlendingValues.Legs = 1.0f;
+		LayerBlendingValues.Pelvis = 1.0f;
+		LayerBlendingValues.Arm_L = 1.0f;
+		LayerBlendingValues.Arm_R = 1.0f;
+		
+		
+		switch (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->MeleeWeaponType)
+		{
+		case EMeleeWeaponType::Unarmed:
+			break;
+		case EMeleeWeaponType::Axe:
+			break;
+		default:
+			break;
+		}
+	}
+	if (WeaponType == EWeaponType::Ranged)
+	{
+		LayerBlendingValues.Legs = 0.0f;
+	}
 }
 
 void UPlayerAnimInstance::OnJumped()

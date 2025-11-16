@@ -88,6 +88,10 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")
 	FAnimGraphAimingValues AimingValues;
 
+	/** Anim Graph - Cover Values */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Cober Values")
+	FAnimGraphCoverValues AnimCoverValues;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	FTransform LeftHandIKTransform = FTransform();
 	
@@ -123,8 +127,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
 	virtual void UpdateWeaponData(ABaseWeapon* newMasterWeapon);
 
-	UFUNCTION()
-	void OnRep_Character();
+	UFUNCTION(BlueprintCallable, Category = "PlayerAnimInstance")
+	virtual void UpdateOverrideData();
 
 	UFUNCTION()
 	void OnJumped();

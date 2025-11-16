@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Animation/AnimSequenceBase.h"
-
+#include "Player/PlayerStructsLibrary.h"
 #include "AnimationStructLibrary.generated.h"
 
 
@@ -99,4 +99,24 @@ struct FAnimConfiguration
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Main Configuration")
 	float SmoothedAimingRotationInterpSpeed = 10.0f;
+};
+
+USTRUCT(BlueprintType)
+struct FAnimGraphCoverValues
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCoverAimRightAvailible = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCoverAimLeftAvailible = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bIsInEndAreaRight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bIsInEndAreaLeft = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCharacterFacingToCoverRight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	bool bCharacterMovingInCoverRight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System|Data")
+	EStandCrouchCoverPose CoverPose = EStandCrouchCoverPose::Standing;
 };

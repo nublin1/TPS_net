@@ -32,7 +32,8 @@ enum class ERangedWeaponType : uint8
 UENUM(BlueprintType, meta=(ScriptName="EMeleeWeaponType"))
 enum class EMeleeWeaponType : uint8
 {
-	Unarmed UMETA(DisplayName = "Unarmed")
+	Unarmed UMETA(DisplayName = "Unarmed"),
+	Axe		UMETA(DisplayName = "Axe"),
 };
 
 UENUM(BlueprintType)

@@ -52,10 +52,10 @@ void ABaseWeapon::UpdateVisual()
 		return;
 	}
 
-	if (WeaponDataAssetRef->WeaponType != EWeaponType::Melee)
+	/*if (WeaponDataAssetRef->WeaponType != EWeaponType::Melee)
 	{
 		return;
-	}
+	}*/
 
 	if (WeaponDataAssetRef->WeaponAssetData.SkeletalMesh)
 	{
