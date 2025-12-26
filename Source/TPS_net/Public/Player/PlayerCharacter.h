@@ -84,15 +84,8 @@ protected:
 	// PROPERTIES AND VARIABLES
 	//====================================================================
 	/** Essential Information */
-	UPROPERTY(Replicated, BlueprintReadWrite)
-	FVector2D MovementVector;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsMoving = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsGrounded;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsSprintingButtonHeld = false;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsAimingButtonHeld = false;
 	
@@ -167,8 +160,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
-	UStateMachineComponent* StateMachine_Aiming;
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* ActiveStateCharacter;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
@@ -217,10 +208,6 @@ protected:
 	virtual void ChangeMaxMoveSpeed(float NewMaxSpeed) override;
 	void ServerSetSpeed_Implementation(float NewMaxSpeed);
 	void MulticastSetSpeed_Implementation(float NewMaxSpeed);
-
-	//
-	UFUNCTION(BlueprintCallable)
-	bool IsStateTransitionAllowed(FGameplayTag NewState);
 	
 	//
 	UFUNCTION(BlueprintCallable)

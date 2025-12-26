@@ -77,8 +77,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FAttackReadyResult CheckIsCanAttack();
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void AiPerformAttack();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PerformAttack();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PerformAttackAbility(TSubclassOf<UGameplayAbility> AbilityClass);
+		
 	
 	UFUNCTION(BlueprintCallable)
 	void TriggerAttack();
@@ -108,6 +111,8 @@ public:
 
 	UFUNCTION()
 	ABaseWeapon* GetCurrentWeaponInHands() {return CurrentWeaponInHands;}
+	UFUNCTION(BlueprintCallable)
+	virtual UWeaponDataAsset* GetWeaponDataAssetRef(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION()
 	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
 
@@ -121,27 +126,43 @@ protected:
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool AutoEquipLast = false;
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CurrentWeaponInHands, VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY( VisibleAnywhere, BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_CurrentWeaponInHands)
 	TObjectPtr<ABaseWeapon> CurrentWeaponInHands;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TSubclassOf<UGameplayAbility> CurrentAttackAbilityClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName HandWeaponSocketName = "SocketWeapon";
-	UPROPERTY(Replicated, BlueprintReadWrite, VisibleAnywhere)
-	TObjectPtr<ABaseWeapon> WeaponPistolHolster;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FGameplayAbilitySpecHandle> AbilitiesGrantedByWeaponInHands;
+	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int NumberOfWeaponPrimaryHolsters = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int MaxNumberOfWeaponMeleeHolsters = 5;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int LastMeleeHolsterUsed = 0;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	TArray<TObjectPtr<ABaseWeapon>> MeleeHolster;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int MaxNumberOfWeaponPistolHolsters = 5;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int LastPistolHolsterUsed = 0;
+	UPROPERTY(Replicated, BlueprintReadWrite, VisibleAnywhere)
+	TArray<TObjectPtr<ABaseWeapon>> WeaponPistolHolster;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int MaxNumberOfWeaponPrimaryHolsters = 5;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int LastPrimaryHolsterUsed = 0;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Blueprintable)
 	TArray<TObjectPtr<ABaseWeapon>> WeaponPrimaryHolster;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int NumberOfWeaponUnarmedHolsters = 10;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int MaxNumberOfWeaponUnarmedHolsters = 5;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int LastUnarmedHolsterUsed = 0;	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	TArray<TObjectPtr<ABaseWeapon>> UnarmedHolster;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int NumberOfWeaponMeleeHolsters = 10;
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
-	TArray<TObjectPtr<ABaseWeapon>> MeleeHolster;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AMasterWeaponRanged> WeaponClassRanged;
@@ -189,8 +210,11 @@ protected:
 	virtual void AddWeapon(ABaseWeapon* Weapon, int NumberSlot);
 	UFUNCTION(Server, Unreliable)
 	virtual void ServerAddWeapon(UWeaponDataAsset* WeaponData);
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void AssignWeaponToHolsterSlot(ABaseWeapon* WeaponInstance, int NumberSlot = 0);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual int GetNextAvailableWeaponIndexInHolster(EHolsterWeaponType Holster = EHolsterWeaponType::None);
 	UFUNCTION(BlueprintCallable)
 	virtual bool CheckHolsterIsEmpty(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION(BlueprintCallable)

@@ -49,7 +49,20 @@ public:
 	virtual void InitCharacterData();
 	UFUNCTION(BlueprintNativeEvent)
 	void InitSetBaseCharacterStats();
-	
+
+	// ASC
+	UFUNCTION(BlueprintCallable, Category="AbilitySystem" )
+	TArray<FGameplayAbilitySpecHandle> GrantAbilities (TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant);
+	UFUNCTION(BlueprintCallable, Category="AbilitySystem" )
+	void RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilitiesToRemove);
+	UFUNCTION(BlueprintCallable, Category="AbilitySystem" )
+	void SendAbilitiesChangedEvent();
+
+	//
+	UFUNCTION(BlueprintCallable)
+	bool IsStateTransitionAllowed(FGameplayTag NewState);
+
+	//
 	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
 	UFUNCTION()
 	virtual FName GetFactionName_Implementation() const override { return FactionName; }
@@ -62,6 +75,8 @@ protected:
 	//====================================================================
 	// Components
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
+	UStateMachineComponent* StateMachine_Aiming;
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Movement;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
@@ -69,6 +84,17 @@ protected:
 	//ASC
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
 	EGameplayEffectReplicationMode ASCReplicationMode = EGameplayEffectReplicationMode::Mixed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+	TArray<TSubclassOf<UGameplayAbility>> StartingAbilities;
+
+	/** Essential Information */
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	FVector2D MovementVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsMoving = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsGrounded;
 
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")

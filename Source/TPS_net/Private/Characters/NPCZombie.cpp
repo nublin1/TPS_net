@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 
 #include "Characters/NPCZombie.h"
@@ -24,19 +24,14 @@ ANPCZombie::ANPCZombie()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
-	
-	AIAttackComponent = CreateDefaultSubobject<UAIAttackComponent>(TEXT("AttackComponent"));
-	AIAttackComponent->OnComponentCreated();
-	AIAttackComponent->SetIsReplicated(true);
 
 	SenseComponent = CreateDefaultSubobject<UNPCSenseComponent>(TEXT("SenseComponent"));
 	SenseComponent->OnComponentCreated();
 	SenseComponent->SetIsReplicated(true);
 
-	BehavorState = CreateDefaultSubobject<UStateMachineComponent>(TEXT("BehavorState"));
+	StateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTreeComponentAI"));
 
 	HealthComponent->OnKilledDelegate.AddDynamic(this, &ANPCZombie::NPCDead);
-
 }
 
 void ANPCZombie::PreInitializeComponents()
@@ -49,9 +44,6 @@ void ANPCZombie::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	SenseComponent->OnActorSensed.AddDynamic(this, &ANPCZombie::OnActorSensed);
-
-	AIAttackComponent->StartAttackDelegate.AddDynamic(this, &ANPCZombie::OnAttack);
-	AIAttackComponent->EndAttackDelegate.AddDynamic(this, &ANPCZombie::OnAttackCompleted);
 }
 
 void ANPCZombie::BeginPlay()
@@ -69,7 +61,6 @@ void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ANPCZombie, SprintSpeed);
-	DOREPLIFETIME(ANPCZombie, AIAttackComponent);
 	DOREPLIFETIME(ANPCZombie, SenseComponent);
 }
 
@@ -82,8 +73,6 @@ void ANPCZombie::InitCharacterData()
 
 	if (SenseComponent)
 		SenseComponent->InitSense(CharacterData->SenseData);
-	if (AIAttackComponent)
-		AIAttackComponent->InitAttackComponent();
 }
 
 UHealthComponent* ANPCZombie::GetHealthComponent() const
@@ -91,14 +80,11 @@ UHealthComponent* ANPCZombie::GetHealthComponent() const
 	return FindComponentByClass<UHealthComponent>();
 }
 
-void ANPCZombie::OnAttack()
+void ANPCZombie::SetTargetActor(AActor* NewTarget)
 {
-	ChangeMaxMoveSpeed(SprintSpeed * 0.8f);
-}
-
-void ANPCZombie::OnAttackCompleted()
-{
-	ChangeMaxMoveSpeed(SprintSpeed);
+	TargetActor = NewTarget;
+	if (OnTargetChanged.IsBound())
+		OnTargetChanged.Broadcast(TargetActor);
 }
 
 void ANPCZombie::OnActorSensed(AActor* SensedActor)
@@ -113,8 +99,9 @@ void ANPCZombie::OnActorSensed(AActor* SensedActor)
 	auto Result = FactionSubsystem->GetAttitudeBetween(FactionName, AnotherFactionName);
 	if (Result == EFactionAttitude::Hostile)
 	{
-		BehavorState->SwitchState(FGameplayTag::RequestGameplayTag(FName("NPCBehavorState.ChasingTarget")));
-		ChaseTarget = SensedActor;
-		AIAttackComponent->SetTargetActor(ChaseTarget);
+		if (SensedCharacter != TargetActor)
+			SetTargetActor(SensedActor);
+		//BehavorState->SwitchState(FGameplayTag::RequestGameplayTag(FName("NPCBehavorState.ChasingTarget")));
+		
 	}
 }

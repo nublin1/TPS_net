@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Weapon/Bullets/BaseBulletActor.h"
 #include "ProjectileFactory.generated.h"
 
 
@@ -20,7 +21,7 @@ class TPS_NET_API IProjectileFactory
 public:
 	virtual AActor* CreateProjectile(
 		UWorld* World,
-		UBlueprint* BulletBlueprint,
+		TSubclassOf<ABaseBulletActor> BulletActorClass,
 		const FVector& SpawnLocation,
 		const FRotator& SpawnRotation,
 		const FActorSpawnParameters& SpawnParameters) = 0;

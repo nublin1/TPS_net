@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "Componets/Weapon/WeaponSystemHelper.h"
+#include "Data/Weapon/WeaponData.h"
 #include "GameFramework/Actor.h"
 #include "BaseWeapon.generated.h"
 
+class UAmmoBase;
 class UCameraComponent;
 class UWeaponDataAsset;
 
@@ -56,11 +59,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void StopAttackSequence() PURE_VIRTUAL(ABaseWeapon::StopAttackSequence, );
 	UFUNCTION(BlueprintCallable)
-	virtual void AttackTrigger()  PURE_VIRTUAL(AttackTrigger::StopAttackSequence, );
-
+	
+	virtual void AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass) PURE_VIRTUAL(AttackTrigger::AttackTrigger, );
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void AimTrigger()  PURE_VIRTUAL(AttackTrigger::AimTrigger, );
-	
+
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetProjectileSpawnLocation();
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetAmmoMeshReloadPosition();
 
 	UFUNCTION()
 	UWeaponDataAsset* GetWeaponDataAssetRef() const { return WeaponDataAssetRef; }
@@ -74,6 +82,9 @@ public:
 	
 	UFUNCTION()
 	virtual void SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset);
+
+	UFUNCTION(Blueprintable)
+	virtual void SetTargetPoint(FVector NewPoint) {TargetPoint = NewPoint;}
 	
 protected:
 	//====================================================================
@@ -84,14 +95,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWeaponDataAsset> StartingWeaponDataAsset;
 
-	UFUNCTION()
-	void OnRep_WeaponDataAssetRef();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USceneComponent> TraceStart;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USceneComponent> TraceEnd;
 
 	// Refs
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<AActor> WeaponOwnerActor = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<UCameraComponent> PlayerCamera;
+	TObjectPtr<UCameraComponent> OwnerCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshCharacter;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -104,9 +117,42 @@ protected:
 	//Data
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bOwnerIsPlayer = false;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAmmoBase> SelectedAmmoData;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<AActor*, FHitResult> HitTargets;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FVector TargetPoint = FVector(0, 0, 0);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TSubclassOf<UGameplayAbility> CurrentAttackAbilityClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FWeaponAbilityData CurrentAbilityData;
 	
+
+	// Timers
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FTimerHandle HitDetectTimer;
+
+	// Settings
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bShowTrace = false;
 
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION()
+	virtual void UpdateTracePoints();
+	
+	UFUNCTION()
+	void OnRep_WeaponDataAssetRef();
+
+	UFUNCTION()
+	void HitDetect();
+	UFUNCTION(BlueprintCallable)
+	void HitDetectStart(bool NewShowTrace = false);
+	UFUNCTION(BlueprintCallable)
+	void HitDetectEnd();
 };

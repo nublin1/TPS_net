@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/BaseAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayAbilitySystem/AbilitySystemComponentBase.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
 
@@ -15,11 +17,15 @@ ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
+	StateMachine_Aiming->OnComponentCreated();
+	StateMachine_Aiming->SetIsReplicated(true);
+	
 	StateMachine_Movement = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Movement"));
 	StateMachine_Movement->OnComponentCreated();
 	StateMachine_Movement->SetIsReplicated(true);
 
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponentBase>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(ASCReplicationMode);
 
@@ -42,6 +48,11 @@ void ABaseCharacter::PossessedBy(AController* NewController)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		if (StartingAbilities.Num() > 0)
+		{
+			GrantAbilities(StartingAbilities);
+		}
 	}
 }
 
@@ -79,6 +90,91 @@ void ABaseCharacter::InitCharacterData()
 	FactionName = CharacterData->FactionName;
 	
 	InitSetBaseCharacterStats();
+}
+
+TArray<FGameplayAbilitySpecHandle> ABaseCharacter::GrantAbilities(
+	TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant)
+{
+	TArray<FGameplayAbilitySpecHandle> GrantedHandles;
+
+	if (!AbilitySystemComponent || !HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ASC is missing on %s! or no Authority"), *GetName());
+		return GrantedHandles;
+	}
+
+	for (const TSubclassOf<UGameplayAbility>& AbilityClass : AbilitiesToGrant)
+	{
+		if (!*AbilityClass)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid ability class in GrantAbilities"));
+			continue;
+		}
+
+		FGameplayAbilitySpec AbilitySpec(AbilityClass, 1, INDEX_NONE, this);
+		FGameplayAbilitySpecHandle Handle = AbilitySystemComponent->GiveAbility(AbilitySpec);
+		GrantedHandles.Add(Handle);
+	}
+
+	SendAbilitiesChangedEvent();
+	return GrantedHandles;
+}
+
+void ABaseCharacter::RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilitiesToRemove)
+{
+	if (!AbilitySystemComponent || !HasAuthority())
+	{
+		return;
+	}
+
+	for (auto AbilityHandle : AbilitiesToRemove)
+	{
+		AbilitySystemComponent->ClearAbility(AbilityHandle);
+	}
+
+	SendAbilitiesChangedEvent();
+}
+
+void ABaseCharacter::SendAbilitiesChangedEvent()
+{
+	FGameplayEventData EventData;
+	EventData.EventTag = FGameplayTag::RequestGameplayTag(FName("Event.Abilities.Changed"));
+	EventData.Instigator = this;
+	EventData.Target = this;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventData.EventTag, EventData);
+}
+
+bool ABaseCharacter::IsStateTransitionAllowed(FGameplayTag NewState)
+{
+	if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
+	{
+		if (!IsGrounded
+			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
+			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder"))))
+			return false;
+	}
+
+	else if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")))
+	{
+		if (!IsGrounded)
+			return false;
+
+		FGameplayTagContainer TestTags;
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder")));
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")));
+		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")));
+
+		for (const auto TestTag : TestTags)
+		{
+			if (NewState.MatchesTag(TestTag))
+				return false;
+		}
+
+		return false;
+	}
+	
+	return true;
 }
 
 void ABaseCharacter::InitSetBaseCharacterStats_Implementation()

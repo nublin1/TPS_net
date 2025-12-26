@@ -10,11 +10,10 @@
 #include "Player/PlayerCharacter.h"
 
 
-AMasterWeaponRanged::AMasterWeaponRanged()
+AMasterWeaponRanged::AMasterWeaponRanged(): CurrentRecoilTime(0)
 {
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
-	
 }
 
 void AMasterWeaponRanged::PostInitializeComponents()
@@ -37,14 +36,14 @@ void AMasterWeaponRanged::BeginPlay()
 	{
 		if (APlayerCharacter* MyPawn = Cast<APlayerCharacter>(PC->GetPawn()))
 		{
-			if (WeaponOwnerActor == MyPawn)
+			if (WeaponOwnerActor && WeaponOwnerActor == MyPawn)
 			{
 				bOwnerIsPlayer = true;
-				PlayerCamera = MyPawn->GetCamera();
+				OwnerCamera = MyPawn->GetCamera();
 				SkeletalMeshCharacter = MyPawn->GetSkeletalMeshComponent();
 				AnimInstanceCharacter = SkeletalMeshCharacter->GetAnimInstance();
 			}
-			else
+			else if (WeaponOwnerActor)
 			{
 				bOwnerIsPlayer = false;
 				if (auto OwnerSkeletalMesh = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
@@ -52,6 +51,8 @@ void AMasterWeaponRanged::BeginPlay()
 			}
 		}
 	}
+
+	
 }
 
 void AMasterWeaponRanged::Tick(float DeltaTime)
@@ -77,11 +78,11 @@ void AMasterWeaponRanged::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsse
 	{
 		WeaponDataAssetRef = NewWeaponDataAsset;
 
-		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes[0];
-		if (!WeaponDataAssetRef->CharacteristicsOfTheWeapon.UsableAmmo.IsEmpty())
+		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes[0];
+		if (!WeaponDataAssetRef->CharacteristicsOfRangedWeapon.UsableAmmo.IsEmpty())
 		{
 			TArray<UAmmoBase*> tempAmmo;
-			for (auto Element : WeaponDataAssetRef->CharacteristicsOfTheWeapon.UsableAmmo)
+			for (auto Element : WeaponDataAssetRef->CharacteristicsOfRangedWeapon.UsableAmmo)
 			{
 				const FAmmoData* AData = Element.DataTable->FindRow<FAmmoData>(
 					Element.RowName, Element.RowName.ToString());
@@ -107,11 +108,44 @@ void AMasterWeaponRanged::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsse
 		StartReload();
 		UpdateVisual();
 	}
+	
+	if (WeaponDataAssetRef && WeaponDataAssetRef->GrantedAbilities.Num() > 0)
+	{
+		auto It = WeaponDataAssetRef->GrantedAbilities.CreateConstIterator();
+		const auto FirstKey = It->Key;
+		const auto FirstValue = It->Value;
+		
+		CurrentAttackAbilityClass= FirstKey;
+		CurrentAbilityData = FirstValue;
+	}
 }
 
 void AMasterWeaponRanged::UpdateVisual()
 {
 	Super::UpdateVisual();
+}
+
+FVector AMasterWeaponRanged::GetProjectileSpawnLocation()
+{
+	FVector SpawnLocation;
+
+	if (bOwnerIsPlayer && WeaponDataAssetRef->bTraceFromCamera)
+	{
+		SpawnLocation = OwnerCamera->K2_GetComponentLocation();
+	}
+	else
+	{
+		FTransform BulletSpawnPointTransform;
+		if (SkeletalMeshWeapon->GetSkinnedAsset())
+			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
+		else if (StaticMeshWeapon->GetStaticMesh())
+			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, StaticMeshWeapon);
+		
+		SpawnLocation = BulletSpawnPointTransform.GetLocation();
+		
+	}
+
+	return SpawnLocation;
 }
 
 bool AMasterWeaponRanged::IsCanStartReload()
@@ -126,7 +160,7 @@ void AMasterWeaponRanged::StartReload()
 {
 	if (HasAuthority())
 	{
-		RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfTheWeapon.MagazineSize;
+		RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;
 		OnRep_RoundsInMagazine();
 	}
 	else
@@ -142,6 +176,9 @@ FAttackReadyResult AMasterWeaponRanged::CheckIsCanAttack()
 
 	if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
 		return FAttackReadyResult(EAttackReadyStatus::AttackDelayActive, TEXT("Attack delay timer is active."));
+
+	if (AvailableShootsCount <=0)
+		return FAttackReadyResult(EAttackReadyStatus::FireSequenceEmpty, TEXT("FireSequenceEmpty"));
 
 	if (bIsReadyToNextShoot && AvailableShootsCount > 0)
 	{
@@ -168,7 +205,7 @@ void AMasterWeaponRanged::InitializeFireSequence()
 		AvailableShootsCount = 1;
 		break;
 	case EFireMode::Burst:
-		AvailableShootsCount = WeaponDataAssetRef->CharacteristicsOfTheWeapon.ShotsPerBurst;
+		AvailableShootsCount = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.ShotsPerBurst;
 		break;
 	case EFireMode::Full_Auto:
 		AvailableShootsCount = GetRoundsInMagazine();
@@ -208,8 +245,11 @@ void AMasterWeaponRanged::StopAttackSequence()
 	StopFireSequence();
 }
 
-void AMasterWeaponRanged::AttackTrigger()
+void AMasterWeaponRanged::AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass)
 {
+	CurrentAttackAbilityClass = AbilityClass;
+	if (const FWeaponAbilityData* FoundData = WeaponDataAssetRef->GrantedAbilities.Find(CurrentAttackAbilityClass))
+		CurrentAbilityData = *FoundData;
 	StartFireWeapon();
 }
 
@@ -231,13 +271,13 @@ void AMasterWeaponRanged::StartFireWeapon()
 	case EBulletMode::HitScan:
 		break;
 	case EBulletMode::Projectile:
-		if (WeaponDataAssetRef->ShootActionData.DelayBeforeSpawnBullet > 0)
+		if (CurrentAbilityData.ShootActionData.DelayBeforeSpawnBullet > 0)
 		{
 			GetWorld()->GetTimerManager().SetTimer(SpawnBulletDelay, [this]()
 			{
 				ConfigureSpawnedProjectile();
 		
-			}, WeaponDataAssetRef->ShootActionData.DelayBeforeSpawnBullet, false);
+			}, CurrentAbilityData.ShootActionData.DelayBeforeSpawnBullet, false);
 			break;
 		}
 		
@@ -254,17 +294,14 @@ void AMasterWeaponRanged::StartFireWeapon()
 	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
 	{
 		bIsReadyToNextShoot = true;
-	}, 60.0f / WeaponDataAssetRef->CharacteristicsOfTheWeapon.RPM, false);
+	}, 60.0f / WeaponDataAssetRef->CharacteristicsOfRangedWeapon.RPM, false);
 }
 
 void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 {
-	auto BulletSpawnPointTransform = GetMuzzleTransform(
-		WeaponDataAssetRef->ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
-
-	BulletBlueprint = WeaponDataAssetRef->ShootActionData.BulletActor;
-	if (BulletBlueprint)
+	if ( CurrentAbilityData.ShootActionData.BulletActorClass)
 	{
+		BulletActorClass = CurrentAbilityData.ShootActionData.BulletActorClass;
 		if (!SelectedAmmoData)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Error: No usable ammo found"))
@@ -275,7 +312,7 @@ void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 		for (int i = 0; i < AmmoCharacteristics.NumberOfShotsPerRound; i++)
 		{
 			// Spreading angle
-			auto SpreadAngle = WeaponDataAssetRef->CharacteristicsOfTheWeapon.SpreadAngle;
+			auto SpreadAngle = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.SpreadAngle;
 			// Отклонение для разброса
 			FRotator RandomSpread = FRotator(
 				FMath::RandRange(-SpreadAngle, SpreadAngle), // Pitch
@@ -283,18 +320,21 @@ void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 				0.0f // Roll (не нужно для разброса)
 			);
 
-			FVector SpawnLocation;
+			FVector SpawnLocation = GetProjectileSpawnLocation();
 			FRotator SpawnRotation;
-			if (bOwnerIsPlayer && WeaponDataAssetRef->ShootActionData.bSpawnFromCamera)
+			/*if (bOwnerIsPlayer && WeaponDataAssetRef->bTraceFromCamera)
 			{
-				SpawnLocation = PlayerCamera->K2_GetComponentLocation();
-				SpawnRotation = PlayerCamera->GetComponentRotation() + RandomSpread;
+				SpawnRotation = OwnerCamera->GetComponentRotation();
 			}
-			else
+			else*/
 			{
-				SpawnLocation = BulletSpawnPointTransform.GetLocation();
-				SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
+				auto BulletSpawnPointTransform =
+					GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
+				SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
+				//SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
 			}
+
+			SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation,TargetPoint) + RandomSpread;
 
 			ServerProjectileSpawn(SpawnLocation, SpawnRotation, AmmoCharacteristics);
 			if (OnSpawnedProjectile.IsBound())
@@ -322,7 +362,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 	auto NewBulletAmmoData = SelectedAmmoData;
 
 
-	auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletBlueprint, SpawnLocation,
+	auto SpawnedActorRef = ProjectileFactory->CreateProjectile(GetWorld(), BulletActorClass, SpawnLocation,
 	                                                           SpawnRotation, SpawnParameters);
 	if (SpawnedActorRef)
 	{
@@ -337,7 +377,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 			return;
 		};
 
-		BulletActor->BulletFlightMode = WeaponDataAssetRef->ShootActionData.BulletFlightMode;
+		BulletActor->BulletFlightMode = CurrentAbilityData.ShootActionData.BulletFlightMode;
 		BulletActor->ActorsToIgnore.Add(WeaponOwnerActor);
 
 		switch (BulletActor->BulletFlightMode)
@@ -361,7 +401,7 @@ void AMasterWeaponRanged::HandleProjectileSpawn(const FVector& SpawnLocation, co
 			BulletActor->SelectedAmmoData = NewBulletAmmoData;
 			if (bOwnerIsPlayer)
 			{
-				BulletActor->SetActorRotation(PlayerCamera->GetForwardVector().Rotation());
+				BulletActor->SetActorRotation(OwnerCamera->GetForwardVector().Rotation());
 			}
 			else
 			{
@@ -422,7 +462,7 @@ void AMasterWeaponRanged::PlayShootEffect_Multicast_Implementation(UParticleSyst
 
 void AMasterWeaponRanged::DecreaseRoundsInMagazine()
 {
-	if (WeaponDataAssetRef->CharacteristicsOfTheWeapon.bInfinityMagazine)
+	if (WeaponDataAssetRef->CharacteristicsOfRangedWeapon.bInfinityMagazine)
 		return;
 
 	if (HasAuthority())
@@ -438,26 +478,26 @@ void AMasterWeaponRanged::ServerDecreaseRoundsInMagazine_Implementation()
 
 void AMasterWeaponRanged::ServerReload_Implementation()
 {
-	RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfTheWeapon.MagazineSize;
+	RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;
 }
 
 void AMasterWeaponRanged::SwitchFireMode()
 {
 	if (SelectedFireMode == EFireMode::None)
 	{
-		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes[0];
+		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes[0];
 		return;
 	}
 
-	int32 CurrentIndex = WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes.IndexOfByKey(
+	int32 CurrentIndex = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes.IndexOfByKey(
 		SelectedFireMode);
 	CurrentIndex++;
-	if (CurrentIndex < WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes.Num())
+	if (CurrentIndex < WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes.Num())
 	{
-		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes[CurrentIndex];
+		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes[CurrentIndex];
 	}
 	else
-		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfTheWeapon.AvailableShootingModes[0];
+		SelectedFireMode = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.AvailableShootingModes[0];
 
 
 	//UE_LOG(LogTemp, Log, TEXT("Fire Mode: %d"), static_cast<int>(SelectedFireMode));
@@ -468,11 +508,6 @@ void AMasterWeaponRanged::SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset)
 	Super::SetWeaponBaseRef(NewWeaponDataAsset);
 
 	InitWeaponBaseData(NewWeaponDataAsset);
-}
-
-void AMasterWeaponRanged::SetTargetPoint(FVector NewPoint)
-{
-	TargetPoint = NewPoint;
 }
 
 void AMasterWeaponRanged::OnRep_RoundsInMagazine() const

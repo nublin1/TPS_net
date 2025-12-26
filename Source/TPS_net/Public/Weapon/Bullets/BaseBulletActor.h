@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "BaseBulletActor.generated.h"
 
 class UAmmoBase;
@@ -49,8 +50,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAutoAim(bool IsAutoAim, FVector NewAimTargetPoint);
 	
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+protected:	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FTimerHandle DestroyHandle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile")
 	TEnumAsByte<ETraceTypeQuery> CollisionChannel = ETraceTypeQuery::TraceTypeQuery1;

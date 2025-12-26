@@ -42,11 +42,6 @@ public:
 	//====================================================================
 	UFUNCTION()
 	void InitAttackComponent();
-	
-	UFUNCTION(Server, Reliable)
-	void Server_HitDetect();
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void ServerClearAlreadyHitTargets();
 
 	UFUNCTION()
 	void SetTargetActor (AActor* NewTargetActor);
@@ -69,10 +64,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ReadyToAttack = true;
 
-	//
-	UPROPERTY(BlueprintReadOnly)
-	TMap<AActor*, bool> AlreadyHitTargets;
-
 	UPROPERTY(EditAnywhere)
 	bool IsDebug = false;
 
@@ -83,21 +74,12 @@ protected:
 
 	//====================================================================
 	// FUNCTIONS
-	//====================================================================
-	UFUNCTION(BlueprintNativeEvent)
-	void PerformAttack();
-	
+	//===================================================================	
 	UFUNCTION()
 	void AttackCompleted(UAnimMontage* Montage, bool bInterrupted);
 	
-	UFUNCTION(BlueprintCallable)
-	void RequestHitDetect();
-	UFUNCTION()
-	bool HitDetect();	
 	UFUNCTION(Server, Reliable)
 	void ServerApplyDamage(AActor* HitActor);
-	UFUNCTION(BlueprintCallable)
-	void ClearAlreadyHitTargets();
 	UFUNCTION()
 	bool InRangeToAttack() const;
 	UFUNCTION(BlueprintCallable)

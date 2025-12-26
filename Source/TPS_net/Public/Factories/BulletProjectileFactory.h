@@ -18,12 +18,12 @@ class TPS_NET_API UBulletProjectileFactory : public UObject, public IProjectileF
 public:
 	virtual AActor* CreateProjectile(
 		UWorld* World,
-		UBlueprint* BulletBlueprint,
+		TSubclassOf<ABaseBulletActor> BulletActorClass,
 		const FVector& SpawnLocation,
 		const FRotator& SpawnRotation,
 		const FActorSpawnParameters& SpawnParameters) override
 	{
 		//return World->SpawnActorDeferred<AActor>(BulletBlueprint->GeneratedClass, FTransform::Identity);
-		return World->SpawnActor<AActor>(BulletBlueprint->GeneratedClass, SpawnLocation, SpawnRotation, SpawnParameters);
+		return World->SpawnActor<AActor>(BulletActorClass, SpawnLocation, SpawnRotation, SpawnParameters);
 	}
 };

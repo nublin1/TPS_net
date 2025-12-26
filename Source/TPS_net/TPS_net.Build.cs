@@ -10,12 +10,13 @@ public class TPS_net : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","RHI",
 			 "OnlineSubsystem", "OnlineSubsystemUtils", "AdvancedSteamSessions", "AIModule",  
-			 "NavigationSystem", "Landscape", "PhysicsCore",  "RecoilAnimation"
+			 "NavigationSystem", "Landscape", "PhysicsCore",  "RecoilAnimation", "StateTreeModule", "GameplayStateTreeModule",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"Slate", "SlateCore", "UMG", "Niagara", "GameplayAbilities",
+			"Slate", "SlateCore", "UMG", "Niagara",
+			"GameplayAbilities",
 			"GameplayTags", "GameplayTasks",
 		});
 		

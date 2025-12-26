@@ -26,14 +26,14 @@ void AMasterWeaponMelee::BeginPlay()
 	{
 		if (APlayerCharacter* MyPawn = Cast<APlayerCharacter>(PC->GetPawn()))
 		{
-			if (WeaponOwnerActor == MyPawn)
+			if (WeaponOwnerActor && WeaponOwnerActor == MyPawn)
 			{
 				bOwnerIsPlayer = true;
-				PlayerCamera = MyPawn->GetCamera();
+				OwnerCamera = MyPawn->GetCamera();
 				SkeletalMeshCharacter = MyPawn->GetSkeletalMeshComponent();
 				AnimInstanceCharacter = SkeletalMeshCharacter->GetAnimInstance();
 			}
-			else
+			else if (WeaponOwnerActor)
 			{
 				bOwnerIsPlayer = false;
 				if (auto OwnerSkeletalMesh = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
@@ -64,7 +64,8 @@ void AMasterWeaponMelee::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset
 void AMasterWeaponMelee::UpdateVisual()
 {
 	Super::UpdateVisual();
-	
+
+	UpdateTracePoints();
 }
 
 void AMasterWeaponMelee::SwitchAttackMode()
@@ -91,16 +92,20 @@ FAttackReadyResult AMasterWeaponMelee::CheckIsCanAttack()
 	return FAttackReadyResult(EAttackReadyStatus::Ready, ReadyMessage);
 }
 
-void AMasterWeaponMelee::AttackTrigger()
+void AMasterWeaponMelee::AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass)
 {
+	CurrentAttackAbilityClass = AbilityClass;
+	if (const FWeaponAbilityData* FoundData = WeaponDataAssetRef->GrantedAbilities.Find(CurrentAttackAbilityClass))
+		CurrentAbilityData = *FoundData;
+	
+	
 	OnFire();
-
 	bIsReadyToNextAttack = false;
 
 	GetWorld()->GetTimerManager().SetTimer(AttackDelayTimerHandle, [this]()
 	{
 		bIsReadyToNextAttack = true;
-	}, WeaponDataAssetRef->CharacteristicsOfTheWeaponMelee.AttackDelay, false);
+	}, WeaponDataAssetRef->WeaponMeleeAttackData.AttackDelay, false);
 }
 
 void AMasterWeaponMelee::AimTrigger()

@@ -59,7 +59,9 @@ public:
 	// FUNCTIONS
 	//====================================================================	
 	virtual void InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset) override;	
-	virtual void UpdateVisual() override;	
+	virtual void UpdateVisual() override;
+
+	virtual FVector GetProjectileSpawnLocation() override;
 
 	virtual bool IsCanStartReload() override;
 	virtual void StartReload() override;
@@ -69,12 +71,12 @@ public:
 	void InitializeFireSequence ();
 	UFUNCTION(BlueprintCallable)
 	void StopFireSequence();
-
+	
 	virtual void SwitchAttackMode()override;
 	virtual void InitializeAttackSequence() override;
 	virtual void StopAttackSequence() override;
 
-	virtual void AttackTrigger() override;
+	virtual void AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass) override;
 
 	virtual void AimTrigger() override;
 
@@ -120,20 +122,18 @@ public:
 	UFUNCTION()
 	uint16 GetRoundsInMagazine() const {return RoundsInMagazine;}
 	UFUNCTION()
-	uint16 GetMagazineSize() const {return WeaponDataAssetRef->CharacteristicsOfTheWeapon.MagazineSize;}
+	uint16 GetMagazineSize() const {return WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;}
 	UFUNCTION()
 	bool GetIsStartShooting() {return bIsStartShooting;}
 
 	//
 	virtual void SetWeaponBaseRef(UWeaponDataAsset* NewWeaponDataAsset) override;
 
-	virtual void SetTargetPoint(FVector NewPoint);
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ClipBoneName;
-	UPROPERTY(Transient)
-	TObjectPtr<UBlueprint> BulletBlueprint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<ABaseBulletActor> BulletActorClass;
 	UPROPERTY()
 	TScriptInterface<IProjectileFactory> ProjectileFactory;
 	
@@ -151,8 +151,7 @@ protected:
 	EFireMode SelectedFireMode = EFireMode::None;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	TArray<TObjectPtr<UAmmoBase>> UsableAmmo;	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAmmoBase> SelectedAmmoData;
+	
 
 	// Timer
 	UPROPERTY()
@@ -167,11 +166,7 @@ protected:
 	bool bIsRecoiling = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentRecoilTime;
-
-	//Data
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FVector TargetPoint = FVector::Zero();
-	
+		
 	//====================================================================
 	// FUNCTIONS
 	//===================================================================

@@ -25,20 +25,20 @@ void UAmmoWidget::SighUp()
 	APawn* OwningPawn = GetOwningPlayer()->GetPawn();
 	if (!OwningPawn)
 	{
-		UE_LOG(LogTemp, Error, TEXT("OwningPawn is null. Cannot proceed with weapon system setup."));
+		UE_LOG(LogTemp, Error, TEXT("UAmmoWidget::OwningPawn is null. Cannot proceed with weapon system setup."));
 		return;
 	}
 	
 	if (!OwningPawn->GetClass()->ImplementsInterface(UWeaponSystemInterface::StaticClass()))
 	{
-		UE_LOG(LogTemp, Error, TEXT("OwningPawn does not implement IWeaponSystemInterface."));
+		UE_LOG(LogTemp, Error, TEXT("UAmmoWidget::OwningPawn does not implement IWeaponSystemInterface."));
 		return;
 	}
 	
 	IWeaponSystemInterface* WeaponSystemInterface = Cast<IWeaponSystemInterface>(OwningPawn);
 	if (!WeaponSystemInterface)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to cast OwningPawn to IWeaponSystemInterface."));
+		UE_LOG(LogTemp, Error, TEXT("UAmmoWidget::Failed to cast OwningPawn to IWeaponSystemInterface."));
 		return;
 	}
 
@@ -78,7 +78,7 @@ void UAmmoWidget::RefreshWeaponDetails(ABaseWeapon* WeaponInfo)
 	SetCurrentAmmo(WeaponRanged->GetRoundsInMagazine());
 	
 	if(MaxMagazineAmmo)
-		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponRanged->GetWeaponDataAssetRef()->CharacteristicsOfTheWeapon.MagazineSize));
+		MaxMagazineAmmo->SetText(FText::AsNumber(WeaponRanged->GetWeaponDataAssetRef()->CharacteristicsOfRangedWeapon.MagazineSize));
 	
 	if (FireMode)
 		SetFireMode(WeaponRanged->GetSelectedFireMode());

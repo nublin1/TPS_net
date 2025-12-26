@@ -9,11 +9,13 @@
 UENUM(BlueprintType)
 enum class EAttackReadyStatus : uint8
 {
-	Ready                UMETA(DisplayName = "Ready to Attack"),            
-	NoAmmo               UMETA(DisplayName = "Not Enough Ammo"),           
-	AttackDelayActive     UMETA(DisplayName = "Attack Delay Active"),       
-	WeaponNotEquipped    UMETA(DisplayName = "Weapon Not Equipped"),     
-	Unknown              UMETA(DisplayName = "Unknown Reason")        
+	Ready						UMETA(DisplayName = "Ready to Attack"),
+	NoAmmo						UMETA(DisplayName = "Not Enough Ammo"),
+	FireSequenceEmpty			UMETA(DisplayName = "Fire Sequence Empty"),
+	AttackDelayActive			UMETA(DisplayName = "Attack Delay Active"),
+	WeaponNotEquipped			UMETA(DisplayName = "Weapon Not Equipped"),
+	WeaponInteractionActive		UMETA(DisplayName = "WeaponInteractionActive"),
+	Unknown						UMETA(DisplayName = "Unknown Reason") 
 };
 
 UENUM(Blueprintable, BlueprintType)

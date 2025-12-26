@@ -25,9 +25,6 @@ APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
 
-	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
-	StateMachine_Aiming->OnComponentCreated();
-
 	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
 	ActiveStateCharacter->OnComponentCreated();
 	ActiveStateCharacter->SetIsReplicated(true);
@@ -236,38 +233,6 @@ void APlayerCharacter::MulticastSetSpeed_Implementation(float NewMaxSpeed)
 {
 	TargetMaxWalkSpeed = NewMaxSpeed;
 	
-}
-
-bool APlayerCharacter::IsStateTransitionAllowed(FGameplayTag NewState)
-{
-	if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
-	{
-		if (!IsGrounded
-			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")))
-			|| StateMachine_Movement->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder"))))
-			return false;
-	}
-
-	else if (NewState == FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")))
-	{
-		if (!IsGrounded)
-			return false;
-
-		FGameplayTagContainer TestTags;
-		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Ladder")));
-		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Dodge")));
-		TestTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("PlayerStates.Parkour")));
-
-		for (const auto TestTag : TestTags)
-		{
-			if (NewState.MatchesTag(TestTag))
-				return false;
-		}
-
-		return false;
-	}
-	
-	return true;
 }
 
 void APlayerCharacter::ShortCollisionOff(UBoxComponent* TargetCollision)

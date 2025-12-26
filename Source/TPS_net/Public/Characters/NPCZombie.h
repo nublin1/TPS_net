@@ -5,18 +5,22 @@
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
 #include "AI/Al_Helper.h"
-#include "GameFramework/Character.h"
+#include "Components/StateTreeComponent.h"
+
 #include "Interfaces/IHealthInterface.h"
-#include "NPC/Inrfaces/AIAttackInterface.h"
+
 #include "NPCZombie.generated.h"
 
 class UWeaponSystemComponent;
 class UNPCSenseComponent;
 
 UCLASS()
-class TPS_NET_API ANPCZombie : public ABaseCharacter, public IIHealthInterface, public IAIAttackInterface
+class TPS_NET_API ANPCZombie : public ABaseCharacter, public IIHealthInterface
 {
 	GENERATED_BODY()
+	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetChanged, AActor*, Target);
+	
 public:
 	ANPCZombie();
 
@@ -32,6 +36,8 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnTargetChanged OnTargetChanged;
 	
 	//====================================================================
 	// FUNCTIONS
@@ -40,8 +46,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
+
 	UFUNCTION()
-	virtual class UAIAttackComponent* GetAIAttackComponent() const override {return AIAttackComponent;}
+	virtual void SetTargetActor(AActor* NewTarget);
 
 protected:
 	//====================================================================
@@ -49,32 +56,21 @@ protected:
 	//====================================================================
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UStateMachineComponent> BehavorState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UAIAttackComponent> AIAttackComponent;
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UNPCSenseComponent> SenseComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<UStateTreeComponent> StateTreeComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<AActor> TargetActor;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Transformation")
 	float SprintSpeed = 600.0f;
 	
-
-	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<AActor> ChaseTarget = nullptr;
-	
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
-	// Attack
-	UFUNCTION()
-	void OnAttack();
-	UFUNCTION()
-	void OnAttackCompleted();
-	
-	//
 	UFUNCTION()
 	void OnActorSensed(AActor* SensedActor);
 

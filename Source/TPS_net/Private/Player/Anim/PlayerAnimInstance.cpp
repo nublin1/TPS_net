@@ -71,9 +71,9 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		if (GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green,
+			/*GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green,
 				FString::Printf(TEXT("State: %s "),
-					*WeaponSysComponent->GetCurrentStateTagName()));
+					*WeaponSysComponent->GetCurrentStateTagName()));*/
 		}
 	}
 	
@@ -165,10 +165,10 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 				return;
 			}
 			
-			LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
+			/*LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 			LayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;*/
 			
 		}
 	}
@@ -247,10 +247,7 @@ void UPlayerAnimInstance::UpdateWeaponHoldPose()
 
 	// Получение позиции для левой руки и перезарядки
 	//LeftHandIKLoc = WeaponSysComponent->GetLeftHandSocketTransform().GetLocation();
-	ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetSkeletalMeshWeapon()->GetSocketTransform(
-		FName("AmmoEject"), RTS_Actor).GetLocation();
-
-	
+	ReloadPosition = WeaponSysComponent->GetCurrentWeaponInHands()->GetAmmoMeshReloadPosition();
 }
 
 void UPlayerAnimInstance::CleanWeaponData(ABaseWeapon* MasterWeapon)
@@ -261,18 +258,24 @@ void UPlayerAnimInstance::CleanWeaponData(ABaseWeapon* MasterWeapon)
 void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 {
 	IsHoldWeapon = WeaponSysComponent->bIsAnyWeaponInHands();
-	WeaponType = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType;
-	UpdateOverrideData();
+	if (IsHoldWeapon)
+	{
+		WeaponType = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType;
+		BlendSpaceRegular = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponPresentationData.BlendSpaceRegular;
+		BlendSpaceAiming = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponPresentationData.BlendSpaceAiming;
+
+		UpdateOverrideData();
+	}
 }
 
 void UPlayerAnimInstance::UpdateOverrideData()
 {
 	if (WeaponType == EWeaponType::Melee)
 	{
-		LayerBlendingValues.Legs = 1.0f;
-		LayerBlendingValues.Pelvis = 1.0f;
+		/*LayerBlendingValues.Legs = 0.0f;
+		LayerBlendingValues.Pelvis = 0.0f;
 		LayerBlendingValues.Arm_L = 1.0f;
-		LayerBlendingValues.Arm_R = 1.0f;
+		LayerBlendingValues.Arm_R = 1.0f;*/
 		
 		
 		switch (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->MeleeWeaponType)

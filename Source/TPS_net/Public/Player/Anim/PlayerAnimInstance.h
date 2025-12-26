@@ -75,14 +75,21 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Read Only Data|Character Information", Meta = (
 		ShowOnlyInnerProperties))
 	FAnimCharacterInformation CharacterInformation;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool IsHoldWeapon;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	EWeaponType WeaponType;
+	
 
 	/** Anim Graph - Layer Blending */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
 	FAnimGraphLayerBlending LayerBlendingValues;
+	
+	/** Weapon Information */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool IsHoldWeapon;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EWeaponType WeaponType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UBlendSpace> BlendSpaceRegular;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UBlendSpace> BlendSpaceAiming;
 
 	/** Anim Graph - Aiming Values */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")

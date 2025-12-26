@@ -17,8 +17,7 @@
 
 
 // Sets default values for this component's properties
-UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), WeaponPistolHolster(nullptr),                                                 
-                                                   SkeletalMeshComponent(nullptr)
+UWeaponSystemComponent::UWeaponSystemComponent(): CurrentWeaponInHands(nullptr), SkeletalMeshComponent(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
@@ -28,9 +27,10 @@ void UWeaponSystemComponent::PostInitProperties()
 {
 	Super::PostInitProperties();
 
-	WeaponPrimaryHolster.SetNum(NumberOfWeaponPrimaryHolsters);
-	UnarmedHolster.SetNum(NumberOfWeaponUnarmedHolsters);
-	MeleeHolster.SetNum(NumberOfWeaponMeleeHolsters);
+	MeleeHolster.SetNum(MaxNumberOfWeaponMeleeHolsters);
+	WeaponPistolHolster.SetNum(MaxNumberOfWeaponPistolHolsters);
+	WeaponPrimaryHolster.SetNum(MaxNumberOfWeaponPrimaryHolsters);
+	UnarmedHolster.SetNum(MaxNumberOfWeaponUnarmedHolsters);
 
 	auto Owner = Cast<APlayerCharacter>(GetOwner());
 	if (Owner)
@@ -88,7 +88,7 @@ bool UWeaponSystemComponent::bCheckHolsterAvaibility(EHolsterWeaponType BeingChe
 		return WeaponPrimaryHolster[NumberOfHolster] == nullptr;
 
 	case EHolsterWeaponType::Pistol:
-		return WeaponPistolHolster == nullptr;
+		return WeaponPistolHolster[NumberOfHolster]== nullptr;
 
 	case EHolsterWeaponType::Unarmed:
 		return UnarmedHolster[NumberOfHolster] == nullptr;
@@ -107,6 +107,11 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 			LeftHandSocketTransform = FTransform::Identity;
 			return;
 		}
+
+		if (CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponGripType == EWeaponGripType::OneHanded)
+		{
+			return;
+		}
 		//LeftHandSocketTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
 		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
 		auto rhand = SkeletalMeshComponent->GetSocketTransform("hand_r", RTS_World);
@@ -122,6 +127,11 @@ FAttackReadyResult UWeaponSystemComponent::CheckIsCanAttack()
 {
 	if (!CurrentWeaponInHands)
 		return FAttackReadyResult(EAttackReadyStatus::WeaponNotEquipped, TEXT("Weapon is not equipped."));
+
+	if (!CurrentStateTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None"))))
+	{
+		return FAttackReadyResult(EAttackReadyStatus::WeaponInteractionActive, TEXT("Weapon is not ready due to active interaction"));
+	}
 
 	if (OwnerStateMachineComponent_Aiming)
 	{
@@ -145,6 +155,14 @@ FAttackReadyResult UWeaponSystemComponent::CheckIsCanAttack()
 	return CurrentWeaponInHands->CheckIsCanAttack();
 	
 	//return FAttackReadyResult(EAttackReadyStatus::Unknown, TEXT("Unknown shoot readiness state."));
+}
+
+void UWeaponSystemComponent::PerformAttack_Implementation()
+{
+}
+
+void UWeaponSystemComponent::PerformAttackAbility_Implementation(TSubclassOf<UGameplayAbility> AbilityClass)
+{
 }
 
 void UWeaponSystemComponent::TriggerAttack() 
@@ -202,6 +220,31 @@ void UWeaponSystemComponent::OnRep_CurrentStateTag()
 	}
 }
 
+UWeaponDataAsset* UWeaponSystemComponent::GetWeaponDataAssetRef(EHolsterWeaponType Holster, int NumberOfHolster)
+{
+	
+	if (CheckHolsterIsEmpty(Holster, NumberOfHolster))
+		return nullptr;
+	
+	switch (Holster)
+	{
+	case EHolsterWeaponType::None:
+		return nullptr;
+	case EHolsterWeaponType::First:
+		return MeleeHolster[NumberOfHolster]->GetWeaponDataAssetRef();
+	case EHolsterWeaponType::Pistol:
+		return nullptr;
+	case EHolsterWeaponType::Primary:
+		return WeaponPrimaryHolster[NumberOfHolster]->GetWeaponDataAssetRef();
+	case EHolsterWeaponType::AlternativePrimary:
+		return nullptr;
+	case EHolsterWeaponType::Unarmed:
+		return UnarmedHolster[NumberOfHolster]->GetWeaponDataAssetRef();
+	}
+
+	return nullptr;
+}
+
 void UWeaponSystemComponent::InitStartingWeapon()
 {
 	if (StartingWeaponsArray.IsEmpty())
@@ -211,8 +254,6 @@ void UWeaponSystemComponent::InitStartingWeapon()
 	{
 		if (!StartingWeapon)
 			continue;
-
-		UWeaponDataAsset* TempWeaponDataAsset = StartingWeapon;
 				
 		//UE_LOG(LogTemp, Error, TEXT("CLIENT. WeaponName %s"),* StartingWeapon.ToString());
 		ServerAddWeapon(StartingWeapon);
@@ -233,7 +274,7 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	int NumberSlot = 0;
 	if (WeaponData->HolsterWeaponType == EHolsterWeaponType::Primary)
 	{
-		for(int i = 0; i < NumberOfWeaponPrimaryHolsters; i++)
+		for(int i = 0; i < MaxNumberOfWeaponPrimaryHolsters; i++)
 		{
 			if (bCheckHolsterAvaibility(WeaponData->HolsterWeaponType, i) == true)
 			{
@@ -249,7 +290,7 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	}
 	else if (WeaponData->HolsterWeaponType == EHolsterWeaponType::Unarmed)
 	{
-		for(int i = 0; i < NumberOfWeaponUnarmedHolsters; i++)
+		for(int i = 0; i < MaxNumberOfWeaponUnarmedHolsters; i++)
 		{
 			if (bCheckHolsterAvaibility(WeaponData->HolsterWeaponType, i) == true)
 			{
@@ -311,7 +352,6 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	
 	Weapon->SetOwner(GetOwner());
 	Weapon->SetWeaponOwnerActor(GetOwner());
-	Weapon->SetReplicates(true);
 
 	UGameplayStatics::FinishSpawningActor(Weapon, SpawnTransform);
 	Weapon->SetWeaponBaseRef(WeaponData);
@@ -322,7 +362,10 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
 											   EAttachmentRule::SnapToTarget, true);
 	Weapon->AttachToComponent(SkeletalMeshComponent, AttachRule,
-							  UWeaponHelper::ConvertHolsterTypeToText(WeaponData->HolsterWeaponType));
+							  WeaponData->HolsterName);
+
+	/*CurrentWeaponInHands->AttachToComponent(SkeletalMeshComponent, AttachRule,
+												CurrentWeaponInHands->GetWeaponDataAssetRef()->HolsterName);*/
 	
 	AddWeapon(Weapon, NumberSlot);
 }
@@ -331,21 +374,83 @@ void UWeaponSystemComponent::AssignWeaponToHolsterSlot(ABaseWeapon* WeaponInstan
 {
 	switch (WeaponInstance->GetWeaponDataAssetRef()->HolsterWeaponType)
 	{
+	case EHolsterWeaponType::None:
+		break;
+	case EHolsterWeaponType::First:
+		MeleeHolster[NumberSlot] = WeaponInstance;
+		break;
 	case EHolsterWeaponType::Primary:
 		WeaponPrimaryHolster[NumberSlot] = WeaponInstance;
 		break;
 	case EHolsterWeaponType::Pistol:
-		WeaponPistolHolster = WeaponInstance;
+		WeaponPistolHolster[NumberSlot] = WeaponInstance;
+		break;	
+	case EHolsterWeaponType::AlternativePrimary:
 		break;
 	case EHolsterWeaponType::Unarmed:
 		UnarmedHolster[NumberSlot] = WeaponInstance;
-	default:
-		break;
 	}
 
 	if (AutoEquipLast)
 		TakeupArms(WeaponInstance->GetWeaponDataAssetRef()->HolsterWeaponType, NumberSlot);
 	
+}
+
+int UWeaponSystemComponent::GetNextAvailableWeaponIndexInHolster(EHolsterWeaponType Holster)
+{
+	switch (Holster)
+	{
+	case EHolsterWeaponType::None:
+		break;
+	case EHolsterWeaponType::First:
+		if (MaxNumberOfWeaponMeleeHolsters <= 0) return -1;
+		for (int i = 1; i <= MaxNumberOfWeaponMeleeHolsters; i++)
+		{
+			int NextIndex = (LastMeleeHolsterUsed + i) % MaxNumberOfWeaponMeleeHolsters;
+			if (!CheckHolsterIsEmpty(EHolsterWeaponType::First, NextIndex))
+			{
+				return NextIndex;
+			}
+		}
+		return -1;
+	case EHolsterWeaponType::Pistol:
+		if (MaxNumberOfWeaponPistolHolsters <= 0) return -1;
+		for (int i = 1; i <= MaxNumberOfWeaponPistolHolsters; i++)
+		{
+			int NextIndex = (LastPistolHolsterUsed + i) % MaxNumberOfWeaponPistolHolsters;
+			if (!CheckHolsterIsEmpty(EHolsterWeaponType::Pistol, NextIndex))
+			{
+				return NextIndex;
+			}
+		}
+		return -1;
+	case EHolsterWeaponType::Primary:
+		if (MaxNumberOfWeaponPrimaryHolsters <= 0) return -1;
+		for (int i = 1; i <= MaxNumberOfWeaponPrimaryHolsters; i++)
+		{
+			int NextIndex = (LastPrimaryHolsterUsed + i) % MaxNumberOfWeaponPrimaryHolsters;
+			if (!CheckHolsterIsEmpty(EHolsterWeaponType::Primary, NextIndex))
+			{
+				return NextIndex;
+			}
+		}
+		return -1;
+	case EHolsterWeaponType::AlternativePrimary:
+		break;
+	case EHolsterWeaponType::Unarmed:
+		if (MaxNumberOfWeaponUnarmedHolsters <= 0) return -1;
+		for (int i = 1; i <= MaxNumberOfWeaponUnarmedHolsters; i++)
+		{
+			int NextIndex = (LastUnarmedHolsterUsed + i) % MaxNumberOfWeaponUnarmedHolsters;
+			if (!CheckHolsterIsEmpty(EHolsterWeaponType::Unarmed, NextIndex))
+			{
+				return NextIndex;
+			}
+		}
+		return -1;
+	}
+
+	return -1;
 }
 
 bool UWeaponSystemComponent::CheckHolsterIsEmpty(EHolsterWeaponType Holster, int NumberOfHolster)
@@ -355,8 +460,13 @@ bool UWeaponSystemComponent::CheckHolsterIsEmpty(EHolsterWeaponType Holster, int
 	case EHolsterWeaponType::None:
 		return true;
 
+	case EHolsterWeaponType::First:
+		if (!MeleeHolster[NumberOfHolster])
+			return true;
+		break;
+
 	case EHolsterWeaponType::Pistol:
-		if (!WeaponPistolHolster)
+		if (!WeaponPistolHolster[NumberOfHolster])
 			return true;
 		break;
 
@@ -379,6 +489,11 @@ bool UWeaponSystemComponent::CheckHolsterIsEmpty(EHolsterWeaponType Holster, int
 
 void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOfHolster)
 {
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+	
 	if (HandWeaponSocketName.IsNone())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HandWeaponSocketName is not set. Cannot attach weapon to socket."));
@@ -391,22 +506,25 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 		return;
 	}*/
 
-	if (LastUsedHolsterType != Holster && CurrentWeaponInHands)
-	{
-		//HideWeapon();
-	}
-
 	switch (Holster)
 	{
 	case EHolsterWeaponType::None:
 		break;
 
-	case EHolsterWeaponType::Pistol:
-		if (!WeaponPistolHolster || WeaponPistolHolster == CurrentWeaponInHands)
+	case EHolsterWeaponType::First:
+		if (!MeleeHolster[NumberOfHolster] || MeleeHolster[NumberOfHolster] == CurrentWeaponInHands)
 			break;
-		
-		CurrentWeaponInHands = WeaponPistolHolster;
+		CurrentWeaponInHands = MeleeHolster[NumberOfHolster];
 		LastUsedHolsterType = Holster;
+		LastMeleeHolsterUsed = NumberOfHolster;
+		break;
+
+	case EHolsterWeaponType::Pistol:
+		if (!WeaponPistolHolster[NumberOfHolster] || WeaponPistolHolster[NumberOfHolster] == CurrentWeaponInHands)
+			break;
+		CurrentWeaponInHands = WeaponPistolHolster[NumberOfHolster];
+		LastUsedHolsterType = Holster;
+		LastPistolHolsterUsed = NumberOfHolster;
 		break;
 
 	case EHolsterWeaponType::Primary:
@@ -414,6 +532,7 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 			break;
 		CurrentWeaponInHands = WeaponPrimaryHolster[NumberOfHolster];
 		LastUsedHolsterType = Holster;
+		LastPrimaryHolsterUsed = NumberOfHolster;
 		break;
 
 	case EHolsterWeaponType::AlternativePrimary:
@@ -423,7 +542,21 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 			break;
 		CurrentWeaponInHands = UnarmedHolster[NumberOfHolster];
 		LastUsedHolsterType = Holster;
+		LastUnarmedHolsterUsed = NumberOfHolster;
 		break;
+	
+	}
+
+	UAbilitySystemComponent* ASC = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
+	if (ASC)
+	{
+		if (auto BaseChar = Cast<ABaseCharacter>(GetOwner()))
+		{
+			TArray<TSubclassOf<UGameplayAbility>> AbilsToAdd;
+			CurrentWeaponInHands->GetWeaponDataAssetRef()->GrantedAbilities.GetKeys(AbilsToAdd);
+			if (!AbilsToAdd.IsEmpty())
+				AbilitiesGrantedByWeaponInHands = BaseChar->GrantAbilities(AbilsToAdd);
+		}
 	}
 	
 	OnRep_CurrentWeaponInHands();
@@ -441,8 +574,19 @@ void UWeaponSystemComponent::HideWeapon()
 		                                        CurrentWeaponInHands->GetWeaponDataAssetRef()->HolsterName);
 	if (OnHideArmsDelegate.IsBound())
 		OnHideArmsDelegate.Broadcast(CurrentWeaponInHands);
+
+	UAbilitySystemComponent* ASC = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
+	if (ASC)
+	{
+		if (auto BaseChar = Cast<ABaseCharacter>(GetOwner()))
+		{
+			BaseChar->RemoveAbilities(AbilitiesGrantedByWeaponInHands);
+		}
+	}
 	
 	CurrentWeaponInHands = nullptr;
+
+	OnRep_CurrentWeaponInHands();
 }
 
 void UWeaponSystemComponent::AttachWeapon(AActor* ActorToAttach, FName SocketName)
