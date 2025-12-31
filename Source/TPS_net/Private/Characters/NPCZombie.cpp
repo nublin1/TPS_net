@@ -80,6 +80,11 @@ UHealthComponent* ANPCZombie::GetHealthComponent() const
 	return FindComponentByClass<UHealthComponent>();
 }
 
+AActor* ANPCZombie::GetCurrentTarget_Implementation() const
+{
+	return TargetActor;
+}
+
 void ANPCZombie::SetTargetActor(AActor* NewTarget)
 {
 	TargetActor = NewTarget;

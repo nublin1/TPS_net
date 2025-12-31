@@ -19,6 +19,7 @@ class TPS_NET_API ABaseWeapon : public AActor
 	GENERATED_BODY()
 
 #pragma region Delegates
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyToNextShoot);
 #pragma endregion
 
 public:
@@ -35,6 +36,8 @@ public:
 	//====================================================================
 	// PROPERTIES AND VARIABLES
 	//====================================================================
+	UPROPERTY(BlueprintAssignable)
+	FOnReadyToNextShoot OnReadyToNextShoot;
 
 	//====================================================================
 	// FUNCTIONS
@@ -131,10 +134,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FWeaponAbilityData CurrentAbilityData;
 	
-
 	// Timers
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FTimerHandle HitDetectTimer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FTimerHandle ShootDelayTimerHandle;
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	FTimerHandle ReloadCooldownTimerHandle;
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	FTimerHandle SpawnBulletDelay;
 
 	// Settings
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

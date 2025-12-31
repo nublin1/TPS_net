@@ -140,6 +140,10 @@ FVector AMasterWeaponRanged::GetProjectileSpawnLocation()
 			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
 		else if (StaticMeshWeapon->GetStaticMesh())
 			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, StaticMeshWeapon);
+		else
+		{
+			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, StaticMeshWeapon);
+		}
 		
 		SpawnLocation = BulletSpawnPointTransform.GetLocation();
 		
@@ -294,6 +298,8 @@ void AMasterWeaponRanged::StartFireWeapon()
 	GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, [this]()
 	{
 		bIsReadyToNextShoot = true;
+		if (OnReadyToNextShoot.IsBound())
+			OnReadyToNextShoot.Broadcast();
 	}, 60.0f / WeaponDataAssetRef->CharacteristicsOfRangedWeapon.RPM, false);
 }
 

@@ -6,7 +6,6 @@
 #include "Engine/DataTable.h"
 #include "Engine/DataAsset.h"
 #include "RecoilAnimationComponent.h"
-#include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
 #include "Weapon/Bullets/BaseBulletActor.h"
 #include "WeaponData.generated.h"
@@ -122,7 +121,11 @@ struct FShootActionData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ToolTip = "Used by AI to determine strike distance"))
-	float AttackRange_AI = 1500.0f;
+	float MaxAttackRange_AI = 1500.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ToolTip = ""))
+	float MaxAttackRange_Tolerance = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ToolTip = "Used by AI to determine strike distance"))
+	float MinAttackRange_AI = 1000.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> CharShootAnimMontage;

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2025 All Rights Reserved.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "AIAttackInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, NotBlueprintable)
+UINTERFACE(MinimalAPI)
 class UAIAttackInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -25,6 +25,6 @@ public:
     //====================================================================
 	// FUNCTIONS
 	//====================================================================
-	UFUNCTION(BlueprintCallable)
-	virtual class UAIAttackComponent* GetAIAttackComponent() const = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	AActor* GetCurrentTarget() const;
 };

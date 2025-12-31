@@ -8,6 +8,7 @@
 #include "Components/StateTreeComponent.h"
 
 #include "Interfaces/IHealthInterface.h"
+#include "NPC/Inrfaces/AIAttackInterface.h"
 
 #include "NPCZombie.generated.h"
 
@@ -15,7 +16,7 @@ class UWeaponSystemComponent;
 class UNPCSenseComponent;
 
 UCLASS()
-class TPS_NET_API ANPCZombie : public ABaseCharacter, public IIHealthInterface
+class TPS_NET_API ANPCZombie : public ABaseCharacter, public IIHealthInterface, public IAIAttackInterface
 {
 	GENERATED_BODY()
 	
@@ -46,6 +47,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual AActor* GetCurrentTarget_Implementation() const ;
 
 	UFUNCTION()
 	virtual void SetTargetActor(AActor* NewTarget);

@@ -153,14 +153,6 @@ protected:
 	TArray<TObjectPtr<UAmmoBase>> UsableAmmo;	
 	
 
-	// Timer
-	UPROPERTY()
-	FTimerHandle ShootDelayTimerHandle;
-	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
-	FTimerHandle ReloadCooldownTimerHandle;
-	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
-	FTimerHandle SpawnBulletDelay;
-
 	// Recoil
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsRecoiling = false;
