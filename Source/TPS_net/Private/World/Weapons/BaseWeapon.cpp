@@ -208,7 +208,7 @@ void ABaseWeapon::HitDetect()
 		TraceEnd->GetComponentLocation(),
 		FQuat::Identity,
 		FCollisionObjectQueryParams(ObjectTypes),
-		FCollisionShape::MakeSphere(WeaponDataAssetRef->WeaponMeleeAttackData.TraceRadiusImpact),
+		FCollisionShape::MakeSphere(CurrentAbilityData.WeaponMeleeAttackData.TraceRadiusImpact),
 		Params
 	);
 	
@@ -245,7 +245,7 @@ void ABaseWeapon::HitDetect()
 
 		UGameplayStatics::ApplyPointDamage(
 		HitActor,
-		WeaponDataAssetRef->WeaponType == EWeaponType::Ranged ? SelectedAmmoData->GetAmmoCharacteristics().ImpactDamage : WeaponDataAssetRef->WeaponMeleeAttackData.ImpactDamage,
+		WeaponDataAssetRef->WeaponType == EWeaponType::Ranged ? SelectedAmmoData->GetAmmoCharacteristics().ImpactDamage :CurrentAbilityData.WeaponMeleeAttackData.ImpactDamage,
 		(Hit.Value.TraceStart - Hit.Value.TraceEnd).GetSafeNormal(),
 		Hit.Value,
 		GetOwner()->GetInstigatorController(),

@@ -97,6 +97,8 @@ struct FWeaponPresentationData
 	TObjectPtr<UBlendSpace> BlendSpaceRegular;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBlendSpace> BlendSpaceAiming;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UBlendSpace> AimOffset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> ReloadAnimMontage;
@@ -208,6 +210,9 @@ struct FWeaponAbilityData
 	FWeaponMeleeAttackData WeaponMeleeAttackData;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FShootActionData ShootActionData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Properties|Curves")
+	TObjectPtr<UCurveFloat> MovementAllowedCurve;
 };
 
 
@@ -290,10 +295,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
 			meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
 	EMeleeWeaponType MeleeWeaponType = EMeleeWeaponType::Unarmed;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Melee",
-	   meta = (EditCondition = "WeaponType == EWeaponType::Melee", EditConditionHides))
-	FWeaponMeleeAttackData WeaponMeleeAttackData;
 
 };
 

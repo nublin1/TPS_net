@@ -105,7 +105,7 @@ void AMasterWeaponMelee::AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClas
 	GetWorld()->GetTimerManager().SetTimer(AttackDelayTimerHandle, [this]()
 	{
 		bIsReadyToNextAttack = true;
-	}, WeaponDataAssetRef->WeaponMeleeAttackData.AttackDelay, false);
+	}, CurrentAbilityData.WeaponMeleeAttackData.AttackDelay, false);
 }
 
 void AMasterWeaponMelee::AimTrigger()

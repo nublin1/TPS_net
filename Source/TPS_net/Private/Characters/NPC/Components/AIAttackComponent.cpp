@@ -81,10 +81,10 @@ bool UAIAttackComponent::InRangeToAttack() const
 
 	if (WeaponSystemComponentRef->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Melee)
 	{
-		auto Attackrange = WeaponSystemComponentRef->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->
+		/*auto Attackrange = WeaponSystemComponentRef->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->
 		                                             WeaponMeleeAttackData.MeleeAttackRange;
 		if (Distance > Attackrange)
-			return false;
+			return false;*/
 	}
 	else
 	{

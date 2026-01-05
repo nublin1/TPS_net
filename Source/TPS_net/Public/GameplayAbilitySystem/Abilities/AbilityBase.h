@@ -23,7 +23,8 @@ public:
 	//====================================================================
 	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "Ability")
 	bool ShouldShowInAbilitiesBar = false;
-	
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = "Ability")
+	bool bNeedToWaitAnim = false;
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
