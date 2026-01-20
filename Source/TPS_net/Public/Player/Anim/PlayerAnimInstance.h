@@ -90,8 +90,11 @@ protected:
 	TObjectPtr<UBlendSpace> BlendSpaceRegular;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBlendSpace> BlendSpaceAiming;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBlendSpace> AimOffset;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bAimOffsetIsValid = false;
 
 	/** Anim Graph - Aiming Values */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Anim Graph - Aiming Values")

@@ -199,6 +199,9 @@ struct FWeaponMeleeAttackData
 	float MeleeAttackRange = 150.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackDelay = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Properties")
+	TSubclassOf<UDamageType> DamageTypeClass;
 };
 
 USTRUCT(BlueprintType)

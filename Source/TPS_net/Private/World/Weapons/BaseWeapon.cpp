@@ -3,6 +3,7 @@
 
 #include "World/Weapons/BaseWeapon.h"
 #include "AbilitySystemComponent.h"
+#include "Data/DamageTypes/DamageType_Knockback.h"
 #include "Data/Weapon/WeaponData.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Engine/StaticMeshSocket.h"
@@ -188,6 +189,93 @@ void ABaseWeapon::UpdateTracePoints()
 void ABaseWeapon::OnRep_WeaponDataAssetRef()
 {
 	UpdateVisual();
+}
+
+void ABaseWeapon::HitDetectAOE()
+{
+	if (!GetWorld()) return;
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(WeaponOwnerActor);
+
+	TArray<FHitResult> OutHits;
+
+	bool bHit = GetWorld()->SweepMultiByObjectType(
+		OutHits,
+		TraceStart->GetComponentLocation(),
+		TraceStart->GetComponentLocation(),
+		FQuat::Identity,
+		FCollisionObjectQueryParams(ObjectTypes),
+		FCollisionShape::MakeSphere(CurrentAbilityData.WeaponMeleeAttackData.AoeRadius),
+		Params
+	);
+	
+	//if (bShowTrace)
+	{
+		DrawDebugSphere(
+			GetWorld(),
+			TraceStart->GetComponentLocation(),
+			CurrentAbilityData.WeaponMeleeAttackData.AoeRadius,
+			24,
+			bHit ? FColor::Red : FColor::Green,
+			false,
+			3.0f
+		);
+	}
+
+	if (!bHit) return;
+
+	TSet<AActor*> DamagedActors;
+	TSet<AActor*> IgnoreActors;
+	for (const FHitResult& Hit : OutHits)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (!HitActor || HitActor == GetOwner())
+			continue;
+		
+		FHitResult LOSHit;
+		FCollisionQueryParams LOSParams;
+		LOSParams.AddIgnoredActor(this);
+		LOSParams.AddIgnoredActor(WeaponOwnerActor);
+		LOSParams.AddIgnoredActor(HitActor);
+
+		const FVector TargetLocation =
+			HitActor->GetActorLocation();
+
+		bool bBlocked = GetWorld()->LineTraceSingleByChannel(
+			LOSHit,
+			WeaponOwnerActor->GetActorLocation(),
+			TargetLocation,
+			ECC_Visibility,
+			LOSParams
+		);
+
+		if (bBlocked)
+			continue;
+
+		DamagedActors.Add(HitActor);
+	}
+
+	if (DamagedActors.Num() == 0)
+		return;
+
+	// --- Radial Damage ---
+	UGameplayStatics::ApplyRadialDamage(
+		GetWorld(),
+		CurrentAbilityData.WeaponMeleeAttackData.AoeDamage,
+		TraceStart->GetComponentLocation(),
+		CurrentAbilityData.WeaponMeleeAttackData.AoeRadius,
+		CurrentAbilityData.WeaponMeleeAttackData.DamageTypeClass,
+		IgnoreActors.Array(),
+		this,
+		GetOwner()->GetInstigatorController(),
+		true // bDoFullDamage
+	);
 }
 
 void ABaseWeapon::HitDetect()

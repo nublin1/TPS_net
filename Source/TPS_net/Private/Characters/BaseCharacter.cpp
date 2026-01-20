@@ -17,6 +17,10 @@ ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
+	ActiveStateCharacter->OnComponentCreated();
+	ActiveStateCharacter->SetIsReplicated(true);
+
 	StateMachine_Aiming = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine_Aiming"));
 	StateMachine_Aiming->OnComponentCreated();
 	StateMachine_Aiming->SetIsReplicated(true);
@@ -37,6 +41,8 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
+
+	CharacterMovementComponent = FindComponentByClass<UCharacterMovementComponent>();
 
 	InitCharacterData();
 }
@@ -79,7 +85,9 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
+	DOREPLIFETIME(ABaseCharacter, ActiveStateCharacter);
 	DOREPLIFETIME(ABaseCharacter, StateMachine_Movement);
+	DOREPLIFETIME(ABaseCharacter, StateMachine_Aiming);
 }
 
 void ABaseCharacter::InitCharacterData()
@@ -255,3 +263,87 @@ void ABaseCharacter::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 	}
 }
 
+void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength)
+{
+	if (!SkeletalMeshComponent || !CharacterMovementComponent)
+		return;
+	
+	SkeletalMeshComponent->SetSimulatePhysics(true);
+	SkeletalMeshComponent->SetCollisionProfileName("Ragdoll", true);
+
+	CharacterMovementComponent->DisableMovement();
+
+	FVector KnockbackDirection = GetActorLocation() - RadialImpactNormal;
+	KnockbackDirection.Z = 0.f;
+	KnockbackDirection.Normalize();
+	
+	FVector Impulse = KnockbackDirection * KnockbackStrength;
+	
+	SkeletalMeshComponent->AddImpulseToAllBodiesBelow(
+		Impulse,
+		TEXT("pelvis"),
+		true
+	);
+
+	if (ActiveStateCharacter)
+	{
+		ActiveStateCharacter->SwitchState(FGameplayTag::RequestGameplayTag(FName("State.Downed")));
+	}
+	
+
+	/*SkeletalMeshComponent->AddRadialImpulse(ImpactOrigin, Radius, KnockbackStrength, ERadialImpulseFalloff::RIF_Linear,
+	                                        true);*/
+}
+
+void ABaseCharacter::RagdollEnd()
+{
+	if (!SkeletalMeshComponent || !CharacterMovementComponent)
+		return;
+	
+	auto AnimInst = SkeletalMeshComponent->GetAnimInstance();
+	if (!AnimInst)
+		return;
+
+	AnimInst->SavePoseSnapshot("RagdollPose.snapshot");
+
+	bool bRagdollFaceUp = true;
+	bool bRagdollOnGround = true;
+	
+	auto PelvisRot = SkeletalMeshComponent->GetSocketRotation("Pelvis");
+	PelvisRot.Roll > 0 ? bRagdollFaceUp = false : bRagdollFaceUp = true;
+
+	auto RagdollLocation = SkeletalMeshComponent->GetSocketLocation("Ragdoll");
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	auto EndVec = FVector(RagdollLocation.X,
+		RagdollLocation.Y,
+		RagdollLocation.Z - Capsule->GetScaledCapsuleHalfHeight());
+
+	FHitResult ResultHit;
+	bool bBlocked = GetWorld()->LineTraceSingleByChannel(ResultHit,
+		RagdollLocation,
+		EndVec,
+		ECC_Visibility);
+	
+	if (bBlocked)
+	{
+		ResultHit.bBlockingHit? bRagdollOnGround = true : bRagdollOnGround = false;
+	}
+	else
+	{
+		bRagdollOnGround = false;
+	}
+
+	if (bRagdollOnGround)
+	{
+		CharacterMovementComponent->SetMovementMode(MOVE_Walking);
+	}
+	else
+	{
+		CharacterMovementComponent->SetMovementMode(MOVE_Falling);
+	}
+
+	SkeletalMeshComponent->SetSimulatePhysics(false);
+	SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
+
+	//CharacterMovementComponent->DisableMovement();
+}

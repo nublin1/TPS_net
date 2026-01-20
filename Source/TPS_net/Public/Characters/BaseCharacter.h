@@ -63,6 +63,9 @@ public:
 	bool IsStateTransitionAllowed(FGameplayTag NewState);
 
 	//
+	UFUNCTION()
+	virtual UStateMachineComponent* GetActiveStateCharacter() {return ActiveStateCharacter;}
+	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Movement() {return StateMachine_Movement;}
 	UFUNCTION()
 	virtual FName GetFactionName_Implementation() const override { return FactionName; }
@@ -75,11 +78,15 @@ protected:
 	//====================================================================
 	// Components
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UStateMachineComponent> ActiveStateCharacter;
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Aiming;
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
 	UStateMachineComponent* StateMachine_Movement;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<UCharacterMovementComponent> CharacterMovementComponent;
 
 	//ASC
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
@@ -126,5 +133,11 @@ protected:
 	void Server_NPCDead(AActor* KilledActor);
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulticast_NPCDead(AActor* KilledActor);
-	
+
+	//
+	UFUNCTION(BlueprintCallable)
+	void ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength );
+
+	UFUNCTION(BlueprintCallable)
+	void RagdollEnd();
 };

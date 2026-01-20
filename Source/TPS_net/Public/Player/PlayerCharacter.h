@@ -58,8 +58,6 @@ public:
 	
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
-	UFUNCTION()
-	virtual UStateMachineComponent* GetActiveStateCharacter() {return ActiveStateCharacter;}
 	virtual ULadderClimbingComponent* GetLadderClimbingComponent() const {return LadderClimbingComponent;}
 
 	FTimerHandle GetShootingPoseTransitionTimer() const {return ShootingPoseTransitionTimer;}
@@ -159,8 +157,6 @@ protected:
 	TObjectPtr<UCameraComponent> FollowCamera;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
-	UStateMachineComponent* ActiveStateCharacter;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
 

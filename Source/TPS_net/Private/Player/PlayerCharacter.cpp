@@ -24,10 +24,6 @@ APlayerCharacter::APlayerCharacter(): CameraInterpolationSpeed(5)
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnComponentCreated();
 	HealthComponent->SetIsReplicated(true);
-
-	ActiveStateCharacter = CreateDefaultSubobject<UStateMachineComponent>(TEXT("ActiveStateCharacter"));
-	ActiveStateCharacter->OnComponentCreated();
-	ActiveStateCharacter->SetIsReplicated(true);
 }
 
 void APlayerCharacter::PostInitProperties()
@@ -81,8 +77,6 @@ UHealthComponent* APlayerCharacter::GetHealthComponent() const
 {
 	return FindComponentByClass<UHealthComponent>();
 }
-
-
 
 void APlayerCharacter::SetEssentialValues(float DeltaTime)
 {
@@ -273,9 +267,8 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, CurrentCameraLocation);
 	DOREPLIFETIME(APlayerCharacter, DesiredCameraLocation);
 	
-	DOREPLIFETIME(APlayerCharacter, StateMachine_Aiming);
 	DOREPLIFETIME(APlayerCharacter, ReplicatedControlRotation);
 	DOREPLIFETIME(APlayerCharacter, WeaponSystemComponent);
-	DOREPLIFETIME(APlayerCharacter, ActiveStateCharacter);
+	
 }
 

@@ -264,6 +264,7 @@ void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 		BlendSpaceRegular = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponPresentationData.BlendSpaceRegular;
 		BlendSpaceAiming = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponPresentationData.BlendSpaceAiming;
 		AimOffset = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponPresentationData.AimOffset;
+		bAimOffsetIsValid = IsValid(AimOffset);
 		UpdateOverrideData();
 	}
 }

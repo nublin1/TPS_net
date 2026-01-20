@@ -157,6 +157,8 @@ protected:
 	UFUNCTION()
 	void OnRep_WeaponDataAssetRef();
 
+	UFUNCTION(BlueprintCallable)
+	void HitDetectAOE();
 	UFUNCTION()
 	void HitDetect();
 	UFUNCTION(BlueprintCallable)
