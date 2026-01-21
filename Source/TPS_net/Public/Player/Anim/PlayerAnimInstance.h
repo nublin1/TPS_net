@@ -56,15 +56,17 @@ protected:
 	/** Anim Graph - Components */
 	UPROPERTY(BlueprintReadWrite,Category="References")
 	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
+	TObjectPtr<UStateMachineComponent> CharacterActiveState;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
 	TObjectPtr<UWeaponSystemComponent> WeaponSysComponent;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
 	TObjectPtr<UStateMachineComponent> StateMachine_Movement;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
 	TObjectPtr<UStateMachineComponent> StateMachine_Aiming;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
 	TObjectPtr<UCharacterMovementComponent> ChMovementComponent;
-	UPROPERTY(BlueprintReadWrite, Category="References")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="References")
 	TObjectPtr<APlayerCharacter> Character;
 
 	/** Anim Graph - In Air */

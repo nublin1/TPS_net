@@ -29,6 +29,7 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 	Character = Cast<APlayerCharacter>(TryGetPawnOwner());
 	if (Character)
 	{
+		CharacterActiveState = Character->GetActiveStateCharacter();
 		ChMovementComponent = Character->GetCharacterMovement();
 		StateMachine_Movement = Character->GetStateMachine_Movement();
 		StateMachine_Aiming =  Character->GetStateMachine_Aiming();

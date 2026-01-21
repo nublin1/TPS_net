@@ -103,6 +103,30 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsGrounded;
 
+	/** Ragdoll Information */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	bool bRagdollFaceUp = true;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	bool bRagdollOnGround = true;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	FVector TargetRagdollLocation = FVector::ZeroVector;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	FRotator TargetRagdollRotator = FRotator::ZeroRotator;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	FVector LastRagdollVilocity = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	TObjectPtr<UAnimMontage> AnimMontage_RagdollStandUp_FaceUp = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="RagdollInfo")
+	TObjectPtr<UAnimMontage> AnimMontage_RagdollStandUp_FaceDown = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ragdoll|State")
+	FGameplayTag RagdollEnterStateTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ragdoll|State")
+	FGameplayTag RagdollExitStateTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ragdoll|State")
+	float RagdollDuration = 2.0f;
+
+	FTimerHandle TimerHandle_Ragdoll;
+
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	TObjectPtr<UCharacterDataAsset> CharacterData;
@@ -136,7 +160,11 @@ protected:
 
 	//
 	UFUNCTION(BlueprintCallable)
-	void ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength );
+	void UpdateActorDuringRagdoll();
+
+	//
+	UFUNCTION(BlueprintCallable)
+	void ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength, FGameplayTag StateTag);
 
 	UFUNCTION(BlueprintCallable)
 	void RagdollEnd();

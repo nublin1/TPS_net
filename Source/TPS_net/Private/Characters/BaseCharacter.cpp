@@ -74,6 +74,8 @@ void ABaseCharacter::OnRep_PlayerState()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UpdateActorDuringRagdoll();
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -263,13 +265,79 @@ void ABaseCharacter::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 	}
 }
 
-void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength)
+void ABaseCharacter::UpdateActorDuringRagdoll()
 {
+	if (ActiveStateCharacter->GetCurrentStateTag() != FGameplayTag::RequestGameplayTag(TEXT("State.Ragdoll")))
+		return;
+	/*if (!ActiveStateCharacter->GetCurrentStateTag().MatchesTag(FGameplayTag::RequestGameplayTag(TEXT("State.Ragdoll"))))
+	{
+		return;
+	}*/
+
 	if (!SkeletalMeshComponent || !CharacterMovementComponent)
 		return;
 	
-	SkeletalMeshComponent->SetSimulatePhysics(true);
+	LastRagdollVilocity = SkeletalMeshComponent->GetPhysicsLinearVelocity("Root");
+	
+	float RangeValueClampedResult = FMath::GetMappedRangeValueClamped(
+		FVector2D(0, 1000),   
+		FVector2D(1000, 2800),
+		LastRagdollVilocity.Size());
+	SkeletalMeshComponent->SetAllMotorsAngularDriveParams(RangeValueClampedResult, 0.0f, 0.0f);
+	
+	TargetRagdollLocation = SkeletalMeshComponent->GetSocketLocation(TEXT("pelvis"));
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	float HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+
+	FRotator PelvisRot = SkeletalMeshComponent->GetSocketRotation(TEXT("pelvis"));
+	bRagdollFaceUp = PelvisRot.Roll > 0.0f;
+	TargetRagdollRotator = FRotator(0.f, 0.0f, bRagdollFaceUp ? PelvisRot.Yaw - 180.0f : PelvisRot.Yaw );
+	
+	FHitResult GroundHit;
+	FVector TraceStart = TargetRagdollLocation ; 
+	FVector TraceEnd = FVector(TargetRagdollLocation.X, TargetRagdollLocation.Y, TargetRagdollLocation.Z - HalfHeight);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		GroundHit, 
+		TraceStart, 
+		TraceEnd, 
+		ECC_Visibility, 
+		QueryParams
+	);
+
+	if (bHit)
+	{
+		bRagdollOnGround = true;
+		SetActorLocation(FVector(TargetRagdollLocation.X, TargetRagdollLocation.Y,TargetRagdollLocation.Z + (HalfHeight - FMath::Abs(GroundHit.ImpactPoint.Z - GroundHit.TraceStart.Z) + 2.0f)));
+		SetActorRotation(TargetRagdollRotator);
+	}
+	else
+	{
+		bRagdollOnGround = false;
+		SetActorLocation(TargetRagdollLocation);
+		SetActorRotation(TargetRagdollRotator);
+	}	
+}
+
+void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength, FGameplayTag StateTag)
+{
+	if (!SkeletalMeshComponent || !CharacterMovementComponent)
+		return;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkeletalMeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
+	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	SkeletalMeshComponent->SetAllBodiesBelowSimulatePhysics("pelvis", true, true);
+	SkeletalMeshComponent->SetAllBodiesBelowPhysicsBlendWeight("pelvis", 1.0f, true, true);
+	
+	/*SkeletalMeshComponent->SetSimulatePhysics(true);
 	SkeletalMeshComponent->SetCollisionProfileName("Ragdoll", true);
+	SkeletalMeshComponent->WakeAllRigidBodies();
+	SkeletalMeshComponent->bBlendPhysics = true;*/
 
 	CharacterMovementComponent->DisableMovement();
 
@@ -287,63 +355,80 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 
 	if (ActiveStateCharacter)
 	{
-		ActiveStateCharacter->SwitchState(FGameplayTag::RequestGameplayTag(FName("State.Downed")));
+		ActiveStateCharacter->SwitchState(StateTag);
 	}
-	
 
 	/*SkeletalMeshComponent->AddRadialImpulse(ImpactOrigin, Radius, KnockbackStrength, ERadialImpulseFalloff::RIF_Linear,
 	                                        true);*/
+
+	GetWorldTimerManager().ClearTimer(TimerHandle_Ragdoll);
+	GetWorldTimerManager().SetTimer(
+		TimerHandle_Ragdoll,
+		this,
+		&ABaseCharacter::RagdollEnd,
+		RagdollDuration,
+		false
+	);
 }
 
 void ABaseCharacter::RagdollEnd()
 {
 	if (!SkeletalMeshComponent || !CharacterMovementComponent)
 		return;
-	
+
 	auto AnimInst = SkeletalMeshComponent->GetAnimInstance();
 	if (!AnimInst)
 		return;
-
 	AnimInst->SavePoseSnapshot("RagdollPose.snapshot");
-
-	bool bRagdollFaceUp = true;
-	bool bRagdollOnGround = true;
 	
-	auto PelvisRot = SkeletalMeshComponent->GetSocketRotation("Pelvis");
-	PelvisRot.Roll > 0 ? bRagdollFaceUp = false : bRagdollFaceUp = true;
-
-	auto RagdollLocation = SkeletalMeshComponent->GetSocketLocation("Ragdoll");
-	UCapsuleComponent* Capsule = GetCapsuleComponent();
-	auto EndVec = FVector(RagdollLocation.X,
-		RagdollLocation.Y,
-		RagdollLocation.Z - Capsule->GetScaledCapsuleHalfHeight());
-
-	FHitResult ResultHit;
-	bool bBlocked = GetWorld()->LineTraceSingleByChannel(ResultHit,
-		RagdollLocation,
-		EndVec,
-		ECC_Visibility);
-	
-	if (bBlocked)
-	{
-		ResultHit.bBlockingHit? bRagdollOnGround = true : bRagdollOnGround = false;
-	}
-	else
-	{
-		bRagdollOnGround = false;
-	}
-
 	if (bRagdollOnGround)
 	{
 		CharacterMovementComponent->SetMovementMode(MOVE_Walking);
+		
+		UAnimMontage* StandUpMontage = bRagdollFaceUp
+		? AnimMontage_RagdollStandUp_FaceUp
+		: AnimMontage_RagdollStandUp_FaceDown;
+
+		if (StandUpMontage && GetMesh()->GetAnimInstance())
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(StandUpMontage, 1.0f, EMontagePlayReturnType::MontageLength);
+		}
 	}
 	else
 	{
 		CharacterMovementComponent->SetMovementMode(MOVE_Falling);
+		CharacterMovementComponent->Velocity = LastRagdollVilocity;
 	}
 
-	SkeletalMeshComponent->SetSimulatePhysics(false);
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
 	SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
+	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SkeletalMeshComponent->SetSimulatePhysics(false);
+	SkeletalMeshComponent->bBlendPhysics = false;
+	SkeletalMeshComponent->SetAllBodiesSimulatePhysics(false);
 
 	//CharacterMovementComponent->DisableMovement();
+
+	FAttachmentTransformRules AttachRules(
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::SnapToTarget,
+	true);
+
+	SkeletalMeshComponent->AttachToComponent(
+		GetCapsuleComponent(),
+		AttachRules,
+		"root"
+	);
+
+	SkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 270.0f));
+
+	if (ActiveStateCharacter && RagdollExitStateTag.IsValid())
+	{
+		ActiveStateCharacter->SwitchState(RagdollExitStateTag);
+	}
+
 }
