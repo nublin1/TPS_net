@@ -122,6 +122,8 @@ protected:
 	FGameplayTag RagdollEnterStateTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ragdoll|State")
 	FGameplayTag RagdollExitStateTag;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Ragdoll|State")
+	FGameplayTag SavedActiveStateTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ragdoll|State")
 	float RagdollDuration = 2.0f;
 

@@ -312,7 +312,7 @@ void ABaseCharacter::UpdateActorDuringRagdoll()
 	{
 		bRagdollOnGround = true;
 		SetActorLocation(FVector(TargetRagdollLocation.X, TargetRagdollLocation.Y,TargetRagdollLocation.Z + (HalfHeight - FMath::Abs(GroundHit.ImpactPoint.Z - GroundHit.TraceStart.Z) + 2.0f)));
-		SetActorRotation(TargetRagdollRotator);
+		//SetActorRotation(TargetRagdollRotator);
 	}
 	else
 	{
@@ -327,7 +327,7 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 	if (!SkeletalMeshComponent || !CharacterMovementComponent)
 		return;
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SkeletalMeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
 	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
@@ -339,7 +339,7 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 	SkeletalMeshComponent->WakeAllRigidBodies();
 	SkeletalMeshComponent->bBlendPhysics = true;*/
 
-	CharacterMovementComponent->DisableMovement();
+	CharacterMovementComponent->SetMovementMode(MOVE_None);
 
 	FVector KnockbackDirection = GetActorLocation() - RadialImpactNormal;
 	KnockbackDirection.Z = 0.f;
@@ -355,6 +355,7 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 
 	if (ActiveStateCharacter)
 	{
+		SavedActiveStateTag = ActiveStateCharacter->GetCurrentStateTag();
 		ActiveStateCharacter->SwitchState(StateTag);
 	}
 
@@ -379,37 +380,12 @@ void ABaseCharacter::RagdollEnd()
 	auto AnimInst = SkeletalMeshComponent->GetAnimInstance();
 	if (!AnimInst)
 		return;
-	AnimInst->SavePoseSnapshot("RagdollPose.snapshot");
-	
-	if (bRagdollOnGround)
+	AnimInst->SavePoseSnapshot("RagdollPose_snapshot");
+
+	if (ActiveStateCharacter && RagdollExitStateTag.IsValid())
 	{
-		CharacterMovementComponent->SetMovementMode(MOVE_Walking);
-		
-		UAnimMontage* StandUpMontage = bRagdollFaceUp
-		? AnimMontage_RagdollStandUp_FaceUp
-		: AnimMontage_RagdollStandUp_FaceDown;
-
-		if (StandUpMontage && GetMesh()->GetAnimInstance())
-		{
-			GetMesh()->GetAnimInstance()->Montage_Play(StandUpMontage, 1.0f, EMontagePlayReturnType::MontageLength);
-		}
+		ActiveStateCharacter->SwitchState(RagdollExitStateTag);
 	}
-	else
-	{
-		CharacterMovementComponent->SetMovementMode(MOVE_Falling);
-		CharacterMovementComponent->Velocity = LastRagdollVilocity;
-	}
-
-	UCapsuleComponent* Capsule = GetCapsuleComponent();
-	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	
-	SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
-	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	SkeletalMeshComponent->SetSimulatePhysics(false);
-	SkeletalMeshComponent->bBlendPhysics = false;
-	SkeletalMeshComponent->SetAllBodiesSimulatePhysics(false);
-
-	//CharacterMovementComponent->DisableMovement();
 
 	FAttachmentTransformRules AttachRules(
 	EAttachmentRule::SnapToTarget,
@@ -424,11 +400,48 @@ void ABaseCharacter::RagdollEnd()
 	);
 
 	SkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
-	SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 270.0f));
+	SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, 270.0f, 0));
 
-	if (ActiveStateCharacter && RagdollExitStateTag.IsValid())
+	SkeletalMeshComponent->SetSimulatePhysics(false);
+	
+	if (bRagdollOnGround)
 	{
-		ActiveStateCharacter->SwitchState(RagdollExitStateTag);
+		CharacterMovementComponent->SetMovementMode(MOVE_Walking);
+		
+		UAnimMontage* StandUpMontage = bRagdollFaceUp
+		? AnimMontage_RagdollStandUp_FaceUp
+		: AnimMontage_RagdollStandUp_FaceDown;
+
+		if (StandUpMontage && GetMesh()->GetAnimInstance())
+		{
+			//GetMesh()->GetAnimInstance()->Montage_Play(StandUpMontage, 1.0f, EMontagePlayReturnType::MontageLength);
+			/*UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(this, &ABaseCharacter::OnStandUpMontageEnded);
+
+			AnimInstance->Montage_Play(StandUpMontage);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, StandUpMontage);*/
+		}
+	}
+	else
+	{
+		CharacterMovementComponent->SetMovementMode(MOVE_Falling);
+		CharacterMovementComponent->Velocity = LastRagdollVilocity;
 	}
 
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	//Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
+	/*SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
+	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	SkeletalMeshComponent->bBlendPhysics = false;
+	SkeletalMeshComponent->SetAllBodiesSimulatePhysics(false);*/
+
+	if (ActiveStateCharacter)
+	{
+		ActiveStateCharacter->SwitchState(SavedActiveStateTag);
+	}
+	
 }
