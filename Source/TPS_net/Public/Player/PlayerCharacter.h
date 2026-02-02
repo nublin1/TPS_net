@@ -20,7 +20,7 @@ class UBoxComponent;
 class UStateMachineComponent;
 
 UCLASS()
-class TPS_NET_API APlayerCharacter : public ABaseCharacter, public IIHealthInterface
+class TPS_NET_API APlayerCharacter : public ABaseCharacter, public IIHealthInterface, public IWeaponSystemInterface
 {
 	GENERATED_BODY()
 
@@ -54,11 +54,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual class UHealthComponent* GetHealthComponent() const override;
 	UFUNCTION()
-	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const {return WeaponSystemComponent;}
+	virtual UWeaponSystemComponent* GetWeaponSystemComponent() const override {return WeaponSystemComponent;}
 	
 	UFUNCTION()
 	virtual UStateMachineComponent* GetStateMachine_Aiming() {return StateMachine_Aiming;}
-	virtual ULadderClimbingComponent* GetLadderClimbingComponent() const {return LadderClimbingComponent;}
+	
 
 	FTimerHandle GetShootingPoseTransitionTimer() const {return ShootingPoseTransitionTimer;}
 
@@ -91,7 +91,9 @@ protected:
 	float Speed = 0.0f;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float TargetMaxWalkSpeed = 600.0f; 
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsLeftShoulderCamera = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraInterpolationSpeed;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
@@ -147,18 +149,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configuration|Anim")
 	FAnimConfiguration Config;
-
-	// Components Clasees
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<ULadderClimbingComponent> LadderClimbingComponentClass = nullptr;
 	
 	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UHealthComponent* HealthComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TObjectPtr<ULadderClimbingComponent> LadderClimbingComponent;
+	
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//TSubclassOf<UWeaponSystemComponent> WeaponSystemComponentClass;

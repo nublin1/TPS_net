@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2026 All Rights Reserved.
 
 #include "Player/Anim/PlayerAnimInstance.h"
 
@@ -115,30 +115,30 @@ void UPlayerAnimInstance::SetIKHands()
 	if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Takeup"))
 		|| WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Hide")))
 	{
-		LayerBlendingValues.EnableHandIK_R = false;
+		CurrentLayerBlendingValues.EnableHandIK_R = false;
 		return;
 	}
 
 	
 	if (IsHoldWeapon)
-		LayerBlendingValues.EnableHandIK_R = true;
+		CurrentLayerBlendingValues.EnableHandIK_R = true;
 	else
-		LayerBlendingValues.EnableHandIK_R = false;
+		CurrentLayerBlendingValues.EnableHandIK_R = false;
 }
 
 void UPlayerAnimInstance::UpdateLayerValues()
 {
 	/*// Set the Base Pose weights
-	LayerBlendingValues.BasePose_N = GetCurveValue(NAME_BasePose_N);
-	//LayerBlendingValues.BasePose_CLF = GetCurveValue(NAME_BasePose_CLF);
+	CurrentLayerBlendingValues.BasePose_N = GetCurveValue(NAME_BasePose_N);
+	//CurrentLayerBlendingValues.BasePose_CLF = GetCurveValue(NAME_BasePose_CLF);
 
 	// Set the Additive amount weights for each body part
-	LayerBlendingValues.Pelvis = GetCurveValue(NAME_Pelvis);
-	LayerBlendingValues.Pelvis_Add = GetCurveValue(NAME_Pelvis_Add);
-	LayerBlendingValues.Spine = GetCurveValue(NAME_Spine);
-	LayerBlendingValues.Head = GetCurveValue(NAME_Head);
-	LayerBlendingValues.Arm_L = GetCurveValue(NAME_Arm_L);
-	LayerBlendingValues.Arm_R = GetCurveValue(NAME_Arm_R);
+	CurrentLayerBlendingValues.Pelvis = GetCurveValue(NAME_Pelvis);
+	CurrentLayerBlendingValues.Pelvis_Add = GetCurveValue(NAME_Pelvis_Add);
+	CurrentLayerBlendingValues.Spine = GetCurveValue(NAME_Spine);
+	CurrentLayerBlendingValues.Head = GetCurveValue(NAME_Head);
+	CurrentLayerBlendingValues.Arm_L = GetCurveValue(NAME_Arm_L);
+	CurrentLayerBlendingValues.Arm_R = GetCurveValue(NAME_Arm_R);
 	*/
 }
 
@@ -151,49 +151,29 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 {
 	if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")))
 	{
-		LayerBlendingValues.Spine = IsHoldWeapon ? 1.0f : 0.0f;
-		LayerBlendingValues.Spine_Add = 0.0f;
-		LayerBlendingValues.Head = IsHoldWeapon ? 1.0f : 0.0f;
-		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
-		LayerBlendingValues.Arm_R = IsHoldWeapon ? 1.0f : 0.0f;
-
-		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
-		{
-			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
-			if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
-			{
-				LayerBlendingValues.EnableHandIK_L = 0.0f;
-				return;
-			}
-			
-			/*LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-			LayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;*/
-			
-		}
+		CurrentLayerBlendingValues = WeaponLayerBlendingValues;
 	}
 	
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Takeup"))
 		|| WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Hide")))
 	{
-		LayerBlendingValues.Spine = 0.0f;
-		LayerBlendingValues.Head = 1.0f;
-		LayerBlendingValues.Arm_L = 0.0f;
-		LayerBlendingValues.EnableHandIK_L = 0.0f;
-		LayerBlendingValues.Arm_R = 1.0f;
+		CurrentLayerBlendingValues.Spine = 0.0f;
+		CurrentLayerBlendingValues.Head = 1.0f;
+		CurrentLayerBlendingValues.Arm_L = 0.0f;
+		CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
+		CurrentLayerBlendingValues.Arm_R = 1.0f;
 	}
 
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload")))
 	{
-		LayerBlendingValues.Arm_L = 1.0f;
-		LayerBlendingValues.EnableHandIK_L = 0.0f;
+		CurrentLayerBlendingValues.Arm_L = 1.0f;
+		CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
 	}
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
 	{
-		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
+		CurrentLayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-		LayerBlendingValues.EnableHandIK_L = 0.0f;
+		CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
 	}
 }
 
@@ -205,7 +185,7 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		if (!IsHoldWeapon)
 			return;
 		
-		LayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
+		CurrentLayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 	}
 	else
@@ -213,23 +193,23 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.StartReload"))
 			|| WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
 		{
-			LayerBlendingValues.EnableHandIK_L = 0.0f;
+			CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
 			return;
 		}
 		
-		LayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
+		CurrentLayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
 		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
 		{
 			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
 			if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
 			{
-				LayerBlendingValues.EnableHandIK_L = 0.0f;
+				CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
 				return;
 			}
 			
-			LayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
+			CurrentLayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
 				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-			LayerBlendingValues.EnableHandIK_L =
+			CurrentLayerBlendingValues.EnableHandIK_L =
 				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 		}
 		
@@ -272,14 +252,16 @@ void UPlayerAnimInstance::UpdateWeaponData(ABaseWeapon* newMasterWeapon)
 
 void UPlayerAnimInstance::UpdateOverrideData()
 {
+	auto WeaponBaseRef = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef();
+
+	WeaponLayerBlendingValues.Spine = IsHoldWeapon ? 1.0f : 0.0f;
+	WeaponLayerBlendingValues.Spine_Add = 0.0f;
+	WeaponLayerBlendingValues.Head = IsHoldWeapon ? 1.0f : 0.0f;
+	WeaponLayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
+	WeaponLayerBlendingValues.Arm_R = IsHoldWeapon ? 1.0f : 0.0f;
+	
 	if (WeaponType == EWeaponType::Melee)
 	{
-		/*LayerBlendingValues.Legs = 0.0f;
-		LayerBlendingValues.Pelvis = 0.0f;
-		LayerBlendingValues.Arm_L = 1.0f;
-		LayerBlendingValues.Arm_R = 1.0f;*/
-		
-		
 		switch (WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->MeleeWeaponType)
 		{
 		case EMeleeWeaponType::Unarmed:
@@ -290,9 +272,19 @@ void UPlayerAnimInstance::UpdateOverrideData()
 			break;
 		}
 	}
-	if (WeaponType == EWeaponType::Ranged)
+	else if (WeaponType == EWeaponType::Ranged)
 	{
-		LayerBlendingValues.Legs = 0.0f;
+		WeaponLayerBlendingValues.Legs = 0.0f;
+
+		WeaponLayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
+				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_L =
+				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+
+		if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
+		{
+			WeaponLayerBlendingValues.EnableHandIK_L = 0.0f;
+		}	
 	}
 }
 

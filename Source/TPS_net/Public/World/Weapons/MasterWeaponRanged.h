@@ -64,7 +64,6 @@ public:
 	virtual FVector GetProjectileSpawnLocation() override;
 
 	virtual bool IsCanStartReload() override;
-	virtual void StartReload() override;
 	virtual FAttackReadyResult CheckIsCanAttack() override;
 	
 	UFUNCTION(BlueprintCallable)
@@ -76,7 +75,7 @@ public:
 	virtual void InitializeAttackSequence() override;
 	virtual void StopAttackSequence() override;
 
-	virtual void AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass) override;
+	virtual void AttackTrigger() override;
 
 	virtual void AimTrigger() override;
 
@@ -105,14 +104,11 @@ public:
 	void PlayShootEffect_Server(UParticleSystem* ParticleSystem, FName SocketName);
 	UFUNCTION(NetMulticast, Unreliable)
 	void PlayShootEffect_Multicast(UParticleSystem* ParticleSystem, FName SocketName);
-
-	UFUNCTION(BlueprintCallable)
-	void DecreaseRoundsInMagazine();
-	UFUNCTION(Server, Unreliable)
-	void ServerDecreaseRoundsInMagazine();
 	
-	UFUNCTION(Server, Unreliable)
-	void ServerReload();
+	virtual void ChangeRoundsInMagazine(int32 Delta, bool bReloadToFull = false) override;
+	UFUNCTION(Server, Reliable)
+	void ServerChangeRoundsInMagazine(int32 Delta, bool bReloadToFull = false);
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void SwitchFireMode();
 

@@ -45,6 +45,8 @@ public:
 	UFUNCTION()
 	virtual void InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset);
 	UFUNCTION()
+	virtual void InitializeGrantedAbilities();
+	UFUNCTION()
 	virtual void UpdateVisual();
 	UFUNCTION(BlueprintCallable)
 	void ToggleBoneVisibility(FName BoneName);
@@ -54,7 +56,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsCanStartReload() PURE_VIRTUAL(ABaseWeapon::IsCanStartReload, return false; );
 	UFUNCTION(BlueprintCallable)
-	virtual void StartReload();
+	virtual void ChangeRoundsInMagazine(int32 Delta, bool bReloadToFull = false);
 	UFUNCTION(BlueprintCallable)
 	virtual FAttackReadyResult CheckIsCanAttack() PURE_VIRTUAL(ABaseWeapon::CheckIsCanAttack, return FAttackReadyResult(););
 	UFUNCTION(BlueprintCallable)
@@ -63,7 +65,7 @@ public:
 	virtual void StopAttackSequence() PURE_VIRTUAL(ABaseWeapon::StopAttackSequence, );
 	UFUNCTION(BlueprintCallable)
 	
-	virtual void AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass) PURE_VIRTUAL(AttackTrigger::AttackTrigger, );
+	virtual void AttackTrigger() PURE_VIRTUAL(AttackTrigger::AttackTrigger, );
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void AimTrigger()  PURE_VIRTUAL(AttackTrigger::AimTrigger, );
@@ -79,6 +81,9 @@ public:
 	USkeletalMeshComponent* GetSkeletalMeshWeapon() const { return SkeletalMeshWeapon; }
 	UFUNCTION()
 	USkeletalMeshComponent* GetSkeletalMeshCharacter() const { return SkeletalMeshCharacter; }
+	UFUNCTION()
+	TSubclassOf<UGameplayAbility> GetCurrentAttackAbilityClass() const {return CurrentAttackAbilityClass;}
+	
 
 	UFUNCTION()
 	virtual void SetWeaponOwnerActor(AActor* NewAOwnerActor) {WeaponOwnerActor = NewAOwnerActor;}

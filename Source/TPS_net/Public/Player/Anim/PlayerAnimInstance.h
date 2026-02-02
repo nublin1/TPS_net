@@ -1,4 +1,4 @@
-// Nublin Studio 2025 All Rights Reserved.
+// Nublin Studio 2026 All Rights Reserved.
 
 #pragma once
 
@@ -76,12 +76,15 @@ protected:
 	/** Character Information */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Read Only Data|Character Information", Meta = (
 		ShowOnlyInnerProperties))
-	FAnimCharacterInformation CharacterInformation;
-	
+	FAnimCharacterInformation CharacterInformation;	
 
 	/** Anim Graph - Layer Blending */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
-	FAnimGraphLayerBlending LayerBlendingValues;
+	FAnimGraphLayerBlending CurrentLayerBlendingValues;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
+	FAnimGraphLayerBlending WeaponLayerBlendingValues;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Anim Graph - Layer Blending")
+	bool bIsNeedOverBlendOverlayLayer = false;
 	
 	/** Weapon Information */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

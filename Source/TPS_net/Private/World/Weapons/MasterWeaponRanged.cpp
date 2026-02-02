@@ -51,8 +51,6 @@ void AMasterWeaponRanged::BeginPlay()
 			}
 		}
 	}
-
-	
 }
 
 void AMasterWeaponRanged::Tick(float DeltaTime)
@@ -105,19 +103,11 @@ void AMasterWeaponRanged::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsse
 			}
 		}
 
-		StartReload();
+		ChangeRoundsInMagazine(0, true);
 		UpdateVisual();
 	}
 	
-	if (WeaponDataAssetRef && WeaponDataAssetRef->GrantedAbilities.Num() > 0)
-	{
-		auto It = WeaponDataAssetRef->GrantedAbilities.CreateConstIterator();
-		const auto FirstKey = It->Key;
-		const auto FirstValue = It->Value;
-		
-		CurrentAttackAbilityClass= FirstKey;
-		CurrentAbilityData = FirstValue;
-	}
+	InitializeGrantedAbilities();
 }
 
 void AMasterWeaponRanged::UpdateVisual()
@@ -158,19 +148,6 @@ bool AMasterWeaponRanged::IsCanStartReload()
 		return false;
 
 	return true;
-}
-
-void AMasterWeaponRanged::StartReload()
-{
-	if (HasAuthority())
-	{
-		RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;
-		OnRep_RoundsInMagazine();
-	}
-	else
-	{
-		ServerReload();
-	}
 }
 
 FAttackReadyResult AMasterWeaponRanged::CheckIsCanAttack()
@@ -249,11 +226,8 @@ void AMasterWeaponRanged::StopAttackSequence()
 	StopFireSequence();
 }
 
-void AMasterWeaponRanged::AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass)
+void AMasterWeaponRanged::AttackTrigger()
 {
-	CurrentAttackAbilityClass = AbilityClass;
-	if (const FWeaponAbilityData* FoundData = WeaponDataAssetRef->GrantedAbilities.Find(CurrentAttackAbilityClass))
-		CurrentAbilityData = *FoundData;
 	StartFireWeapon();
 }
 
@@ -268,7 +242,7 @@ void AMasterWeaponRanged::AimTrigger()
 void AMasterWeaponRanged::StartFireWeapon()
 {
 	OnFire();
-	DecreaseRoundsInMagazine();
+	ChangeRoundsInMagazine(-1);
 
 	switch (WeaponDataAssetRef->BulletMode)
 	{
@@ -466,25 +440,39 @@ void AMasterWeaponRanged::PlayShootEffect_Multicast_Implementation(UParticleSyst
 	}
 }
 
-void AMasterWeaponRanged::DecreaseRoundsInMagazine()
+void AMasterWeaponRanged::ChangeRoundsInMagazine(int32 Delta, bool bReloadToFull)
 {
 	if (WeaponDataAssetRef->CharacteristicsOfRangedWeapon.bInfinityMagazine)
 		return;
 
-	if (HasAuthority())
-		RoundsInMagazine--;
-	else
-		ServerDecreaseRoundsInMagazine();
+	if (!HasAuthority())
+	{
+		ServerChangeRoundsInMagazine(Delta);
+		return;
+	}
+
+	const int32 MaxMagazineSize =
+		WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;
+
+	if (bReloadToFull)
+	{
+		RoundsInMagazine = MaxMagazineSize;
+		OnRep_RoundsInMagazine();
+		return;
+	}	
+
+	RoundsInMagazine = FMath::Clamp(
+		RoundsInMagazine + Delta,
+		0,
+		MaxMagazineSize
+	);
+
+	OnRep_RoundsInMagazine();
 }
 
-void AMasterWeaponRanged::ServerDecreaseRoundsInMagazine_Implementation()
+void AMasterWeaponRanged::ServerChangeRoundsInMagazine_Implementation(int32 Delta, bool bReloadToFull)
 {
-	RoundsInMagazine--;
-}
-
-void AMasterWeaponRanged::ServerReload_Implementation()
-{
-	RoundsInMagazine = WeaponDataAssetRef->CharacteristicsOfRangedWeapon.MagazineSize;
+	ChangeRoundsInMagazine(Delta);
 }
 
 void AMasterWeaponRanged::SwitchFireMode()

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Nublin Studio 2026 All Rights Reserved.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "WeaponSystemInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, NotBlueprintable)
 class UWeaponSystemInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -25,5 +25,6 @@ public:
 	//====================================================================
 	// FUNCTIONS
 	//====================================================================
+	UFUNCTION(BlueprintCallable)
 	virtual class UWeaponSystemComponent* GetWeaponSystemComponent() const = 0;
 };

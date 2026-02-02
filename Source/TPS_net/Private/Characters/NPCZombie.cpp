@@ -62,6 +62,7 @@ void ANPCZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	
 	DOREPLIFETIME(ANPCZombie, SprintSpeed);
 	DOREPLIFETIME(ANPCZombie, SenseComponent);
+	DOREPLIFETIME(ANPCZombie, WeaponSystemComponent);
 }
 
 void ANPCZombie::InitCharacterData()

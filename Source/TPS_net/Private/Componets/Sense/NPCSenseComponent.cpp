@@ -2,7 +2,7 @@
 
 
 #include "Componets/Sense/NPCSenseComponent.h"
-
+#include "Engine/OverlapResult.h"
 #include "Data/Characters/CharacterStructs.h"
 
 // Sets default values for this component's properties
@@ -76,9 +76,9 @@ void UNPCSenseComponent::PerformSenseCheck()
 
 	TArray<TObjectPtr<AActor>> OverlapedActors;
 
-	for (auto& Result : Overlaps)
+	for (auto& OverlapResult : Overlaps)
 	{
-		AActor* Other = Result.GetActor();
+		AActor* Other = OverlapResult.GetActor();
 		if (!Other || Other == Owner) continue;
 
 		bool bClassAllowed = false;

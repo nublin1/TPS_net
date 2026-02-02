@@ -72,7 +72,7 @@ void UMultiplayerGameInstance::FindSessions(bool bIsLAN, bool bIsPresence)
 	// Set this Query Setting if "bIsPresence" is true
 	if (bIsPresence)
 	{
-		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
+		//SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
 	}
 	TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
 	// Set the Delegate to the Delegate Handle of the FindSession function

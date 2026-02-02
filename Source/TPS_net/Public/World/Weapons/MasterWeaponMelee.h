@@ -50,7 +50,7 @@ public:
 
 	virtual FAttackReadyResult CheckIsCanAttack() override;
 
-	virtual void AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass) override;
+	virtual void AttackTrigger() override;
 	virtual void AimTrigger() override;
 
 protected:

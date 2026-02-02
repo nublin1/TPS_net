@@ -9,9 +9,12 @@
 #include "GameplayAbilitySystem/BaseAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Componets/Ladder/LadderClimbingComponent.h"
 #include "GameplayAbilitySystem/AbilitySystemComponentBase.h"
 #include "Net/UnrealNetwork.h"
 #include "StateMachine/StateMachineComponent.h"
+
+class UAnimInstance;
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -36,6 +39,18 @@ ABaseCharacter::ABaseCharacter()
 	BaseAttributes = CreateDefaultSubobject<UBaseAttributeSet>(TEXT("BaseAttributes"));
 }
 
+void ABaseCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
+	if (LadderClimbingComponentClass)
+	{
+		LadderClimbingComponent = NewObject<ULadderClimbingComponent>(this, LadderClimbingComponentClass);
+		LadderClimbingComponent->RegisterComponent();
+		AddInstanceComponent(LadderClimbingComponent);
+	}
+}
+
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -43,6 +58,9 @@ void ABaseCharacter::BeginPlay()
 	SkeletalMeshComponent = FindComponentByClass<USkeletalMeshComponent>();
 
 	CharacterMovementComponent = FindComponentByClass<UCharacterMovementComponent>();
+
+	AbilitySystemComponent->OnAbilityEnded.AddUObject(
+	this, &ThisClass::OnAbilityEnded);
 
 	InitCharacterData();
 }
@@ -265,6 +283,18 @@ void ABaseCharacter::NetMulticast_NPCDead_Implementation(AActor* KilledActor)
 	}
 }
 
+void ABaseCharacter::OnAbilityEnded(const FAbilityEndedData& EndedData)
+{
+	FAbilityEndedDataBlueprintWrapper AbilityEndedDataBlueprintWrapper;
+	AbilityEndedDataBlueprintWrapper.AbilityThatEnded = EndedData.AbilityThatEnded;
+	AbilityEndedDataBlueprintWrapper.GameplayTagContainer = EndedData.AbilityThatEnded->GetAssetTags();
+	AbilityEndedDataBlueprintWrapper.bWasCancelled = EndedData.bWasCancelled;
+	AbilityEndedDataBlueprintWrapper.AbilitySpecHandle = EndedData.AbilitySpecHandle;
+	AbilityEndedDataBlueprintWrapper.bReplicateEndAbility = EndedData.bReplicateEndAbility;
+	
+	AbilityEndedInfo(AbilityEndedDataBlueprintWrapper);
+}
+
 void ABaseCharacter::UpdateActorDuringRagdoll()
 {
 	if (ActiveStateCharacter->GetCurrentStateTag() != FGameplayTag::RequestGameplayTag(TEXT("State.Ragdoll")))
@@ -308,21 +338,50 @@ void ABaseCharacter::UpdateActorDuringRagdoll()
 		QueryParams
 	);
 
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+	
 	if (bHit)
 	{
 		bRagdollOnGround = true;
+		if (bRagdollOnGround && !bWasRagdollOnGround)
+		{
+			RagdollGroundedStartTime = CurrentTime;
+		}
+		
+		/*FVector LeftFoot  = SkeletalMeshComponent->GetSocketLocation("foot_l");
+		FVector RightFoot = SkeletalMeshComponent->GetSocketLocation("foot_r");
+		FVector FeetCenter = (LeftFoot + RightFoot) * 0.5f;*/
+		
 		SetActorLocation(FVector(TargetRagdollLocation.X, TargetRagdollLocation.Y,TargetRagdollLocation.Z + (HalfHeight - FMath::Abs(GroundHit.ImpactPoint.Z - GroundHit.TraceStart.Z) + 2.0f)));
-		//SetActorRotation(TargetRagdollRotator);
+		SetActorRotation(FRotator(0,-TargetRagdollRotator.Roll, 0.0f));
 	}
 	else
 	{
 		bRagdollOnGround = false;
+		RagdollGroundedStartTime = -1.0f;
+		
 		SetActorLocation(TargetRagdollLocation);
-		SetActorRotation(TargetRagdollRotator);
-	}	
+		SetActorRotation(FRotator(0,-TargetRagdollRotator.Roll, 0.0f));
+	}
+
+	bWasRagdollOnGround = bRagdollOnGround;
+
+	const float CurrentSpeed = LastRagdollVilocity.Size();
+	const float TimeInRagdoll = GetWorld()->GetTimeSeconds() - RagdollStartTime;
+	const float TimeOnGround = (RagdollGroundedStartTime > 0.f)
+		? CurrentTime - RagdollGroundedStartTime
+		: 0.f;
+	
+	if (bRagdollOnGround &&
+	TimeInRagdoll >= RagdollMinDuration &&
+	TimeOnGround >= RagdollMinTimeOnGround &&
+	LastRagdollVilocity.Size() <= RagdollStopSpeed)
+	{
+		RagdollEnd();
+	}
 }
 
-void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength, FGameplayTag StateTag)
+void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float KnockbackStrength)
 {
 	if (!SkeletalMeshComponent || !CharacterMovementComponent)
 		return;
@@ -340,6 +399,7 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 	SkeletalMeshComponent->bBlendPhysics = true;*/
 
 	CharacterMovementComponent->SetMovementMode(MOVE_None);
+	CharacterMovementComponent->DisableMovement();
 
 	FVector KnockbackDirection = GetActorLocation() - RadialImpactNormal;
 	KnockbackDirection.Z = 0.f;
@@ -356,72 +416,77 @@ void ABaseCharacter::ApplyKnockback(FVector RadialImpactNormal, const float Knoc
 	if (ActiveStateCharacter)
 	{
 		SavedActiveStateTag = ActiveStateCharacter->GetCurrentStateTag();
-		ActiveStateCharacter->SwitchState(StateTag);
+		ActiveStateCharacter->SwitchState(RagdollEnterStateTag);
 	}
 
 	/*SkeletalMeshComponent->AddRadialImpulse(ImpactOrigin, Radius, KnockbackStrength, ERadialImpulseFalloff::RIF_Linear,
 	                                        true);*/
 
-	GetWorldTimerManager().ClearTimer(TimerHandle_Ragdoll);
-	GetWorldTimerManager().SetTimer(
-		TimerHandle_Ragdoll,
-		this,
-		&ABaseCharacter::RagdollEnd,
-		RagdollDuration,
-		false
-	);
+	RagdollStartTime = GetWorld()->GetTimeSeconds();
+	RagdollGroundedStartTime = -1.0f;
 }
 
 void ABaseCharacter::RagdollEnd()
 {
 	if (!SkeletalMeshComponent || !CharacterMovementComponent)
 		return;
-
+	
 	auto AnimInst = SkeletalMeshComponent->GetAnimInstance();
 	if (!AnimInst)
 		return;
-	AnimInst->SavePoseSnapshot("RagdollPose_snapshot");
 
-	if (ActiveStateCharacter && RagdollExitStateTag.IsValid())
-	{
-		ActiveStateCharacter->SwitchState(RagdollExitStateTag);
-	}
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetAllBodiesSimulatePhysics(false);
+	
+	FPoseSnapshot PoseSnapshot;
+	AnimInst->SnapshotPose(PoseSnapshot);
+	AnimInst->SavePoseSnapshot("RagdollPose_snapshot");
+	
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
 
 	FAttachmentTransformRules AttachRules(
 	EAttachmentRule::SnapToTarget,
 	EAttachmentRule::SnapToTarget,
 	EAttachmentRule::SnapToTarget,
-	true);
-
+	false);
+	
 	SkeletalMeshComponent->AttachToComponent(
 		GetCapsuleComponent(),
-		AttachRules,
-		"root"
+		AttachRules
+		
 	);
-
-	SkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
-	SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, 270.0f, 0));
-
-	SkeletalMeshComponent->SetSimulatePhysics(false);
+	
+	//SkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	//SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	if (bRagdollOnGround)
-	{
-		CharacterMovementComponent->SetMovementMode(MOVE_Walking);
-		
+	{		
 		UAnimMontage* StandUpMontage = bRagdollFaceUp
 		? AnimMontage_RagdollStandUp_FaceUp
 		: AnimMontage_RagdollStandUp_FaceDown;
 
 		if (StandUpMontage && GetMesh()->GetAnimInstance())
 		{
+			
 			//GetMesh()->GetAnimInstance()->Montage_Play(StandUpMontage, 1.0f, EMontagePlayReturnType::MontageLength);
-			/*UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &ABaseCharacter::OnStandUpMontageEnded);
+			EndDelegate.BindUObject(this, &ABaseCharacter::OnRagdollStandUpMontageEnded);
 
 			AnimInstance->Montage_Play(StandUpMontage);
-			AnimInstance->Montage_SetEndDelegate(EndDelegate, StandUpMontage);*/
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, StandUpMontage);
+
+			if (ActiveStateCharacter && RagdollExitStateTag.IsValid())
+			{
+				ActiveStateCharacter->SwitchState(RagdollExitStateTag);
+			}
+			if (StateMachine_Movement)
+			{
+				StateMachine_Movement->SwitchState(IdleMovementStateTag);
+			}
 		}
 	}
 	else
@@ -430,18 +495,64 @@ void ABaseCharacter::RagdollEnd()
 		CharacterMovementComponent->Velocity = LastRagdollVilocity;
 	}
 
-	UCapsuleComponent* Capsule = GetCapsuleComponent();
-	//Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	
-	/*SkeletalMeshComponent->SetCollisionProfileName("CharacterMesh", true);
-	SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ClearFallImpactData();
+}
 
-	SkeletalMeshComponent->bBlendPhysics = false;
-	SkeletalMeshComponent->SetAllBodiesSimulatePhysics(false);*/
-
+void ABaseCharacter::OnRagdollStandUpMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	SkeletalMeshComponent->SetSimulatePhysics(false);
+	SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, 270.0f, 0));
 	if (ActiveStateCharacter)
 	{
 		ActiveStateCharacter->SwitchState(SavedActiveStateTag);
 	}
-	
+
+	CharacterMovementComponent->SetMovementMode(MOVE_Walking);
+}
+
+void ABaseCharacter::ClearFallImpactData()
+{
+	FallImpactType = EFallImpactType::None;
+	SavedVelocityAfterFalling = FVector::ZeroVector;
+	bWasFalling = false;
+}
+
+EFallImpactType ABaseCharacter::CalculateFallImpact(const FVector& Velocity) const
+{
+	const float VerticalSpeed = Velocity.Z;
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("VerticalSpeed: %f"), VerticalSpeed)); }
+
+	if (VerticalSpeed > FallingHeavyImpactSpeed)
+	{
+		return EFallImpactType::None;
+	}
+	else if (VerticalSpeed <= FallingHeavyImpactSpeed &&
+			 VerticalSpeed > FallingRagdollImpactSpeed)
+	{
+		return EFallImpactType::Heavy;
+	}
+	else if (VerticalSpeed <= FallingRagdollImpactSpeed)
+	{
+		return EFallImpactType::Ragdoll;
+	}
+
+	return EFallImpactType::None;
+}
+
+float ABaseCharacter::CalculateFallDamage(const FVector& Velocity) const
+{
+	const float VerticalSpeed = FMath::Abs(Velocity.Z);
+
+	if (VerticalSpeed < MinFallDamageSpeed)
+	{
+		return 0.f;
+	}
+
+	const float NormalizedSpeed = FMath::GetMappedRangeValueClamped(
+		FVector2D(MinFallDamageSpeed, MaxFallDamageSpeed),
+		FVector2D(0.f, 1.f),
+		VerticalSpeed
+	);
+
+	return MaxFallDamage * NormalizedSpeed * NormalizedSpeed;
 }

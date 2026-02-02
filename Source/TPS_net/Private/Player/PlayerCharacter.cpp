@@ -41,13 +41,6 @@ void APlayerCharacter::PostInitializeComponents()
 	{
 		HealthComponent->OnKilledDelegate.AddUniqueDynamic(this, &APlayerCharacter::OnHealthDepleted);
 	}
-
-	if (LadderClimbingComponentClass)
-	{
-		LadderClimbingComponent = NewObject<ULadderClimbingComponent>(this, LadderClimbingComponentClass);
-		LadderClimbingComponent->RegisterComponent();
-		AddInstanceComponent(LadderClimbingComponent);
-	}
 }
 
 void APlayerCharacter::BeginPlay()

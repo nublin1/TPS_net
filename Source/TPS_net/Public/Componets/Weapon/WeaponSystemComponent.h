@@ -81,7 +81,10 @@ public:
 	void PerformAttack();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void PerformAttackAbility(TSubclassOf<UGameplayAbility> AbilityClass);
-		
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	FGameplayAbilitySpecHandle FindGrantedAbilityHandleByClass(	TSubclassOf<UGameplayAbility> AbilityClass) const;
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	FGameplayAbilitySpecHandle GetCurrentWeaponAttackAbilityHandle() const;	
 	
 	UFUNCTION(BlueprintCallable)
 	void TriggerAttack();
@@ -180,8 +183,6 @@ protected:
 	EHolsterWeaponType LastUsedHolsterType = EHolsterWeaponType::None;
 
 	//Left Hand Helpers
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LeftHandSocketName = "LeftHandSocket";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FTransform LeftHandSocketTransform;
 

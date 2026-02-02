@@ -58,6 +58,17 @@ void ABaseWeapon::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset)
 {
 }
 
+void ABaseWeapon::InitializeGrantedAbilities()
+{
+	if (WeaponDataAssetRef && !WeaponDataAssetRef->GrantedAbilities.IsEmpty())
+	{
+		auto It = WeaponDataAssetRef->GrantedAbilities.CreateConstIterator();
+        
+		CurrentAttackAbilityClass = It->Key;
+		CurrentAbilityData = It->Value;
+	}
+}
+
 void ABaseWeapon::UpdateVisual()
 {
 	if (!WeaponDataAssetRef)
@@ -103,7 +114,7 @@ void ABaseWeapon::ToggleBoneVisibility(FName BoneName)
 	}
 }
 
-void ABaseWeapon::StartReload()
+void ABaseWeapon::ChangeRoundsInMagazine(int32 Delta, bool bReloadToFull)
 {
 }
 
@@ -232,6 +243,8 @@ void ABaseWeapon::HitDetectAOE()
 
 	TSet<AActor*> DamagedActors;
 	TSet<AActor*> IgnoreActors;
+	IgnoreActors.Add(WeaponOwnerActor);
+	
 	for (const FHitResult& Hit : OutHits)
 	{
 		AActor* HitActor = Hit.GetActor();
@@ -273,7 +286,7 @@ void ABaseWeapon::HitDetectAOE()
 		CurrentAbilityData.WeaponMeleeAttackData.DamageTypeClass,
 		IgnoreActors.Array(),
 		this,
-		GetOwner()->GetInstigatorController(),
+		WeaponOwnerActor->GetInstigatorController(),
 		true // bDoFullDamage
 	);
 }

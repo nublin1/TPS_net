@@ -112,8 +112,9 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 		{
 			return;
 		}
-		//LeftHandSocketTransform = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
-		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSocketName, RTS_World);
+
+		FName LeftHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.LeftHandSocketName;
+		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSockName, RTS_World);
 		auto rhand = SkeletalMeshComponent->GetSocketTransform("hand_r", RTS_World);
 		LeftHandSocketTransform = UKismetMathLibrary::MakeRelativeTransform(lhand, rhand);
 	}
@@ -163,6 +164,41 @@ void UWeaponSystemComponent::PerformAttack_Implementation()
 
 void UWeaponSystemComponent::PerformAttackAbility_Implementation(TSubclassOf<UGameplayAbility> AbilityClass)
 {
+}
+
+FGameplayAbilitySpecHandle UWeaponSystemComponent::FindGrantedAbilityHandleByClass(
+	TSubclassOf<UGameplayAbility> AbilityClass) const
+{
+	UAbilitySystemComponent* ASC = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
+	if (!AbilityClass || !ASC)
+	{
+		return FGameplayAbilitySpecHandle();
+	}
+	
+	for (const FGameplayAbilitySpecHandle& Handle : AbilitiesGrantedByWeaponInHands)
+	{
+		const FGameplayAbilitySpec* Spec =
+			ASC->FindAbilitySpecFromHandle(Handle);
+
+		if (!Spec || !Spec->Ability)
+		{
+			continue;
+		}
+
+		if (Spec->Ability->GetClass() == AbilityClass)
+		{
+			return Handle;
+		}
+	}
+
+	return FGameplayAbilitySpecHandle();
+}
+
+FGameplayAbilitySpecHandle UWeaponSystemComponent::GetCurrentWeaponAttackAbilityHandle() const
+{
+	if (!CurrentWeaponInHands)
+		return FGameplayAbilitySpecHandle();
+	return FindGrantedAbilityHandleByClass(CurrentWeaponInHands->GetCurrentAttackAbilityClass());
 }
 
 void UWeaponSystemComponent::TriggerAttack() 
@@ -304,7 +340,6 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 	if (bIsFreeSlotFound == false)
 		return;
 	
-
 	// Set up spawn parameters
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = GetOwner();
@@ -348,15 +383,15 @@ void UWeaponSystemComponent::ServerAddWeapon_Implementation(UWeaponDataAsset* We
 			return;
 		}
 	}
-
 	
 	Weapon->SetOwner(GetOwner());
 	Weapon->SetWeaponOwnerActor(GetOwner());
 
 	UGameplayStatics::FinishSpawningActor(Weapon, SpawnTransform);
 	Weapon->SetWeaponBaseRef(WeaponData);
-	//Weapon->SwitchFireMode();
-	Weapon-> StartReload();
+	Weapon->InitializeGrantedAbilities();
+	if (WeaponData->WeaponType == EWeaponType::Ranged)
+		Weapon->ChangeRoundsInMagazine(0, true);
 	Weapon->UpdateVisual();
 
 	const FAttachmentTransformRules AttachRule(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget,
@@ -660,7 +695,8 @@ void UWeaponSystemComponent::InitState()
 
 	if (CurrentStateTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload"))))
 	{
-		CurrentWeaponInHands->StartReload();		
+		//if (CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Ranged)
+		//	CurrentWeaponInHands->ChangeRoundsInMagazine(0, true);
 		SwitchState(FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")));
 	}
 }

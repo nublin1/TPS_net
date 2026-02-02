@@ -59,6 +59,8 @@ void AMasterWeaponMelee::InitWeaponBaseData(UWeaponDataAsset* NewWeaponDataAsset
 		
 		UpdateVisual();
 	}
+	
+	InitializeGrantedAbilities();
 }
 
 void AMasterWeaponMelee::UpdateVisual()
@@ -92,13 +94,8 @@ FAttackReadyResult AMasterWeaponMelee::CheckIsCanAttack()
 	return FAttackReadyResult(EAttackReadyStatus::Ready, ReadyMessage);
 }
 
-void AMasterWeaponMelee::AttackTrigger(TSubclassOf<UGameplayAbility> AbilityClass)
+void AMasterWeaponMelee::AttackTrigger()
 {
-	CurrentAttackAbilityClass = AbilityClass;
-	if (const FWeaponAbilityData* FoundData = WeaponDataAssetRef->GrantedAbilities.Find(CurrentAttackAbilityClass))
-		CurrentAbilityData = *FoundData;
-	
-	
 	OnFire();
 	bIsReadyToNextAttack = false;
 

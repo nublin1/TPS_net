@@ -110,6 +110,8 @@ struct FWeaponPresentationData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UAnimBlueprint* WeaponAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName LeftHandSocketName = "LeftHandSocket";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName ClipBoneName = "Clip_Bone";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName AmmoMeshReloadPosition = "AmmoMesh";
@@ -200,6 +202,11 @@ struct FWeaponMeleeAttackData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackDelay = 2.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Properties")
+	bool bEnableRagdoll = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
+	float KnockbackStrength = 700.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Properties")
 	TSubclassOf<UDamageType> DamageTypeClass;
 };
@@ -208,6 +215,9 @@ USTRUCT(BlueprintType)
 struct FWeaponAbilityData
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool ActivateDuringAiming = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FWeaponMeleeAttackData WeaponMeleeAttackData;
