@@ -117,7 +117,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual UWeaponDataAsset* GetWeaponDataAssetRef(EHolsterWeaponType Holster = EHolsterWeaponType::None, int NumberOfHolster = 0);
 	UFUNCTION()
-	FTransform GetLeftHandSocketTransform() const {return LeftHandSocketTransform;}
+	FTransform GetLeftHandSocketTransform() const {return SecondaryHandRelativeTransform;}
 
 protected:
 	//====================================================================
@@ -133,8 +133,8 @@ protected:
 	TObjectPtr<ABaseWeapon> CurrentWeaponInHands;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TSubclassOf<UGameplayAbility> CurrentAttackAbilityClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandWeaponSocketName = "SocketWeapon";
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//FName HandWeaponSocketName = "SocketWeapon";
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FGameplayAbilitySpecHandle> AbilitiesGrantedByWeaponInHands;
 	
@@ -157,7 +157,7 @@ protected:
 	int MaxNumberOfWeaponPrimaryHolsters = 5;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int LastPrimaryHolsterUsed = 0;
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Blueprintable)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	TArray<TObjectPtr<ABaseWeapon>> WeaponPrimaryHolster;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -184,7 +184,7 @@ protected:
 
 	//Left Hand Helpers
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FTransform LeftHandSocketTransform;
+	FTransform SecondaryHandRelativeTransform;
 
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

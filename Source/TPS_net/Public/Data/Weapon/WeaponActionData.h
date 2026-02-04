@@ -21,7 +21,4 @@ public:
 	TObjectPtr<UAnimMontage> AttackAnimMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackRange = 150.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Properties|Curves")
-	TObjectPtr<UCurveFloat> MovementAllowedCurve;
 };

@@ -111,6 +111,8 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	FTransform LeftHandIKTransform = FTransform();
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
+	FTransform RightHandIKTransform = FTransform();
 	
 	//====================================================================
 	// FUNCTIONS

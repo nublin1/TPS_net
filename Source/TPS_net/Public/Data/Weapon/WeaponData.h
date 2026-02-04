@@ -109,8 +109,12 @@ struct FWeaponPresentationData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UAnimBlueprint* WeaponAnimationBlueprint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName LeftHandSocketName = "LeftHandSocket";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName PrimaryAttachSocketName = "SocketWeapon";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName PrimaryHandBoneName = "hand_r"; // Кость персонажа, от которой считаем IK
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SecondaryHandIKSocketName = "LeftHandSocket";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName ClipBoneName = "Clip_Bone";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -223,9 +227,6 @@ struct FWeaponAbilityData
 	FWeaponMeleeAttackData WeaponMeleeAttackData;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FShootActionData ShootActionData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Properties|Curves")
-	TObjectPtr<UCurveFloat> MovementAllowedCurve;
 };
 
 
@@ -250,7 +251,11 @@ public:
 	FName HolsterName = "HolsterName";
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
-    EWeaponGripType WeaponGripType = EWeaponGripType::TwoHanded;
+    EWeaponGripType WeaponGripTypeRelaxed = EWeaponGripType::TwoHanded;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
+	EWeaponGripType WeaponGripTypeAiming = EWeaponGripType::TwoHanded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Base")
+	bool bIsRightHandDominant = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Base")
 	float WeaponMass = 1.0f; // kilograms

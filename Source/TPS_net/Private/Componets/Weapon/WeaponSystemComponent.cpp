@@ -104,23 +104,19 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 	{
 		if (CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponType == EWeaponType::Melee)
 		{
-			LeftHandSocketTransform = FTransform::Identity;
+			SecondaryHandRelativeTransform = FTransform::Identity;
 			return;
 		}
 
-		if (CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponGripType == EWeaponGripType::OneHanded)
-		{
-			return;
-		}
-
-		FName LeftHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.LeftHandSocketName;
-		auto lhand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(LeftHandSockName, RTS_World);
-		auto rhand = SkeletalMeshComponent->GetSocketTransform("hand_r", RTS_World);
-		LeftHandSocketTransform = UKismetMathLibrary::MakeRelativeTransform(lhand, rhand);
+		FName SecondHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.SecondaryHandIKSocketName;
+		FName PrimaryHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.PrimaryHandBoneName;
+		auto SecHand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(SecondHandSockName, RTS_World);
+		auto PrimHand = SkeletalMeshComponent->GetSocketTransform(PrimaryHandSockName, RTS_World);
+		SecondaryHandRelativeTransform = UKismetMathLibrary::MakeRelativeTransform(SecHand, PrimHand);
 	}
 	else
 	{
-		LeftHandSocketTransform = FTransform::Identity;
+		SecondaryHandRelativeTransform = FTransform::Identity;
 	}
 }
 
@@ -529,15 +525,9 @@ void UWeaponSystemComponent::TakeupArms(EHolsterWeaponType Holster, int NumberOf
 		return;
 	}
 	
-	if (HandWeaponSocketName.IsNone())
+	/*if (HandWeaponSocketName.IsNone())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HandWeaponSocketName is not set. Cannot attach weapon to socket."));
-		return;
-	}
-
-	/*if (!SkeletalMeshComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Skeletal MeshComponent is null. Cannot attach weapon to the skeletal mesh."));
 		return;
 	}*/
 
@@ -638,7 +628,7 @@ void UWeaponSystemComponent::AttachWeapon(AActor* ActorToAttach, FName SocketNam
 void UWeaponSystemComponent::OnRep_CurrentWeaponInHands()
 {
 	if (CurrentWeaponInHands)
-		AttachWeapon(CurrentWeaponInHands, HandWeaponSocketName);
+		AttachWeapon(CurrentWeaponInHands, CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.PrimaryAttachSocketName);
 
 	if (OnTakeupArmsDelegate.IsBound())
 		OnTakeupArmsDelegate.Broadcast(CurrentWeaponInHands);

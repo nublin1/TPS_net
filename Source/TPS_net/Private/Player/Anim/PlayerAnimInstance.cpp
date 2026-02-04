@@ -118,12 +118,6 @@ void UPlayerAnimInstance::SetIKHands()
 		CurrentLayerBlendingValues.EnableHandIK_R = false;
 		return;
 	}
-
-	
-	if (IsHoldWeapon)
-		CurrentLayerBlendingValues.EnableHandIK_R = true;
-	else
-		CurrentLayerBlendingValues.EnableHandIK_R = false;
 }
 
 void UPlayerAnimInstance::UpdateLayerValues()
@@ -149,6 +143,12 @@ void UPlayerAnimInstance::UpdateAimingValues(float DeltaSeconds)
 
 void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
 {
+	TObjectPtr<UWeaponDataAsset> WeaponBaseRef = nullptr; 
+	if (IsHoldWeapon)
+	{
+		WeaponBaseRef = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef();
+	}
+	
 	if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")))
 	{
 		CurrentLayerBlendingValues = WeaponLayerBlendingValues;
@@ -171,22 +171,33 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 	}
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.CompleteReload")))
 	{
-		CurrentLayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-		CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
+		CurrentLayerBlendingValues.Arm_L = 1.0f;
+		WeaponLayerBlendingValues.EnableHandIK_L = WeaponBaseRef->WeaponGripTypeRelaxed == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
 	}
 }
 
 void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& NewStateTag)
 {
+	TObjectPtr<UWeaponDataAsset> WeaponBaseRef = nullptr; 
+	if (IsHoldWeapon)
+	{
+		WeaponBaseRef = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef();
+	}
+	
 	if (NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.Aiming"))
 		|| NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.HipAiming")))
 	{
 		if (!IsHoldWeapon)
+		{
+			CurrentLayerBlendingValues.Arm_L = 0.0f;
 			return;
+		}
 		
-		CurrentLayerBlendingValues.Arm_L = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef()->WeaponGripType ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		CurrentLayerBlendingValues.Arm_L = 1.0f;
+		
+		bool SecondHandIK = WeaponBaseRef->WeaponGripTypeAiming == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_L = WeaponBaseRef->bIsRightHandDominant? SecondHandIK : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_R = WeaponBaseRef->bIsRightHandDominant? 0.0f :SecondHandIK;
 	}
 	else
 	{
@@ -198,20 +209,10 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 		}
 		
 		CurrentLayerBlendingValues.Arm_L = IsHoldWeapon ? 1.0f : 0.0f;
-		if (auto CurrentWeapon = WeaponSysComponent->GetCurrentWeaponInHands())
-		{
-			auto WeaponBaseRef = CurrentWeapon->GetWeaponDataAssetRef();
-			if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
-			{
-				CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
-				return;
-			}
-			
-			CurrentLayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-			CurrentLayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-		}
+		
+		bool SecondHandIK = WeaponBaseRef->WeaponGripTypeRelaxed == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_L = WeaponBaseRef->bIsRightHandDominant? SecondHandIK : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_R = WeaponBaseRef->bIsRightHandDominant? 0.0f :SecondHandIK;
 		
 	}
 }
@@ -254,6 +255,7 @@ void UPlayerAnimInstance::UpdateOverrideData()
 {
 	auto WeaponBaseRef = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef();
 
+	WeaponLayerBlendingValues.Legs = 0.0f;
 	WeaponLayerBlendingValues.Spine = IsHoldWeapon ? 1.0f : 0.0f;
 	WeaponLayerBlendingValues.Spine_Add = 0.0f;
 	WeaponLayerBlendingValues.Head = IsHoldWeapon ? 1.0f : 0.0f;
@@ -274,17 +276,9 @@ void UPlayerAnimInstance::UpdateOverrideData()
 	}
 	else if (WeaponType == EWeaponType::Ranged)
 	{
-		WeaponLayerBlendingValues.Legs = 0.0f;
-
-		WeaponLayerBlendingValues.Arm_L = WeaponBaseRef->WeaponGripType ==
-				EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-		WeaponLayerBlendingValues.EnableHandIK_L =
-				WeaponBaseRef->WeaponGripType == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
-
-		if (WeaponBaseRef->RangedWeaponType == ERangedWeaponType::Pistol)
-		{
-			WeaponLayerBlendingValues.EnableHandIK_L = 0.0f;
-		}	
+		bool SecondHandIK = WeaponBaseRef->WeaponGripTypeRelaxed == EWeaponGripType::TwoHanded ? 1.0f : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_L = WeaponBaseRef->bIsRightHandDominant? SecondHandIK : 0.0f;
+		WeaponLayerBlendingValues.EnableHandIK_R = WeaponBaseRef->bIsRightHandDominant? 0.0f :SecondHandIK;
 	}
 }
 
