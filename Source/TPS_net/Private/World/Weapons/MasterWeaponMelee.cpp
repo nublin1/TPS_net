@@ -109,3 +109,8 @@ void AMasterWeaponMelee::AimTrigger()
 {
 	
 }
+
+void AMasterWeaponMelee::StopAimTrigger()
+{
+	
+}

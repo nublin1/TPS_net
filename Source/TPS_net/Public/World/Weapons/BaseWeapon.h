@@ -69,6 +69,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void AimTrigger()  PURE_VIRTUAL(AttackTrigger::AimTrigger, );
+	UFUNCTION(BlueprintCallable)
+	virtual void StopAimTrigger()  PURE_VIRTUAL(AttackTrigger::AimTrigger, );
 
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetProjectileSpawnLocation();

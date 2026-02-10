@@ -239,6 +239,11 @@ void AMasterWeaponRanged::AimTrigger()
 	}
 }
 
+void AMasterWeaponRanged::StopAimTrigger()
+{
+	
+}
+
 void AMasterWeaponRanged::StartFireWeapon()
 {
 	OnFire();

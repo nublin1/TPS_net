@@ -78,6 +78,7 @@ public:
 	virtual void AttackTrigger() override;
 
 	virtual void AimTrigger() override;
+	virtual void StopAimTrigger() override;
 
 	UFUNCTION()
 	void StartFireWeapon();

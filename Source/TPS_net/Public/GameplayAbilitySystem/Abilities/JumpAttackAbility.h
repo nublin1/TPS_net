@@ -41,7 +41,7 @@ protected:
 	float GetDynamicPredictDistance(float InPredictionTime) const;
 	bool ShouldTriggerLandingDynamic(float InPredictionTime);
 
-	// Событие, которое мы вызовем в Блюпринт, когда пора приземляться
+	// Событие в Блюпринт когда пора приземляться
 	UFUNCTION(BlueprintImplementableEvent, Category = "Jump Attack")
 	void OnLandingPredicted();
 };

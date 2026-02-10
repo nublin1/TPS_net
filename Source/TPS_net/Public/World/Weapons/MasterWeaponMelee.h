@@ -51,7 +51,9 @@ public:
 	virtual FAttackReadyResult CheckIsCanAttack() override;
 
 	virtual void AttackTrigger() override;
+	
 	virtual void AimTrigger() override;
+	virtual void StopAimTrigger() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
