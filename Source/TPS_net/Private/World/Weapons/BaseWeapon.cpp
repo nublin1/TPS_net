@@ -114,6 +114,73 @@ void ABaseWeapon::ToggleBoneVisibility(FName BoneName)
 	}
 }
 
+TOptional<FTransform> ABaseWeapon::FindSocketOrComponentTransform(FName SocketName, USceneComponent* OverrideComponent)
+{
+	if (!WeaponOwnerActor)
+		return FTransform::Identity;
+
+	// 1. Приоритет: OverrideComponent (если указан)
+	if (OverrideComponent) 
+	{ 
+		if (OverrideComponent->DoesSocketExist(SocketName)) 
+		{
+			return OverrideComponent->GetSocketTransform(SocketName, RTS_World); 
+		}		
+		if (OverrideComponent->GetName() == SocketName.ToString())
+		{
+			return OverrideComponent->GetComponentTransform();
+		}
+	}
+
+	// 2. Проверяем скелетный меш
+	if (SkeletalMeshWeapon && SkeletalMeshWeapon->GetSkeletalMeshAsset())
+	{
+		if (SkeletalMeshWeapon->DoesSocketExist(SocketName))
+			return SkeletalMeshWeapon->GetSocketTransform(SocketName, RTS_World);
+	}
+
+	// 3. Static Mesh компонент оружия
+	if (StaticMeshWeapon && StaticMeshWeapon->GetStaticMesh()) 
+	{ 
+		if (StaticMeshWeapon->DoesSocketExist(SocketName)) 
+		{
+			return StaticMeshWeapon->GetSocketTransform(SocketName, RTS_World); 
+		}
+	}
+
+	// 4. Поиск по имени компонента среди всех SceneComponent
+	for (UActorComponent* C : WeaponOwnerActor->GetComponents()) 
+	{ 
+		if (USceneComponent* SC = Cast<USceneComponent>(C)) 
+		{ 
+			if (SC->GetName() == SocketName.ToString()) 
+			{ 
+				return SC->GetComponentTransform(); 
+			} 
+		} 
+	}
+
+	// 5.
+	if (SkeletalMeshCharacter)
+	{
+		if (SkeletalMeshCharacter->DoesSocketExist(SocketName)) 
+		{
+			return SkeletalMeshCharacter->GetSocketTransform(SocketName, RTS_World); 
+		}
+	}
+
+	return {};
+}
+
+FTransform ABaseWeapon::GetSocketOrComponentTransform(FName SocketName, bool& bOutFound,
+	USceneComponent* OverrideComponent)
+{
+	TOptional<FTransform> Result = FindSocketOrComponentTransform(SocketName, OverrideComponent);
+	
+	bOutFound = Result.IsSet();
+	return Result.Get(WeaponOwnerActor ? WeaponOwnerActor->GetActorTransform() : FTransform::Identity);
+}
+
 void ABaseWeapon::ChangeRoundsInMagazine(int32 Delta, bool bReloadToFull)
 {
 }

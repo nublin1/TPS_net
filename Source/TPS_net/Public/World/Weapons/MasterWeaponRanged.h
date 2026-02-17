@@ -162,9 +162,6 @@ protected:
 	UFUNCTION()
 	void OnRep_RoundsInMagazine() const;
 
-	UFUNCTION(BlueprintCallable)
-	FTransform GetMuzzleTransform(FName SocketName, USceneComponent* OverrideComponent = nullptr);
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowTrajectory();
 

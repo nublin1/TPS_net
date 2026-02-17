@@ -26,6 +26,16 @@ public:
 	FRamHitWall OnWallHit;*/
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "RamCharge|Animation")
+	TObjectPtr<UAnimMontage> RamChargeAnimation;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "RamCharge|Animation")
+	TObjectPtr<UAnimMontage> WallHitAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "RamCharge|Trace")
+	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
+	UPROPERTY(EditDefaultsOnly, Category = "RamCharge|Trace")
+	TEnumAsByte<ECollisionChannel> WallObjectType = ECC_WorldStatic;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ForwardSweepLength = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

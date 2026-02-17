@@ -51,6 +51,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleBoneVisibility(FName BoneName);
 
+	UFUNCTION()
+	TOptional<FTransform> FindSocketOrComponentTransform(FName SocketName, USceneComponent* OverrideComponent = nullptr);
+	UFUNCTION(BlueprintCallable)
+	FTransform GetSocketOrComponentTransform(FName SocketName, bool& bOutFound, USceneComponent* OverrideComponent = nullptr);
+
 	UFUNCTION(BlueprintCallable)
 	virtual void SwitchAttackMode() PURE_VIRTUAL(ABaseWeapon::SwitchAttackMode,);
 	UFUNCTION(BlueprintCallable)

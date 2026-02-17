@@ -87,16 +87,15 @@ void URamCharge::DoTrace()
 	);
 
 	TArray<FHitResult> Hits;
-	GetWorld()->SweepMultiByChannel(Hits, Start, End, FQuat::Identity, ECC_Pawn, Shape);
+	GetWorld()->SweepMultiByChannel(Hits, Start, End, FQuat::Identity, TraceChannel, Shape);
 	
 	TSet<AActor*> ActorsHitThisTick;
 	for (const FHitResult& Hit : Hits)
 	{
 		AActor* HitActorPtr = Hit.GetActor();
 		if (!HitActorPtr || HitActorPtr == Character) continue;
-
-		// (WorldStatic)
-		if (Hit.Component.IsValid() && Hit.Component->GetCollisionObjectType() == ECC_WorldStatic)
+		
+		if (Hit.Component.IsValid() && Hit.Component->GetCollisionObjectType() == WallObjectType)
 		{
 			HitWall();
 			continue; 

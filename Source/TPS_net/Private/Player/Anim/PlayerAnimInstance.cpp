@@ -151,7 +151,19 @@ void UPlayerAnimInstance::WeaponStateChanged(AActor* Actor, const FGameplayTag& 
 	
 	if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.None")))
 	{
-		CurrentLayerBlendingValues = WeaponLayerBlendingValues;
+		if (!IsHoldWeapon)
+		{
+			CurrentLayerBlendingValues.Spine = 0.0f;
+			CurrentLayerBlendingValues.Head = 0.0f;
+			CurrentLayerBlendingValues.Arm_L = 0.0f;
+			CurrentLayerBlendingValues.Arm_R = 0.0f;
+			CurrentLayerBlendingValues.EnableHandIK_L = 0.0f;
+			CurrentLayerBlendingValues.EnableHandIK_R = 0.0f;
+		}
+		else
+		{
+			CurrentLayerBlendingValues = WeaponLayerBlendingValues;
+		}
 	}
 	
 	else if (WeaponSysComponent->GetCurrentStateTag() == FGameplayTag::RequestGameplayTag(FName("WeaponInteractionStates.Takeup"))
@@ -183,6 +195,8 @@ void UPlayerAnimInstance::AimingStateChanged(AActor* Actor, const FGameplayTag& 
 	{
 		WeaponBaseRef = WeaponSysComponent->GetCurrentWeaponInHands()->GetWeaponDataAssetRef();
 	}
+	if (!WeaponBaseRef)
+		return;
 	
 	if (NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.Aiming"))
 		|| NewStateTag == FGameplayTag::RequestGameplayTag(FName("PlayerAimingStates.HipAiming")))

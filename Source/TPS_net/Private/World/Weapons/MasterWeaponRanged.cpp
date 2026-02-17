@@ -125,18 +125,20 @@ FVector AMasterWeaponRanged::GetProjectileSpawnLocation()
 	}
 	else
 	{
-		FTransform BulletSpawnPointTransform;
+		TOptional<FTransform> BulletSpawnPointTransform;
 		if (SkeletalMeshWeapon->GetSkinnedAsset())
-			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
+			BulletSpawnPointTransform = FindSocketOrComponentTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
 		else if (StaticMeshWeapon->GetStaticMesh())
-			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, StaticMeshWeapon);
+			BulletSpawnPointTransform = FindSocketOrComponentTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, nullptr);
+
+		if (BulletSpawnPointTransform.IsSet())
+		{
+			SpawnLocation = BulletSpawnPointTransform.GetValue().GetLocation();
+		}
 		else
 		{
-			BulletSpawnPointTransform = GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, StaticMeshWeapon);
+			SpawnLocation = WeaponOwnerActor->GetActorTransform().GetLocation();
 		}
-		
-		SpawnLocation = BulletSpawnPointTransform.GetLocation();
-		
 	}
 
 	return SpawnLocation;
@@ -314,8 +316,8 @@ void AMasterWeaponRanged::ConfigureSpawnedProjectile()
 			else*/
 			{
 				auto BulletSpawnPointTransform =
-					GetMuzzleTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
-				SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator();
+					FindSocketOrComponentTransform(CurrentAbilityData.ShootActionData.BulletSpawnSocketTransformName, SkeletalMeshWeapon);
+				SpawnRotation = BulletSpawnPointTransform.GetValue().GetRotation().Rotator();
 				//SpawnRotation = BulletSpawnPointTransform.GetRotation().Rotator() + RandomSpread;
 			}
 
@@ -513,38 +515,4 @@ void AMasterWeaponRanged::OnRep_RoundsInMagazine() const
 {
 	if (OnCompleteReloadDelegate.IsBound())
 		OnCompleteReloadDelegate.Broadcast(RoundsInMagazine);
-}
-
-FTransform AMasterWeaponRanged::GetMuzzleTransform(FName SocketName, USceneComponent* OverrideComponent)
-{
-	if (!WeaponOwnerActor)
-		return FTransform::Identity;
-
-	// 1. Проверяем скелетный меш
-	if (USkeletalMeshComponent* Skel = WeaponOwnerActor->FindComponentByClass<USkeletalMeshComponent>())
-	{
-		if (Skel->DoesSocketExist(SocketName))
-			return Skel->GetSocketTransform(SocketName, RTS_World);
-	}
-
-	for (UActorComponent* C : WeaponOwnerActor->GetComponents())
-	{
-		if (USceneComponent* SC = Cast<USceneComponent>(C))
-		{
-			if (SC->GetName() == SocketName.ToString())
-			{
-				return SC->GetComponentTransform();
-			}
-		}
-	}
-
-	if (OverrideComponent)
-	{
-		if (OverrideComponent->DoesSocketExist(SocketName))
-			return OverrideComponent->GetSocketTransform(SocketName, RTS_World);
-
-		return OverrideComponent->GetComponentTransform();
-	}
-
-	return WeaponOwnerActor->GetActorTransform();
 }

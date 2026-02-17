@@ -108,11 +108,19 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 			return;
 		}
 
-		FName SecondHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.SecondaryHandIKSocketName;
 		FName PrimaryHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.PrimaryHandBoneName;
-		auto SecHand = CurrentWeaponInHands->GetSkeletalMeshWeapon()->GetSocketTransform(SecondHandSockName, RTS_World);
+		FName SecondHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.SecondaryHandIKSocketName;
+		
 		auto PrimHand = SkeletalMeshComponent->GetSocketTransform(PrimaryHandSockName, RTS_World);
-		SecondaryHandRelativeTransform = UKismetMathLibrary::MakeRelativeTransform(SecHand, PrimHand);
+		auto SecHand = CurrentWeaponInHands->FindSocketOrComponentTransform(SecondHandSockName);
+		if (SecHand.IsSet())
+		{
+			SecondaryHandRelativeTransform = UKismetMathLibrary::MakeRelativeTransform(SecHand.GetValue(), PrimHand);
+		}
+		else
+		{
+			SecondaryHandRelativeTransform = FTransform::Identity;
+		}
 	}
 	else
 	{
