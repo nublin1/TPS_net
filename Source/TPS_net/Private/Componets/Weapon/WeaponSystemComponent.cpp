@@ -108,7 +108,7 @@ void UWeaponSystemComponent::UpdateSocketsTransform()
 			return;
 		}
 
-		FName PrimaryHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.PrimaryHandBoneName;
+		FName PrimaryHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPFresentationData.PrimaryHandBoneName;
 		FName SecondHandSockName = CurrentWeaponInHands->GetWeaponDataAssetRef()->WeaponPresentationData.SecondaryHandIKSocketName;
 		
 		auto PrimHand = SkeletalMeshComponent->GetSocketTransform(PrimaryHandSockName, RTS_World);
